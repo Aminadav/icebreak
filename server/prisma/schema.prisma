@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Game relations
+  gameRooms    GameRoom[]      @relation("GameRoomPlayers")
+  gameAnswers  GameAnswer[]
+  
+  // Email preferences
+  emailNotifications Boolean @default(true)
+  lastEmailSent      DateTime?
+
+  @@map("users")
+}
+
+model GameRoom {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  hostId      String
+  isActive    Boolean  @default(true)
+  maxPlayers  Int      @default(10)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  players     User[]        @relation("GameRoomPlayers")
+  questions   Question[]
+  gameAnswers GameAnswer[]
+
+  @@map("game_rooms")
+}
+
+model Question {
+  id          String   @id @default(uuid())
+  text        String
+  textEn      String?  // English translation
+  orderIndex  Int
+  gameRoomId  String
+  createdAt   DateTime @default(now())
+
+  // Relations
+  gameRoom    GameRoom     @relation(fields: [gameRoomId], references: [id], onDelete: Cascade)
+  gameAnswers GameAnswer[]
+
+  @@map("questions")
+}
+
+model GameAnswer {
+  id         String   @id @default(uuid())
+  answer     String
+  userId     String
+  questionId String
+  gameRoomId String
+  createdAt  DateTime @default(now())
+
+  // Relations
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  gameRoom   GameRoom @relation(fields: [gameRoomId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, questionId])
+  @@map("game_answers")
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(uuid())
+  eventName  String
+  userId     String?
+  properties Json?
+  createdAt  DateTime @default(now())
+
+  @@map("analytics_events")
+}

@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  font-family: 'Heebo', Arial, sans-serif;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: linear-gradient(
+      to bottom,
+      transparent,
+      rgb(var(--background-end-rgb))
+    )
+    rgb(var(--background-start-rgb));
+}
+
+/* RTL Support */
+[dir="rtl"] {
+  text-align: right;
+}
+
+[dir="ltr"] {
+  text-align: left;
+}
+
+/* Loading Animation */
+.loading-spinner {
+  @apply animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500;
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-100 rounded-full;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 rounded-full hover:bg-gray-400;
+}
+
+/* Animation Classes */
+.slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Button Hover Effects */
+.btn-primary {
+  @apply bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95;
+}
+
+.btn-secondary {
+  @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-lg transition-all duration-200;
+}
+
+/* Form Elements */
+.form-input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+}
+
+.form-input:focus {
+  @apply outline-none;
+}
+
+/* Cards */
+.card {
+  @apply bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden;
+}
+
+.card-header {
+  @apply px-6 py-4 border-b border-gray-200 bg-gray-50;
+}
+
+.card-body {
+  @apply px-6 py-4;
+}
+
+/* Dark mode support */
+.dark body {
+  color: white;
+  background: #1a1a1a;
+}
+
+.dark .card {
+  @apply bg-gray-800 border-gray-700;
+}
+
+.dark .card-header {
+  @apply bg-gray-700 border-gray-600;
+}
+
+.dark .form-input {
+  @apply bg-gray-700 border-gray-600 text-white;
+}

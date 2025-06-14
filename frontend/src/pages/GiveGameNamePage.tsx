@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGame } from '../contexts/GameContext';
 
 interface GiveGameNamePageProps {
   onBack: () => void;
@@ -10,22 +11,44 @@ interface GiveGameNamePageProps {
 
 export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePageProps): JSX.Element {
   const { texts } = useLanguage();
+  const { createGame, isLoading, error, isConnected } = useGame();
   const [gameName, setGameName] = useState('');
 
-  // Silence unused warning for onBack - keeping it for future use
+  // Silence unused warnings - keeping for future use
   void onBack;
+  void onContinue;
 
-  const handleContinue = () => {
-    if (gameName.trim()) {
-      onContinue(gameName.trim());
+  const handleContinue = async () => {
+    if (!gameName.trim()) return;
+    
+    try {
+      await createGame(gameName.trim());
+      // onContinue will be called from GameContext after successful creation via alert
+    } catch (error) {
+      console.error('Failed to create game:', error);
+      // Error is handled in GameContext and displayed to user
     }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && gameName.trim()) {
+    if (e.key === 'Enter' && gameName.trim() && !isLoading) {
       handleContinue();
     }
   };
+
+  // Show connection status
+  if (!isConnected) {
+    return (
+      <PageLayout showHeader={true} onMenuAction={() => {}}>
+        <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
+          <div className="text-center">
+            <h1 className="text-white text-3xl font-bold mb-4">מתחבר לשרת...</h1>
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto"></div>
+          </div>
+        </main>
+      </PageLayout>
+    );
+  }
 
   return (
     <PageLayout 
@@ -58,6 +81,15 @@ export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePag
           </h1>
         </div>
         
+        {/* Error Message */}
+        {error && (
+          <div className="text-center mb-4 max-w-md">
+            <p className="text-red-400 text-lg bg-red-100 bg-opacity-20 px-4 py-2 rounded-lg">
+              {error}
+            </p>
+          </div>
+        )}
+        
         {/* Subtitle */}
         <div className="text-center mb-8 max-w-md">
           <p className="text-white text-lg opacity-90">
@@ -83,14 +115,21 @@ export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePag
           <Button
             variant="primary-large"
             onClick={handleContinue}
-            disabled={!gameName.trim()}
+            disabled={!gameName.trim() || isLoading}
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
-              gameName.trim() 
+              gameName.trim() && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 
                 : 'bg-gray-400 cursor-not-allowed opacity-50'
             }`}
           >
-            {texts.giveGameName.continueButton}
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-2"></div>
+                יוצר משחק...
+              </div>
+            ) : (
+              texts.giveGameName.continueButton
+            )}
           </Button>
         </div>
       </main>

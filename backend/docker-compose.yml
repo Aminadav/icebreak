@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: icebreak_postgres
+    environment:
+      POSTGRES_DB: icebreak_db
+      POSTGRES_USER: icebreak_user
+      POSTGRES_PASSWORD: icebreak_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command: postgres -c 'shared_preload_libraries=pg_stat_statements'
+
+volumes:
+  postgres_data:

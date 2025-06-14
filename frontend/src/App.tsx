@@ -1,14 +1,16 @@
 import { LanguageProvider } from './contexts/LanguageContext';
-import ButtonShowcase from './pages/ButtonShowcase';
+import { GameProvider } from './contexts/GameContext';
 import './App.css';
 import HomePage from './pages/HomePage';
 
 function App(): JSX.Element {
   return (
     <LanguageProvider>
-      <div className="text-center">
-        <HomePage />
-      </div>
+      <GameProvider>
+        <div className="text-center">
+          <HomePage />
+        </div>
+      </GameProvider>
     </LanguageProvider>
   );
 }

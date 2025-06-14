@@ -5,17 +5,21 @@ function setupSocketHandlers(io) {
   console.log('🔧 Setting up Socket.io handlers...');
   console.log('🎯 IO instance received:', !!io);
   console.log('🎯 IO engine:', !!io.engine);
+  console.log('🎯 IO supported transports:', io.engine.opts.transports);
+  console.log('🎯 IO CORS settings:', JSON.stringify(io.engine.opts.cors, null, 2));
   
   // Add middleware to log all connections
   io.use((socket, next) => {
     console.log('🔌 Socket middleware: New connection attempt from:', socket.handshake.address);
     console.log('🔌 Socket middleware: Headers:', socket.handshake.headers.origin);
+    console.log('🔌 Socket middleware: Query params:', JSON.stringify(socket.handshake.query));
     next();
   });
   
   io.on('connection', (socket) => {
+    console.log('✅ Socket.io client connected:', socket.id);
+    console.log('🤝 Transport type:', socket.conn.transport.name);
     console.log(`📱 NEW HIGH-LEVEL CONNECTION: ${socket.id}`);
-    console.log(`📱 New client connected: ${socket.id}`);
     console.log(`👥 Total connected clients: ${io.engine.clientsCount}`);
     
     // רישום מכשיר
@@ -93,7 +97,8 @@ function setupSocketHandlers(io) {
     });
     
     // התנתקות
-    socket.on('disconnect', () => {
+    socket.on('disconnect', (reason) => {
+      console.log(`❌ Socket.io client disconnected: ${socket.id}, Reason: ${reason}`);
       console.log(`📱 Client disconnected: ${socket.id}`);
     });
   });

@@ -18,18 +18,47 @@ app.use(cors({
 
 app.use(express.json());
 
+// הוספת תמיכה בקבצים סטטיים
+app.use(express.static('public'));
+
 // הגדרת Socket.io עם CORS
 const io = socketIo(server, {
   cors: {
     origin: ["http://localhost:3000", "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true
-  }
+  },
+  transports: ['polling', 'websocket'],
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  connectTimeout: 30000,
+  allowUpgrades: true,
+  cookie: false,
+  debug: true,
 });
 
-console.log('⚡ Socket.io instance created');
-console.log('🔗 Socket.io attached to server:', !!io.httpServer);
-console.log('🌐 Socket.io listening on paths:', io.path());
+// הוספת לוג לדיבוג
+console.log('⚡ Socket.io instance created with options:', {
+  cors: io._corsObj,
+  transports: io._opts?.transports || 'default',
+  path: io.path(),
+  adapter: io.adapter && io.adapter.constructor.name,
+});
+
+// הגדרת Socket handlers תחילה
+setupSocketHandlers(io);
+console.log('🔗 Socket handlers setup completed');
+
+// Add direct connection event for debugging - למטרות דיבוג בלבד
+io.on('connection', (socket) => {
+  console.log('⭐ DIRECT connection handler in server.js: client connected:', socket.id);
+  console.log('⭐ Transport type:', socket.conn.transport.name);
+  console.log('⭐ Handshake data:', JSON.stringify({
+    headers: socket.handshake.headers,
+    query: socket.handshake.query,
+    auth: socket.handshake.auth,
+  }, null, 2));
+});
 
 // Add Socket.io engine debugging
 io.engine.on('connection_error', (err) => {
@@ -57,10 +86,6 @@ io.engine.on('disconnect', (socket) => {
   console.log('🔌 Engine disconnection:', socket.id);
 });
 
-// הגדרת Socket handlers
-setupSocketHandlers(io);
-console.log('🔗 Socket handlers setup completed');
-
 // בדיקת בריאות השרת
 app.get('/health', (req, res) => {
   res.json({ 
@@ -75,8 +100,15 @@ app.get('/socket-test', (req, res) => {
   res.json({
     socketio: 'ready',
     connectedClients: io.engine.clientsCount || 0,
-    message: 'Socket.io is running'
+    message: 'Socket.io is running',
+    handlers: Object.keys(io.listeners('connection')).length || 0,
+    engineHandlers: Object.keys(io.engine.listeners('connection')).length || 0
   });
+});
+
+// HTML דף הבדיקה
+app.get('/test', (req, res) => {
+  res.redirect('/socket-test.html');
 });
 
 const PORT = process.env.PORT || 3001;

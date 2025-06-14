@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Socket</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+</head>
+<body>
+    <h1>Direct Socket Test</h1>
+    <button onclick="testConnection()">Test Connection</button>
+    <div id="logs"></div>
+
+    <script>
+        function log(msg) {
+            document.getElementById('logs').innerHTML += '<div>' + new Date().toLocaleTimeString() + ': ' + msg + '</div>';
+            console.log(msg);
+        }
+
+        function testConnection() {
+            log('🧪 Starting connection test...');
+            
+            const socket = io('http://localhost:3001', {
+                transports: ['polling', 'websocket'],
+                timeout: 5000
+            });
+
+            socket.on('connect', () => {
+                log('✅ Connected! ID: ' + socket.id);
+            });
+
+            socket.on('connect_error', (error) => {
+                log('❌ Connection error: ' + error.message);
+            });
+
+            socket.on('disconnect', (reason) => {
+                log('📱 Disconnected: ' + reason);
+            });
+
+            setTimeout(() => {
+                if (!socket.connected) {
+                    log('⏰ No connection after 10 seconds');
+                    socket.disconnect();
+                }
+            }, 10000);
+        }
+    </script>
+</body>
+</html>

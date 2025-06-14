@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import socketService from '../services/socketService';
-import { getDeviceId, setDeviceId } from '../utils/deviceManager';
+import { simpleSocketService } from '../services/simpleSocketService';
+import { getDeviceId, setDeviceId, generateUUID } from '../utils/deviceManager';
 import type { UserData, GameData, DeviceRegisteredResponse, GameCreatedResponse, ErrorResponse } from '../services/types';
 
 console.log('📁 GameContext module loaded');
@@ -35,14 +35,18 @@ export function GameProvider({ children }: GameProviderProps) {
 
   // Initialize socket connection and device registration
   useEffect(() => {
-    console.log('🔄 useEffect triggered, isInitialized:', isInitialized);
+    console.log('🔄 GameContext useEffect triggered, isInitialized:', isInitialized);
+    console.log('🔄 Current timestamp:', new Date().toISOString());
     if (!isInitialized) {
       console.log('▶️ Starting initialization...');
       setIsInitialized(true);
       initializeConnection();
+    } else {
+      console.log('⏭️ Already initialized, skipping...');
     }
     
     return () => {
+      console.log('🧹 GameContext useEffect cleanup called');
       socketService.disconnect();
     };
   }, [isInitialized]);
@@ -50,17 +54,23 @@ export function GameProvider({ children }: GameProviderProps) {
   const initializeConnection = async () => {
     try {
       console.log('🔗 Initializing socket connection...');
+      console.log('📊 Current socket state:', {
+        isConnected: socketService.isConnected(),
+        socketId: socketService.getSocketId()
+      });
       setIsLoading(true);
       setError(null);
 
       // Set up socket event listeners
       socketService.setOnConnect(() => {
         console.log('✅ Socket connected successfully');
+        console.log('✅ Transport type:', socketService.getTransportType());
+        console.log('✅ Socket ID:', socketService.getSocketId());
         setIsConnected(true);
         
         // Register device when connected
         const existingDeviceId = getDeviceId();
-        socketService.registerDevice(existingDeviceId || undefined);
+        socketService.registerDevice(existingDeviceId || generateUUID());
       });
 
       socketService.setOnDisconnect(() => {
@@ -106,6 +116,7 @@ export function GameProvider({ children }: GameProviderProps) {
 
       // Connect to server with timeout
       console.log('🔌 Attempting to connect to server...');
+      console.log('📞 About to call socketService.connect()');
       
       const connectionTimeout = setTimeout(() => {
         console.error('⏰ Connection timeout after 30 seconds');
@@ -114,9 +125,12 @@ export function GameProvider({ children }: GameProviderProps) {
       }, 30000); // הגדלנו ל-30 שניות
       
       try {
+        console.log('📡 Calling socketService.connect()...');
         await socketService.connect();
+        console.log('✅ socketService.connect() completed successfully');
         clearTimeout(connectionTimeout);
       } catch (error) {
+        console.error('❌ socketService.connect() failed:', error);
         clearTimeout(connectionTimeout);
         throw error;
       }

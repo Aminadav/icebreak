@@ -4,7 +4,7 @@ import type { DeviceRegisteredResponse, GameCreatedResponse, ErrorResponse } fro
 class SocketService {
   private socket: Socket | null = null;
   private connectionPromise: Promise<void> | null = null;
-  
+
   // Event callbacks
   private onDeviceRegistered?: (data: DeviceRegisteredResponse) => void;
   private onGameCreated?: (data: GameCreatedResponse) => void;
@@ -13,11 +13,25 @@ class SocketService {
   private onDisconnect?: () => void;
 
   /**
+   * קבלת סוג התחבורה הנוכחי
+   */
+  getTransportType(): string | null {
+    return (this.socket as any)?.conn?.transport?.name || null;
+  }
+
+  /**
+   * קבלת מזהה השקע הנוכחי
+   */
+  getSocketId(): string | null {
+    return this.socket?.id || null;
+  }
+
+  /**
    * התחברות לשרת Socket.io
    */
   connect(): Promise<void> {
     console.log('🎯 SocketService.connect() called');
-    
+
     // אם כבר מחובר
     if (this.socket?.connected) {
       console.log('✅ Already connected');
@@ -31,23 +45,61 @@ class SocketService {
     }
 
     console.log('🚀 Starting new connection...');
-    
+
     this.connectionPromise = new Promise((resolve, reject) => {
       try {
         console.log('🔌 Creating socket.io connection to http://localhost:3001');
+        
+        // נקה socket קיים אם יש
+        if (this.socket) {
+          console.log('🧹 Cleaning up existing socket');
+          this.socket.removeAllListeners();
+          this.socket.disconnect();
+          this.socket = null;
+        }
+        
         this.socket = io('http://localhost:3001', {
-          transports: ['polling'], // רק polling בינתיים, בלי websocket
+          transports: ['polling', 'websocket'],
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
           timeout: 20000,
-          forceNew: true,
-          reconnection: false, // נבטל reconnection אוטומטי לעכשיו
+          // מוסיף פרמטרים לבקשה כדי לעזור בדיבוג
+          query: {
+            clientId: 'frontend-app-' + new Date().getTime(),
+            debug: 'true'
+          }
         });
+
+        console.log('📡 Socket instance created, adding event listeners...');
+
+        // הוספת timeout לחיבור
+        const connectionTimeout = setTimeout(() => {
+          console.error('⏰ Connection timeout after 30 seconds');
+          console.log('🔍 Socket state at timeout:', {
+            exists: !!this.socket,
+            connected: this.socket?.connected,
+            id: this.socket?.id
+          });
+          this.connectionPromise = null;
+          if (this.socket) {
+            this.socket.removeAllListeners();
+            this.socket.disconnect();
+            this.socket = null;
+          }
+          reject(new Error('Connection timeout'));
+        }, 30000);
 
         // חיבור מוצלח
         this.socket.on('connect', () => {
           console.log('✅ Connected to server successfully');
           console.log('🔗 Socket ID:', this.socket?.id);
+          console.log('🚀 Transport:', (this.socket as any)?.conn?.transport?.name);
+          console.log('🎯 About to clear timeout and resolve promise');
+          clearTimeout(connectionTimeout);
           this.connectionPromise = null;
+          console.log('📞 Calling onConnect callback');
           this.onConnect?.();
+          console.log('✨ Resolving promise');
           resolve();
         });
 
@@ -59,7 +111,13 @@ class SocketService {
         // שגיאת חיבור
         this.socket.on('connect_error', (error) => {
           console.error('❌ Connection error:', error);
+          clearTimeout(connectionTimeout);
           this.connectionPromise = null;
+          if (this.socket) {
+            this.socket.removeAllListeners();
+            this.socket.disconnect();
+            this.socket = null;
+          }
           reject(new Error(`Connection failed: ${error.message || 'Unknown error'}`));
         });
 
@@ -68,7 +126,7 @@ class SocketService {
           console.log('📱 Disconnected:', reason);
           this.connectionPromise = null;
           this.onDisconnect?.();
-          
+
           // אם ההתנתקות לא הייתה מכוונת, נסה להתחבר מחדש
           if (reason === 'io server disconnect') {
             console.log('🔄 Server disconnected us, attempting to reconnect...');
@@ -111,6 +169,12 @@ class SocketService {
       throw new Error('Socket not connected');
     }
 
+    // וידוא שמזהה המכשיר הוא UUID תקין
+    if (deviceId && !deviceId.match(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)) {
+      console.warn('Invalid device ID format, will get a new one from server');
+      deviceId = undefined;
+    }
+
     console.log('📱 Registering device:', deviceId || 'new device');
     this.socket.emit('register_device', { deviceId });
   }
@@ -145,6 +209,8 @@ class SocketService {
    */
   disconnect(): void {
     if (this.socket) {
+      console.log('🔌 Disconnecting socket:', this.socket.id);
+      this.socket.removeAllListeners();
       this.socket.disconnect();
       this.socket = null;
     }

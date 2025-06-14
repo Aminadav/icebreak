@@ -9,4 +9,4 @@ if [ -z "$commit_message" ]; then
 fi
 git add .
 git commit -m "$commit_message"
-git push origin main
+git push

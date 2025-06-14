@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Button from '../components/Button';
+import Input from '../components/Input';
 import MainHeader from '../components/MainHeader';
 import TopMenu from '../components/TopMenu';
 import Answer from '../components/Answer';
@@ -19,6 +20,12 @@ interface ComponentsShowcaseProps {
 export default function ComponentsShowcase({ onBack }: ComponentsShowcaseProps) {
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
+  
+  // Input component states
+  const [textInput, setTextInput] = useState('');
+  const [phoneInput, setPhoneInput] = useState('');
+  const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
 
   const handleMenuAction = (action: string) => {
     console.log('Menu action:', action);
@@ -127,6 +134,92 @@ export default function ComponentsShowcase({ onBack }: ComponentsShowcaseProps) 
                 עם אייקון
               </Button>
             </div>
+          </div>
+        </section>
+
+        {/* Input Component */}
+        <section className="bg-white bg-opacity-10 backdrop-blur-sm rounded-3xl p-8 border border-white border-opacity-20">
+          <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+            ⌨️ Input Component
+            <span className="text-sm bg-green-500 text-white px-3 py-1 rounded-full">5 types</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Text Input */}
+            <div className="space-y-3">
+              <h4 className="text-white font-semibold">Text Input</h4>
+              <Input
+                type="text"
+                value={textInput}
+                onChange={setTextInput}
+                placeholder="הכנס טקסט כאן"
+              />
+            </div>
+
+            {/* Phone Input */}
+            <div className="space-y-3">
+              <h4 className="text-white font-semibold">Phone Input</h4>
+              <Input
+                type="tel"
+                value={phoneInput}
+                onChange={setPhoneInput}
+                placeholder="מספר טלפון"
+              />
+            </div>
+
+            {/* Email Input */}
+            <div className="space-y-3">
+              <h4 className="text-white font-semibold">Email Input</h4>
+              <Input
+                type="email"
+                value={emailInput}
+                onChange={setEmailInput}
+                placeholder="כתובת אימייל"
+              />
+            </div>
+
+            {/* Password Input */}
+            <div className="space-y-3">
+              <h4 className="text-white font-semibold">Password Input</h4>
+              <Input
+                type="password"
+                value={passwordInput}
+                onChange={setPasswordInput}
+                placeholder="סיסמא"
+              />
+            </div>
+
+            {/* Disabled Input */}
+            <div className="space-y-3">
+              <h4 className="text-white font-semibold">Disabled Input</h4>
+              <Input
+                type="text"
+                value="לא ניתן לעריכה"
+                onChange={() => {}}
+                disabled={true}
+              />
+            </div>
+
+            {/* AutoFocus Input */}
+            <div className="space-y-3">
+              <h4 className="text-white font-semibold">AutoFocus (refresh to see)</h4>
+              <Input
+                type="text"
+                value=""
+                onChange={() => {}}
+                placeholder="רכיב זה יקבל פוקוס אוטומטי"
+                autoFocus={true}
+              />
+            </div>
+          </div>
+
+          <div className="mt-6 text-purple-200 text-sm">
+            <p>• תמיכה בסוגי קלט שונים: text, tel, email, password, number</p>
+            <p>• עיצוב אחיד עם מעברי צבע חלקים</p>
+            <p>• תמיכה ב-focus, disabled, autoFocus</p>
+            <p>• placeholder מותאם לשפה העברית</p>
+            <p>• עיצוב רספונסיבי</p>
+            <p>• אירועי מקלדת (onKeyPress)</p>
           </div>
         </section>
 

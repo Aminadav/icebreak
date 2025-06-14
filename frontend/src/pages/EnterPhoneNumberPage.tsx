@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
+import Input from '../components/Input';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface EnterPhoneNumberPageProps {
@@ -95,17 +96,15 @@ export default function EnterPhoneNumberPage({ onBack, onContinue }: EnterPhoneN
         </div>
         
         {/* Phone number input */}
-        <div className="w-full max-w-md mb-8">
-          <input
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={texts.enterPhoneNumber.placeholder}
-            className="w-full px-6 py-4 text-xl text-center transition-all duration-200 bg-white border-4 border-white shadow-lg rounded-2xl focus:outline-none focus:ring-4 focus:ring-orange-300 focus:border-orange-400"
-            autoFocus
-          />
-        </div>
+        <Input
+          type="tel"
+          value={phoneNumber}
+          onChange={setPhoneNumber}
+          onKeyPress={handleKeyPress}
+          placeholder={texts.enterPhoneNumber.placeholder}
+          className="mb-8"
+          autoFocus
+        />
         
         {/* Continue Button */}
         <div className="mb-20">

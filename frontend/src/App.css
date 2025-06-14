@@ -1,0 +1,36 @@
+/* Import Google Fonts for Bubblegum Sans */
+@import url('https://fonts.googleapis.com/css2?family=Bubblegum+Sans&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior: none;
+  }
+
+  /* Remove all shadows from buttons */
+  button {
+    box-shadow: none !important;
+  }
+  
+  button:hover {
+    box-shadow: none !important;
+  }
+  
+  button:focus {
+    box-shadow: none !important;
+  }
+}

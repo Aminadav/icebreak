@@ -7,9 +7,10 @@ import { useSocket } from '../contexts/SocketContext';
 interface GiveGameNamePageProps {
   onBack: () => void;
   onContinue: (gameName: string) => void;
+  onGameCreated: () => void;
 }
 
-export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePageProps): JSX.Element {
+export default function GiveGameNamePage({ onBack, onContinue, onGameCreated }: GiveGameNamePageProps): JSX.Element {
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
   
@@ -40,8 +41,9 @@ export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePag
       const gameCreatedHandler = (data: any) => {
         setIsLoading(false);
         if (data.success) {
-          alert(`✅ המשחק "${data.gameName}" נוצר בהצלחה!`);
           console.log('🎮 Game created successfully:', data);
+          // Navigate to phone number page instead of showing alert
+          onGameCreated();
         } else {
           setError('שגיאה ביצירת המשחק');
         }

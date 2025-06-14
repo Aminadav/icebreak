@@ -45,6 +45,12 @@ interface Texts {
     placeholder: string;
     continueButton: string;
   };
+  enterPhoneNumber: {
+    title: string;
+    subtitle: string;
+    placeholder: string;
+    continueButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -94,6 +100,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       subtitle: 'אנחנו ממליצים לתת את השם של קבוצת הווצאפ שלכם',
       placeholder: 'שם המשחק...',
       continueButton: 'המשך'
+    },
+    enterPhoneNumber: {
+      title: 'הכנסת מותרת רק לחברי הקבוצה',
+      subtitle: 'הכניסו מספר טלפון',
+      placeholder: '(052)',
+      continueButton: 'שלח'
     }
   },
   en: {
@@ -142,6 +154,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       subtitle: 'We recommend using your WhatsApp group name',
       placeholder: 'Game name...',
       continueButton: 'Continue'
+    },
+    enterPhoneNumber: {
+      title: 'Entry allowed only for group members',
+      subtitle: 'Enter phone number',
+      placeholder: '(052)',
+      continueButton: 'Send'
     }
   }
 };

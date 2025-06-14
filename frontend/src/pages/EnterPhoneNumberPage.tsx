@@ -1,0 +1,135 @@
+import { useState } from 'react';
+import PageLayout from '../components/PageLayout';
+import Button from '../components/Button';
+import { useLanguage } from '../contexts/LanguageContext';
+
+interface EnterPhoneNumberPageProps {
+  onBack: () => void;
+  onContinue: (phoneNumber: string) => void;
+}
+
+export default function EnterPhoneNumberPage({ onBack, onContinue }: EnterPhoneNumberPageProps): JSX.Element {
+  const { texts } = useLanguage();
+  
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Silence unused warnings - keeping for future use
+  void onBack;
+  void onContinue;
+
+  const handleContinue = async () => {
+    if (!phoneNumber.trim()) {
+      setError('מספר טלפון נדרש');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      // For now, just simulate processing
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      alert(`✅ מספר הטלפון ${phoneNumber} נשמר בהצלחה!`);
+      console.log('📱 Phone number entered:', phoneNumber);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Failed to process phone number:', error);
+      setError('שגיאה בשמירת מספר הטלפון');
+      setIsLoading(false);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && phoneNumber.trim() && !isLoading) {
+      handleContinue();
+    }
+  };
+
+  return (
+    <PageLayout 
+      showHeader={true} 
+      onMenuAction={() => {}}
+    >
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
+        {/* No Entry Icon */}
+        <div className="mb-8 drop-shadow-2xl">
+          <img 
+            src="/images/game-assets/no-entry.png" 
+            alt="No Entry Icon" 
+            className="w-32 h-32 max-w-full animate-float-in hover:scale-105 hover:drop-shadow-[0_20px_30px_rgba(255,165,0,0.3)] transition-all duration-300 ease-out cursor-pointer filter brightness-105"
+            style={{
+              animationDelay: '0.3s',
+              animationFillMode: 'both'
+            }}
+            onAnimationEnd={(e) => {
+              if (e.animationName === 'float-in') {
+                e.currentTarget.style.animation = 'gentle-float 3s ease-in-out infinite';
+              }
+            }}
+          />
+        </div>
+        
+        {/* Title */}
+        <div className="max-w-md mb-8 text-center">
+          <h1 className="text-3xl font-bold leading-tight text-white">
+            {texts.enterPhoneNumber.title}
+          </h1>
+        </div>
+        
+        {/* Error Message */}
+        {error && (
+          <div className="max-w-md mb-4 text-center">
+            <p className="px-4 py-2 text-lg text-red-400 bg-red-100 rounded-lg bg-opacity-20">
+              {error}
+            </p>
+          </div>
+        )}
+        
+        {/* Subtitle */}
+        <div className="max-w-md mb-8 text-center">
+          <p className="text-lg text-white opacity-90">
+            {texts.enterPhoneNumber.subtitle}
+          </p>
+        </div>
+        
+        {/* Phone number input */}
+        <div className="w-full max-w-md mb-8">
+          <input
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={texts.enterPhoneNumber.placeholder}
+            className="w-full px-6 py-4 text-xl text-center transition-all duration-200 bg-white border-4 border-white shadow-lg rounded-2xl focus:outline-none focus:ring-4 focus:ring-orange-300 focus:border-orange-400"
+            autoFocus
+          />
+        </div>
+        
+        {/* Continue Button */}
+        <div className="mb-20">
+          <Button
+            variant="primary-large"
+            onClick={handleContinue}
+            disabled={!phoneNumber.trim() || isLoading}
+            className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
+              phoneNumber.trim() && !isLoading
+                ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 
+                : 'bg-gray-400 cursor-not-allowed opacity-50'
+            }`}
+          >
+            {isLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="w-6 h-6 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
+                שולח...
+              </div>
+            ) : (
+              texts.enterPhoneNumber.continueButton
+            )}
+          </Button>
+        </div>
+      </main>
+    </PageLayout>
+  );
+}

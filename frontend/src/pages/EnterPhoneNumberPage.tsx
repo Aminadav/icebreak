@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 
 interface EnterPhoneNumberPageProps {
@@ -55,22 +56,11 @@ export default function EnterPhoneNumberPage({ onBack, onContinue }: EnterPhoneN
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* No Entry Icon */}
-        <div className="mb-8 drop-shadow-2xl">
-          <img 
-            src="/images/game-assets/no-entry.png" 
-            alt="No Entry Icon" 
-            className="w-32 h-32 max-w-full animate-float-in hover:scale-105 hover:drop-shadow-[0_20px_30px_rgba(255,165,0,0.3)] transition-all duration-300 ease-out cursor-pointer filter brightness-105"
-            style={{
-              animationDelay: '0.3s',
-              animationFillMode: 'both'
-            }}
-            onAnimationEnd={(e) => {
-              if (e.animationName === 'float-in') {
-                e.currentTarget.style.animation = 'gentle-float 3s ease-in-out infinite';
-              }
-            }}
-          />
-        </div>
+        <AnimatedImage
+          src="/images/game-assets/no-entry.png"
+          alt="No Entry Icon"
+          size="medium"
+        />
         
         {/* Title */}
         <div className="max-w-md mb-8 text-center">

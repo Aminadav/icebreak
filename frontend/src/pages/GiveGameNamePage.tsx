@@ -2,6 +2,7 @@ import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
+import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 
@@ -103,22 +104,11 @@ export default function GiveGameNamePage({ onBack, onContinue, onGameCreated }: 
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Friends illustration */}
-        <div className="mb-8 drop-shadow-2xl">
-          <img 
-            src="/images/game-assets/give-game-name.png" 
-            alt="Friends sitting together" 
-            className="w-80 h-auto max-w-full animate-float-in hover:scale-105 hover:drop-shadow-[0_20px_30px_rgba(255,165,0,0.3)] transition-all duration-300 ease-out cursor-pointer filter brightness-105"
-            style={{
-              animationDelay: '0.3s',
-              animationFillMode: 'both'
-            }}
-            onAnimationEnd={(e) => {
-              if (e.animationName === 'float-in') {
-                e.currentTarget.style.animation = 'gentle-float 3s ease-in-out infinite';
-              }
-            }}
-          />
-        </div>
+        <AnimatedImage
+          src="/images/game-assets/give-game-name.png"
+          alt="Friends sitting together"
+          size="large"
+        />
         
         {/* Title */}
         <div className="max-w-md mb-4 text-center">

@@ -5,6 +5,7 @@ import MainHeader from '../components/MainHeader';
 import TopMenu from '../components/TopMenu';
 import Answer from '../components/Answer';
 import AnswerContainer from '../components/AnswerContainer';
+import AnimatedImage from '../components/AnimatedImage';
 
 // WhatsApp icon component for examples
 const WhatsAppIcon = () => (
@@ -319,6 +320,67 @@ export default function ComponentsShowcase({ onBack }: ComponentsShowcaseProps) 
             <p>• ניהול מצב משותף</p>
             <p>• פריסה אוטומטית</p>
             <p>• אנימציות מתואמות</p>
+          </div>
+        </section>
+
+        {/* AnimatedImage Component */}
+        <section className="bg-white bg-opacity-10 backdrop-blur-sm rounded-3xl p-8 border border-white border-opacity-20">
+          <h2 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
+            🖼️ AnimatedImage Component
+            <span className="text-sm bg-purple-500 text-white px-3 py-1 rounded-full">4 sizes</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Small */}
+            <div className="space-y-3 text-center">
+              <h4 className="text-white font-semibold">Small</h4>
+              <AnimatedImage
+                src="/images/game-assets/no-entry.png"
+                alt="Small animated image"
+                size="small"
+              />
+            </div>
+
+            {/* Medium */}
+            <div className="space-y-3 text-center">
+              <h4 className="text-white font-semibold">Medium</h4>
+              <AnimatedImage
+                src="/images/game-assets/no-entry.png"
+                alt="Medium animated image"
+                size="medium"
+              />
+            </div>
+
+            {/* Large */}
+            <div className="space-y-3 text-center col-span-full">
+              <h4 className="text-white font-semibold">Large</h4>
+              <AnimatedImage
+                src="/images/game-assets/give-game-name.png"
+                alt="Large animated image"
+                size="large"
+                className="mx-auto"
+              />
+            </div>
+
+            {/* Custom */}
+            <div className="space-y-3 text-center col-span-full">
+              <h4 className="text-white font-semibold">Custom Size</h4>
+              <AnimatedImage
+                src="/images/game-assets/no-entry.png"
+                alt="Custom sized image"
+                size="custom"
+                className="w-40 h-40 mx-auto"
+              />
+            </div>
+          </div>
+          
+          <div className="mt-6 text-purple-200 text-sm">
+            <p>• אנימצית כניסה חלקה (float-in)</p>
+            <p>• מעבר לאנימצית ריחוף עדינה לאחר הטעינה</p>
+            <p>• אפקט hover עם scale וצל מאחור</p>
+            <p>• 4 גדלים מוכנים: small, medium, large, custom</p>
+            <p>• משמש בעמודי EnterPhoneNumber ו-GiveGameName</p>
+            <p>• תמיכה ב-className מותאם אישית</p>
           </div>
         </section>
 

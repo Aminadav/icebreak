@@ -2,7 +2,7 @@ import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useGame } from '../contexts/GameContext';
+import { useSocket } from '../contexts/SocketContext';
 
 interface GiveGameNamePageProps {
   onBack: () => void;
@@ -11,22 +11,65 @@ interface GiveGameNamePageProps {
 
 export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePageProps): JSX.Element {
   const { texts } = useLanguage();
-  const { createGame, isLoading, error, isConnected } = useGame();
+  const { socket, isConnected } = useSocket();
+  
   const [gameName, setGameName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Silence unused warnings - keeping for future use
   void onBack;
   void onContinue;
 
   const handleContinue = async () => {
-    if (!gameName.trim()) return;
+    if (!gameName.trim()) {
+      setError('שם המשחק נדרש');
+      return;
+    }
+    
+    if (!socket || !isConnected) {
+      setError('לא מחובר לשרת');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
     
     try {
-      await createGame(gameName.trim());
-      // onContinue will be called from GameContext after successful creation via alert
+      // Set up listener for game_created response
+      const gameCreatedHandler = (data: any) => {
+        setIsLoading(false);
+        if (data.success) {
+          alert(`✅ המשחק "${data.gameName}" נוצר בהצלחה!`);
+          console.log('🎮 Game created successfully:', data);
+        } else {
+          setError('שגיאה ביצירת המשחק');
+        }
+        // Remove the listener after use
+        socket.off('game_created', gameCreatedHandler);
+      };
+
+      // Set up error handler
+      const errorHandler = (data: any) => {
+        setIsLoading(false);
+        setError(data.message || 'שגיאה ביצירת המשחק');
+        console.error('❌ Game creation error:', data);
+        // Remove the listener after use
+        socket.off('error', errorHandler);
+      };
+
+      // Add event listeners
+      socket.on('game_created', gameCreatedHandler);
+      socket.on('error', errorHandler);
+      
+      // Emit the create_game event
+      console.log('📤 Emitting create_game event with name:', gameName.trim());
+      socket.emit('create_game', { gameName: gameName.trim() });
+      
     } catch (error) {
       console.error('Failed to create game:', error);
-      // Error is handled in GameContext and displayed to user
+      setError('שגיאה ביצירת המשחק');
+      setIsLoading(false);
     }
   };
 
@@ -42,8 +85,8 @@ export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePag
       <PageLayout showHeader={true} onMenuAction={() => {}}>
         <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
           <div className="text-center">
-            <h1 className="text-white text-3xl font-bold mb-4">מתחבר לשרת...</h1>
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-white mx-auto"></div>
+            <h1 className="mb-4 text-3xl font-bold text-white">מתחבר לשרת...</h1>
+            <div className="w-16 h-16 mx-auto border-b-2 border-white rounded-full animate-spin"></div>
           </div>
         </main>
       </PageLayout>
@@ -75,37 +118,37 @@ export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePag
         </div>
         
         {/* Title */}
-        <div className="text-center mb-4 max-w-md">
-          <h1 className="text-white text-3xl font-bold leading-tight">
+        <div className="max-w-md mb-4 text-center">
+          <h1 className="text-3xl font-bold leading-tight text-white">
             {texts.giveGameName.title}
           </h1>
         </div>
         
         {/* Error Message */}
         {error && (
-          <div className="text-center mb-4 max-w-md">
-            <p className="text-red-400 text-lg bg-red-100 bg-opacity-20 px-4 py-2 rounded-lg">
+          <div className="max-w-md mb-4 text-center">
+            <p className="px-4 py-2 text-lg text-red-400 bg-red-100 rounded-lg bg-opacity-20">
               {error}
             </p>
           </div>
         )}
         
         {/* Subtitle */}
-        <div className="text-center mb-8 max-w-md">
-          <p className="text-white text-lg opacity-90">
+        <div className="max-w-md mb-8 text-center">
+          <p className="text-lg text-white opacity-90">
             {texts.giveGameName.subtitle}
           </p>
         </div>
         
         {/* Game name input */}
-        <div className="mb-8 w-full max-w-md">
+        <div className="w-full max-w-md mb-8">
           <input
             type="text"
             value={gameName}
             onChange={(e) => setGameName(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder={texts.giveGameName.placeholder}
-            className="w-full px-6 py-4 text-xl text-center bg-white rounded-2xl border-4 border-white shadow-lg focus:outline-none focus:ring-4 focus:ring-orange-300 focus:border-orange-400 transition-all duration-200"
+            className="w-full px-6 py-4 text-xl text-center transition-all duration-200 bg-white border-4 border-white shadow-lg rounded-2xl focus:outline-none focus:ring-4 focus:ring-orange-300 focus:border-orange-400"
             autoFocus
           />
         </div>
@@ -124,7 +167,7 @@ export default function GiveGameNamePage({ onBack, onContinue }: GiveGameNamePag
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-2"></div>
+                <div className="w-6 h-6 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
                 יוצר משחק...
               </div>
             ) : (

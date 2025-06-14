@@ -5,13 +5,13 @@ import GiveGameNamePage from './GiveGameNamePage';
 import Button from '../components/Button';
 import PageLayout from '../components/PageLayout';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useSimpleGame } from '../contexts/SimpleGameContext';
+import { useSocket } from '../contexts/SocketContext';
 
 interface HomePageProps {}
 
 export default function HomePage({}: HomePageProps): JSX.Element {
   const { texts } = useLanguage();
-  const { isConnected, error, testConnection } = useSimpleGame();
+  const { isConnected, deviceId, userId, error } = useSocket();
   const [currentPage, setCurrentPage] = useState<'home' | 'about' | 'components' | 'giveGameName'>('home');
 
   const handleCreateGame = () => {
@@ -46,49 +46,25 @@ export default function HomePage({}: HomePageProps): JSX.Element {
   // Show give game name page if selected
   if (currentPage === 'giveGameName') {
     return <GiveGameNamePage onBack={() => setCurrentPage('home')} onContinue={handleGameNameSubmit} />;
-  }
-
-  return (
+  }  return (
     <PageLayout 
-      showHeader={true} 
+      showHeader={true}
       onMenuAction={handleMenuNavigation}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
+
         {/* Logo */}
         <div className="mb-8">
           <img 
             src="/videos/animated-logo-white.gif" 
             alt="IceBreak Logo" 
-            className="w-80 h-auto max-w-full"
+            className="h-auto max-w-full w-80"
           />
-        </div>
-
-        {/* Connection Status */}
-        <div className="mb-4 p-3 rounded-lg bg-black bg-opacity-30">
-          <div className="flex items-center justify-center gap-2">
-            <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`}></div>
-            <span className="text-white text-sm">
-              {isConnected ? '✅ מחובר לשרת' : '❌ לא מחובר לשרת'}
-            </span>
-            {!isConnected && (
-              <button 
-                onClick={testConnection}
-                className="ml-2 px-2 py-1 bg-blue-500 text-white text-xs rounded hover:bg-blue-600"
-              >
-                נסה שוב
-              </button>
-            )}
-          </div>
-          {error && (
-            <div className="text-red-300 text-xs mt-1 text-center">
-              שגיאה: {error}
-            </div>
-          )}
         </div>
         
         {/* Subtitle */}
-        <div className="text-center mb-16 max-w-md">
-          <h2 className="text-white text-2xl font-bold leading-tight">
+        <div className="max-w-md mb-16 text-center">
+          <h2 className="text-2xl font-bold leading-tight text-white">
             {texts.homepage.subtitle}
           </h2>
         </div>

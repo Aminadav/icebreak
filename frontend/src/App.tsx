@@ -1,16 +1,16 @@
 import { LanguageProvider } from './contexts/LanguageContext';
-import { SimpleGameProvider } from './contexts/SimpleGameContext';
+import { SocketProvider } from './contexts/SocketContext';
 import './App.css';
 import HomePage from './pages/HomePage';
 
 function App(): JSX.Element {
   return (
     <LanguageProvider>
-      <SimpleGameProvider>
+      <SocketProvider>
         <div className="text-center">
           <HomePage />
         </div>
-      </SimpleGameProvider>
+      </SocketProvider>
     </LanguageProvider>
   );
 }

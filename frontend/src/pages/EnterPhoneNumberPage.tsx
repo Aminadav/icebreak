@@ -4,6 +4,8 @@ import Button from '../components/Button';
 import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useSocket } from '../contexts/SocketContext';
+import { useNavigation } from '../contexts/NavigationContext';
 
 interface EnterPhoneNumberPageProps {
   onBack: () => void;
@@ -13,6 +15,8 @@ interface EnterPhoneNumberPageProps {
 
 export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction }: EnterPhoneNumberPageProps): JSX.Element {
   const { texts } = useLanguage();
+  const { socket } = useSocket();
+  const { push } = useNavigation();
   
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -20,10 +24,16 @@ export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction 
 
   // Silence unused warnings - keeping for future use
   void onContinue;
+  void onBack;
 
   const handleContinue = async () => {
     if (!phoneNumber.trim()) {
       setError('מספר טלפון נדרש');
+      return;
+    }
+
+    if (!socket) {
+      setError('אין חיבור לשרת');
       return;
     }
     
@@ -31,11 +41,36 @@ export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction 
     setError(null);
     
     try {
-      // For now, just simulate processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert(`✅ מספר הטלפון ${phoneNumber} נשמר בהצלחה!`);
-      console.log('📱 Phone number entered:', phoneNumber);
-      setIsLoading(false);
+      // Set up SMS sent handler
+      const smsSentHandler = (data: any) => {
+        setIsLoading(false);
+        if (data.success) {
+          console.log('📱 SMS sent successfully:', data);
+          // Navigate to 2FA page
+          push('enter2faCode', { phoneNumber });
+        } else {
+          setError(data.message || 'שגיאה בשליחת SMS');
+        }
+        // Remove the listener after use
+        socket.off('sms_sent', smsSentHandler);
+      };
+
+      // Set up error handler
+      const errorHandler = (data: any) => {
+        setIsLoading(false);
+        setError(data.message || 'שגיאה בשליחת מספר הטלפון');
+        console.error('❌ Phone number submission error:', data);
+        // Remove the listener after use
+        socket.off('error', errorHandler);
+      };
+
+      // Add event listeners
+      socket.on('sms_sent', smsSentHandler);
+      socket.on('error', errorHandler);
+
+      // Emit phone number
+      console.log('📤 Emitting submit_phone_number:', phoneNumber);
+      socket.emit('submit_phone_number', { phoneNumber });
     } catch (error) {
       console.error('Failed to process phone number:', error);
       setError('שגיאה בשמירת מספר הטלפון');

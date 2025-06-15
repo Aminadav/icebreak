@@ -6,6 +6,7 @@ import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from '../pages/ComponentsShowcase';
 import GiveGameNamePage from '../pages/GiveGameNamePage';
 import EnterPhoneNumberPage from '../pages/EnterPhoneNumberPage';
+import Enter2faCodePage from '../pages/Enter2faCodePage';
 
 // Animation control - set to false to disable animations
 const ENABLE_ANIMATIONS = false;
@@ -98,6 +99,21 @@ export default function AppRouter(): JSX.Element {
                   push('components');
                 }
               }}
+            />
+          );
+
+        case 'enter2faCode':
+          return (
+            <Enter2faCodePage 
+              onBack={back}
+              onMenuAction={(page: string) => {
+                if (page === 'about') {
+                  push('about');
+                } else if (page === 'components') {
+                  push('components');
+                }
+              }}
+              phoneNumber={entry.props?.phoneNumber}
             />
           );
 

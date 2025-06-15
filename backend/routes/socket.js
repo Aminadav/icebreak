@@ -85,6 +85,41 @@ function setupSocketHandlers(io) {
       }
     });
     
+    // טיפול בהגשת מספר טלפון
+    socket.on('submit_phone_number', async (data) => {
+      try {
+        const { phoneNumber } = data;
+        
+        if (!socket.userId) {
+          throw new Error('User not registered');
+        }
+        
+        if (!phoneNumber || phoneNumber.trim().length === 0) {
+          throw new Error('Phone number is required');
+        }
+        
+        // TODO: בעתיד כאן נשלח SMS אמיתי
+        console.log(`📱 Phone number submitted: ${phoneNumber} by user: ${socket.userId}`);
+        
+        // סימולציה של שליחת SMS
+        setTimeout(() => {
+          socket.emit('sms_sent', {
+            phoneNumber: phoneNumber,
+            success: true,
+            message: 'SMS sent successfully'
+          });
+        }, 1000); // דחיית שנייה לסימולציה
+        
+        console.log(`📤 SMS simulation sent to: ${phoneNumber}`);
+      } catch (error) {
+        console.error('Error processing phone number:', error);
+        socket.emit('error', {
+          message: 'Failed to process phone number',
+          error: error.message
+        });
+      }
+    });
+    
     // עדכון זמן הביקור האחרון
     socket.on('ping', async () => {
       if (socket.deviceId) {

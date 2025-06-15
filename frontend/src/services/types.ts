@@ -3,11 +3,13 @@ export interface SocketEvents {
   // Client to Server
   register_device: (data: { deviceId?: string }) => void;
   create_game: (data: { gameName: string }) => void;
+  submit_phone_number: (data: { phoneNumber: string }) => void;
   ping: () => void;
   
   // Server to Client
   device_registered: (data: DeviceRegisteredResponse) => void;
   game_created: (data: GameCreatedResponse) => void;
+  sms_sent: (data: SmsSentResponse) => void;
   error: (data: ErrorResponse) => void;
 }
 
@@ -24,6 +26,12 @@ export interface GameCreatedResponse {
   status: 'waiting' | 'active' | 'finished';
   createdAt: string;
   success: boolean;
+}
+
+export interface SmsSentResponse {
+  phoneNumber: string;
+  success: boolean;
+  message: string;
 }
 
 export interface ErrorResponse {

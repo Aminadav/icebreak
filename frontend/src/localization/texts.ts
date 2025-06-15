@@ -51,6 +51,11 @@ interface Texts {
     placeholder: string;
     continueButton: string;
   };
+  enter2faCode: {
+    title: string;
+    placeholder: string;
+    continueButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -106,6 +111,11 @@ export const texts: Record<'he' | 'en', Texts> = {
       subtitle: 'הכניסו מספר טלפון',
       placeholder: '(052)',
       continueButton: 'שלח'
+    },
+    enter2faCode: {
+      title: 'הכנס קוד אימות',
+      placeholder: '_ _ _ _ _ _',
+      continueButton: 'המשך'
     }
   },
   en: {
@@ -160,6 +170,11 @@ export const texts: Record<'he' | 'en', Texts> = {
       subtitle: 'Enter phone number',
       placeholder: '(052)',
       continueButton: 'Send'
+    },
+    enter2faCode: {
+      title: 'Enter verification code',
+      placeholder: '_ _ _ _ _ _',
+      continueButton: 'Continue'
     }
   }
 };

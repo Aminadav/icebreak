@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 // Define page types
-export type PageType = 'home' | 'about' | 'components' | 'giveGameName' | 'enterPhoneNumber';
+export type PageType = 'home' | 'about' | 'components' | 'giveGameName' | 'enterPhoneNumber' | 'enter2faCode';
 
 // Define navigation entry
 export interface NavigationEntry {

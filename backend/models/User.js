@@ -140,11 +140,46 @@ async function getUserStats(userId) {
   }
 }
 
+/**
+ * Update user email address
+ * @param {string} userId - User ID
+ * @param {string} email - Email address (normalized)
+ * @returns {Object} - Success result or error
+ */
+async function updateUserEmail(userId, email) {
+  try {
+    const result = await pool.query(
+      'UPDATE users SET email = $1, email_verified = FALSE WHERE user_id = $2 RETURNING *',
+      [email, userId]
+    );
+    
+    if (result.rows.length === 0) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    return { 
+      success: true, 
+      user: result.rows[0],
+      message: 'Email updated successfully'
+    };
+  } catch (error) {
+    console.error('Error updating user email:', error);
+    
+    // Handle unique constraint violation
+    if (error.code === '23505' && error.constraint === 'unique_email_lower') {
+      return { success: false, error: 'Email address already exists' };
+    }
+    
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   findUserByPhone,
   createUser,
   findOrCreateUser,
   associateDeviceWithUser,
   getUserDevices,
-  getUserStats
+  getUserStats,
+  updateUserEmail
 };

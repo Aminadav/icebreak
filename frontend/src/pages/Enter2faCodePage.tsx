@@ -7,6 +7,7 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
+import EnterEmailPage from './EnterEmailPage';
 
 interface Enter2faCodePageProps {
   phoneNumber?: string;
@@ -60,7 +61,8 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
         console.log(`👤 User logged in: ${userInfo.userId}, Games: ${userInfo.gamesCreated}, Devices: ${userInfo.deviceCount}`);
       }
       
-      // TODO: Navigate to next step or complete flow
+      // Navigate to email entry page
+      push(<EnterEmailPage phoneNumber={phoneNumber} userId={userInfo?.userId} />);
     };
 
     const verificationFailureHandler = (data: any) => {

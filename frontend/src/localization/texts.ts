@@ -56,6 +56,12 @@ interface Texts {
     placeholder: string;
     continueButton: string;
   };
+  enterEmail: {
+    title: string;
+    subtitle: string;
+    placeholder: string;
+    continueButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -116,6 +122,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       title: 'הכנס קוד אימות',
       placeholder: '_ _ _ _ _ _',
       continueButton: 'המשך'
+    },
+    enterEmail: {
+      title: 'הכנס כתובת אימייל',
+      subtitle: 'נשלח לך עדכונים על המשחק',
+      placeholder: 'כתובת אימייל...',
+      continueButton: 'המשך'
     }
   },
   en: {
@@ -174,6 +186,12 @@ export const texts: Record<'he' | 'en', Texts> = {
     enter2faCode: {
       title: 'Enter verification code',
       placeholder: '_ _ _ _ _ _',
+      continueButton: 'Continue'
+    },
+    enterEmail: {
+      title: 'Enter email address',
+      subtitle: 'We will send you game updates',
+      placeholder: 'Email address...',
       continueButton: 'Continue'
     }
   }

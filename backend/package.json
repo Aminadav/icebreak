@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js",
+    "dev": "pkill -f 'nodemon.*server.js' || pkill -f 'node.*server.js' || true && nodemon server.js",
     "db:setup": "node scripts/setupDatabase.js",
     "db:start": "bash scripts/start-db.sh",
     "db:stop": "docker-compose down",

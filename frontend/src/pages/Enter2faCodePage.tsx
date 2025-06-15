@@ -4,6 +4,7 @@ import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useSocket } from '../contexts/SocketContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
 
@@ -14,6 +15,7 @@ interface Enter2faCodePageProps {
 export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps): JSX.Element {
   const { texts } = useLanguage();
   const { back, push } = useNavigation();
+  const { socket } = useSocket();
   
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
@@ -63,17 +65,52 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
       setError('יש להכניס קוד בן 6 ספרות');
       return;
     }
+
+    if (!socket) {
+      setError('אין חיבור לשרת');
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
     
     try {
-      // For now, just simulate processing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      alert(`✅ קוד האימות ${fullCode} אומת בהצלחה!`);
-      console.log('🔐 2FA code entered:', fullCode);
-      setIsLoading(false);
-      // TODO: Navigate to next step or complete flow
+      // Set up verification success handler
+      const verificationSuccessHandler = (data: any) => {
+        setIsLoading(false);
+        console.log('✅ 2FA verification successful:', data);
+        alert(`✅ קוד האימות אומת בהצלחה!`);
+        // TODO: Navigate to next step or complete flow
+        // Remove the listener after use
+        socket.off('2fa_verified', verificationSuccessHandler);
+      };
+
+      // Set up verification failure handler
+      const verificationFailureHandler = (data: any) => {
+        setIsLoading(false);
+        setError('קוד האימות שגוי');
+        console.log('❌ 2FA verification failed:', data);
+        // Remove the listener after use
+        socket.off('2fa_verification_failed', verificationFailureHandler);
+      };
+
+      // Set up error handler
+      const errorHandler = (data: any) => {
+        setIsLoading(false);
+        setError(data.message || 'שגיאה באימות הקוד');
+        console.error('❌ 2FA verification error:', data);
+        // Remove the listener after use
+        socket.off('error', errorHandler);
+      };
+
+      // Add event listeners
+      socket.on('2fa_verified', verificationSuccessHandler);
+      socket.on('2fa_verification_failed', verificationFailureHandler);
+      socket.on('error', errorHandler);
+
+      // Emit verification request
+      console.log('📤 Emitting verify_2fa_code:', fullCode);
+      socket.emit('verify_2fa_code', { code: fullCode });
     } catch (error) {
       console.error('Failed to verify 2FA code:', error);
       setError('שגיאה באימות הקוד');

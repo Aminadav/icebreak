@@ -35,7 +35,7 @@ export default function AppRouter(): JSX.Element {
         }}
       >
         {/* Dark overlay for better readability */}
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-purple-900/60 via-blue-900/60 to-purple-900/60"></div>
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-br"></div>
         
         {/* Page content */}
         <div className="relative z-10 min-h-full">

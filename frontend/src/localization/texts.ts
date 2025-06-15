@@ -101,13 +101,13 @@ export const texts: Record<'he' | 'en', Texts> = {
       createGameButton: 'יצירת משחק לקבוצה שלי >>'
     },
     giveGameName: {
-      title: 'תן שם למשחק',
+      title: 'תנו שם למשחק',
       subtitle: 'אנחנו ממליצים לתת את השם של קבוצת הווצאפ שלכם',
       placeholder: 'שם המשחק...',
       continueButton: 'המשך'
     },
     enterPhoneNumber: {
-      title: 'הכנסת מותרת רק לחברי הקבוצה',
+      title: 'הכניסה מותרת רק לחברי הקבוצה',
       subtitle: 'הכניסו מספר טלפון',
       placeholder: '(052)',
       continueButton: 'שלח'

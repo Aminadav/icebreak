@@ -150,6 +150,7 @@ export default function ComponentsShowcase() {
                 value={textInput}
                 onChange={setTextInput}
                 placeholder="הכנס טקסט כאן"
+                data-testid="demo-text-input"
               />
             </div>
 
@@ -161,6 +162,7 @@ export default function ComponentsShowcase() {
                 value={phoneInput}
                 onChange={setPhoneInput}
                 placeholder="מספר טלפון"
+                data-testid="demo-phone-input"
               />
             </div>
 
@@ -172,6 +174,7 @@ export default function ComponentsShowcase() {
                 value={emailInput}
                 onChange={setEmailInput}
                 placeholder="כתובת אימייל"
+                data-testid="demo-email-input"
               />
             </div>
 
@@ -183,6 +186,7 @@ export default function ComponentsShowcase() {
                 value={passwordInput}
                 onChange={setPasswordInput}
                 placeholder="סיסמא"
+                data-testid="demo-password-input"
               />
             </div>
 
@@ -194,6 +198,7 @@ export default function ComponentsShowcase() {
                 value="לא ניתן לעריכה"
                 onChange={() => {}}
                 disabled={true}
+                data-testid="demo-disabled-input"
               />
             </div>
 
@@ -206,6 +211,7 @@ export default function ComponentsShowcase() {
                 onChange={() => {}}
                 placeholder="רכיב זה יקבל פוקוס אוטומטי"
                 autoFocus={true}
+                data-testid="demo-autofocus-input"
               />
             </div>
           </div>

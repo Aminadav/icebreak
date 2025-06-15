@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { get2FACode } from './test-utils';
 
 /**
  * End-to-End Test for Icebreak App User Registration Flow
@@ -8,19 +9,14 @@ import { test, expect } from '@playwright/test';
  * 2. GiveGameNamePage - Enter game name
  * 3. EnterPhoneNumberPage - Enter phone number (0523737233)
  * 4. Enter2faCodePage - Enter 2FA code
- * 5. EnterEmailPage - Enter email addresses
+ * 5. EnterEmailPage - Enter email address
+ * 6. EnterNamePage - Enter user name
  */
 
 const TEST_PHONE_NUMBER = '0523737233';
 
-// Temporary hardcoded function for 2FA code generation
-function get2FACode(phoneNumber: string): string {
-  // For testing, return a predictable code based on phone number
-  return '792889';
-}
-
 test.describe('Icebreak App E2E Flow', () => {
-  test('Complete user registration flow from homepage to email entry', async ({ page }) => {
+  test('Complete user registration flow from homepage to name entry', async ({ page }) => {
     console.log('🚀 Starting E2E test - Complete user registration flow');
     
     // Step 1: Navigate to homepage
@@ -102,8 +98,31 @@ test.describe('Icebreak App E2E Flow', () => {
     // Use force click to bypass overlay issues on mobile
     await verifyButton.click({ force: true });
     
-    // Step 5: Enter email addresses
+    // Step 5: Enter email address
     console.log('📍 Step 5: Navigate to email entry page');
+    await page.waitForLoadState('networkidle');
+    
+    // Add extra wait to ensure page is fully loaded
+    await page.waitForTimeout(2000);
+    
+    // Wait for email page to load by checking for the heading first
+    await expect(page.getByRole('heading', { name: /הכנס כתובת אימייל|Enter Email/i })).toBeVisible();
+    
+    // Wait for email input to be visible (should be unique now)
+    const emailInput = page.getByTestId('email-input');
+    await expect(emailInput).toBeVisible();
+    
+    // Enter email address
+    await emailInput.fill('test@example.com');
+    
+    // Click continue button
+    const emailContinueButton = page.getByTestId('email-continue-button');
+    await expect(emailContinueButton).toBeEnabled();
+    console.log('✅ Step 5 complete: Entered email address');
+    await emailContinueButton.click();
+    
+    // Step 6: Enter user name
+    console.log('📍 Step 6: Navigate to enter name page');
     await page.waitForLoadState('networkidle');
     
     // Add extra wait to ensure page is fully loaded
@@ -113,63 +132,18 @@ test.describe('Icebreak App E2E Flow', () => {
     console.log('🔍 Current page URL:', page.url());
     console.log('🔍 Page title:', await page.title());
     
-    // Debug: Look for all elements with data-testid
-    const allTestIds = await page.locator('[data-testid]').allTextContents();
-    console.log('🔍 All test IDs found:', allTestIds);
+    // Wait for name input to be visible
+    const nameInput = page.getByTestId('name-input');
+    await expect(nameInput).toBeVisible();
     
-    // Debug: Check if email-input exists anywhere
-    const emailInputs = page.getByTestId('email-input');
-    const emailCount = await emailInputs.count();
-    console.log(`🔍 Found ${emailCount} email input(s) with data-testid="email-input"`);
+    // Enter user name
+    await nameInput.fill('Test User');
     
-    // Alternative: Try finding email inputs by input type
-    const emailInputsByType = page.locator('input[type="email"]');
-    const emailTypeCount = await emailInputsByType.count();
-    console.log(`🔍 Found ${emailTypeCount} input[type="email"] elements`);
-    
-    // Alternative: Try finding any input elements
-    const allInputs = page.locator('input');
-    const allInputsCount = await allInputs.count();
-    console.log(`🔍 Found ${allInputsCount} total input elements`);
-    
-    if (emailCount > 0) {
-      // Use the original approach if email inputs are found
-      for (let i = 0; i < emailCount; i++) {
-        const emailInput = emailInputs.nth(i);
-        
-        // Force fill even if hidden (common issue in mobile viewport)
-        await emailInput.fill(`test${i + 1}@example.com`, { force: true });
-        console.log(`✅ Filled email input ${i + 1}: test${i + 1}@example.com`);
-      }
-    } else if (emailTypeCount > 0) {
-      // Fallback: Use input[type="email"] if test ID not found
-      console.log('⚠️ Using fallback: input[type="email"] selector');
-      for (let i = 0; i < emailTypeCount; i++) {
-        const emailInput = emailInputsByType.nth(i);
-        
-        // Force fill even if hidden
-        await emailInput.fill(`test${i + 1}@example.com`, { force: true });
-        console.log(`✅ Filled email input ${i + 1} (by type): test${i + 1}@example.com`);
-      }
-    } else {
-      console.log('❌ No email inputs found - taking screenshot for debugging');
-      await page.screenshot({ path: 'debug-email-page.png', fullPage: true });
-      throw new Error('No email inputs found on the page');
-    }
-    
-    // Click continue button - handle all continue buttons
-    const emailContinueButtons = page.getByTestId('email-continue-button');
-    const continueButtonCount = await emailContinueButtons.count();
-    console.log(`Found ${continueButtonCount} continue button(s)`);
-    
-    // Click the first continue button with force
-    if (continueButtonCount > 0) {
-      const continueButton = emailContinueButtons.first();
-      await continueButton.click({ force: true });
-      console.log(`✅ Step 5 complete: Clicked continue button`);
-    } else {
-      console.log('❌ No continue button found');
-    }
+    // Click continue button
+    const nameContinueButton = page.getByTestId('name-continue-button');
+    await expect(nameContinueButton).toBeEnabled();
+    console.log('✅ Step 6 complete: Entered user name');
+    await nameContinueButton.click();
     
     console.log('🎉 E2E test completed successfully!');
   });

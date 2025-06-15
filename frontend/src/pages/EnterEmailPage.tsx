@@ -8,6 +8,7 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
+import EnterNamePage from './EnterNamePage';
 
 interface EnterEmailPageProps {
   phoneNumber?: string;
@@ -74,11 +75,8 @@ export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPagePr
         setIsLoading(false);
         console.log('✅ Email saved successfully:', data);
         
-        // Show success message
-        console.log('✅ Email saved successfully');
-        
-        // TODO: Navigate to next step or complete the flow
-        // This might be the dashboard, game lobby, or completion page
+        // Navigate to enter name page
+        push(<EnterNamePage phoneNumber={phoneNumber} userId={userId} email={email.toLowerCase().trim()} />);
         
         // Cleanup listener
         socket.off('email_saved', handleEmailSaved);

@@ -62,6 +62,11 @@ interface Texts {
     placeholder: string;
     continueButton: string;
   };
+  enterName: {
+    title: string;
+    placeholder: string;
+    continueButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -128,6 +133,11 @@ export const texts: Record<'he' | 'en', Texts> = {
       subtitle: 'נשלח לך עדכונים על המשחק',
       placeholder: 'כתובת אימייל...',
       continueButton: 'המשך'
+    },
+    enterName: {
+      title: 'מה השם שלך?',
+      placeholder: 'הכנס את שמך...',
+      continueButton: 'המשך >>'
     }
   },
   en: {
@@ -193,6 +203,11 @@ export const texts: Record<'he' | 'en', Texts> = {
       subtitle: 'We will send you game updates',
       placeholder: 'Email address...',
       continueButton: 'Continue'
+    },
+    enterName: {
+      title: 'What is your name?',
+      placeholder: 'Enter your name...',
+      continueButton: 'Continue >>'
     }
   }
 };

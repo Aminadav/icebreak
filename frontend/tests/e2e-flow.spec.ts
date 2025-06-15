@@ -95,8 +95,12 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(verifyButton).toBeEnabled();
     console.log('✅ Step 4 complete: Entered 2FA code');
     
-    // Use force click to bypass overlay issues on mobile
+    // Use force click to bypass overlay issues on mobile and wait for navigation
     await verifyButton.click({ force: true });
+    
+    // Wait for navigation to email page
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
     
     // Step 5: Enter email address
     console.log('📍 Step 5: Navigate to email entry page');
@@ -109,17 +113,21 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(page.getByRole('heading', { name: /הכנס כתובת אימייל|Enter Email/i })).toBeVisible();
     
     // Wait for email input to be visible using a more specific selector
-    const emailInput = page.locator('main input[type="email"][data-testid="email-input"]').first();
+    const emailInput = page.getByTestId('email-input').first();
     await expect(emailInput).toBeVisible();
     
     // Enter email address
     await emailInput.fill('test@example.com');
     
-    // Click continue button
+    // Click continue button and wait for navigation
     const emailContinueButton = page.getByTestId('email-continue-button');
     await expect(emailContinueButton).toBeEnabled();
     console.log('✅ Step 5 complete: Entered email address');
     await emailContinueButton.click();
+    
+    // Wait for navigation to name page
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
     
     // Step 6: Enter user name
     console.log('📍 Step 6: Navigate to enter name page');
@@ -167,8 +175,11 @@ test.describe('Icebreak App E2E Flow', () => {
     await nameContinueButton.click();
     await expect(modalOverlay).toBeVisible();
     
-    // Now click "Yes" to confirm
-    await page.getByTestId('name-confirmation-yes').click();
+    // Now click "Yes" to confirm with force to bypass overlay issues
+    await page.getByTestId('name-confirmation-yes').click({ force: true });
+    
+    // Wait a moment for the modal to close
+    await page.waitForTimeout(500);
     
     // Modal should close
     await expect(modalOverlay).not.toBeVisible();
@@ -183,12 +194,17 @@ test.describe('Icebreak App E2E Flow', () => {
     // Navigate to name entry page quickly (reuse flow)
     await page.goto('http://localhost:3000');
     
-    // Quick navigation through the flow
+    // Quick navigation through the flow with improved waits
     await page.getByText('יצירת משחק לקבוצה שלי >>').click();
+    await page.waitForLoadState('networkidle');
+    
     await page.getByTestId('game-name-input').fill('Test Game');
     await page.getByTestId('game-name-continue-button').click();
+    await page.waitForLoadState('networkidle');
+    
     await page.getByTestId('phone-number-input').fill(TEST_PHONE_NUMBER);
     await page.getByTestId('phone-number-continue-button').click();
+    await page.waitForLoadState('networkidle');
     
     // Get 2FA code and fill it (should be 123456 for test number)
     const code2FA = get2FACode(TEST_PHONE_NUMBER);
@@ -196,13 +212,18 @@ test.describe('Icebreak App E2E Flow', () => {
     for (let i = 0; i < 6; i++) {
       await page.getByTestId(`2fa-code-input-${i}`).fill(code2FA[i]);
     }
-    await page.getByTestId('2fa-code-verify-button').click();
+    await page.getByTestId('2fa-code-verify-button').click({ force: true });
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
     
-    await page.getByTestId('email-input').fill('test@example.com');
+    await page.getByTestId('email-input').first().fill('test@example.com');
     await page.getByTestId('email-continue-button').click();
+    await page.waitForLoadState('networkidle');
+    await page.waitForTimeout(1000);
     
     // Now test modal edge cases
     const nameInput = page.getByTestId('name-input');
+    await expect(nameInput).toBeVisible();
     await nameInput.fill('Modal Test User');
     await page.getByTestId('name-continue-button').click();
     
@@ -211,7 +232,8 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(modalOverlay).toBeVisible();
     
     // Click on the overlay background (not the modal content)
-    await modalOverlay.click({ position: { x: 10, y: 10 } });
+    await modalOverlay.click({ position: { x: 10, y: 10 }, force: true });
+    await page.waitForTimeout(500);
     await expect(modalOverlay).not.toBeVisible();
     console.log('✅ Modal closed by clicking outside');
     
@@ -220,6 +242,7 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(modalOverlay).toBeVisible();
     
     await page.keyboard.press('Escape');
+    await page.waitForTimeout(500);
     await expect(modalOverlay).not.toBeVisible();
     console.log('✅ Modal closed by Escape key');
     

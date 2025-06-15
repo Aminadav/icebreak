@@ -41,10 +41,10 @@ export default function NameConfirmationModal({ name, onYes, onNo }: NameConfirm
             {line}
           </div>
         ))}
-        <div className="mt-2">
-          <span className="text-[#F3A257] font-bold text-xl">{userName}</span>
+        <>
+          <span className="text-[#F3A257] font-bold text-3xl">{userName}</span>
           <span> {parts[1]}</span>
-        </div>
+        </>
       </>
     );
   };
@@ -63,11 +63,11 @@ export default function NameConfirmationModal({ name, onYes, onNo }: NameConfirm
         </div>
 
         {/* Title and Message */}
-        <div className="text-center mb-4">
-          <div className="text-white text-lg font-normal leading-tight tracking-wide mb-2">
+        <div className="mb-4 text-center">
+          <div className="mb-2 text-lg font-normal leading-tight tracking-wide text-white">
             {texts.nameConfirmation.title}
           </div>
-          <div className="text-white text-lg font-normal leading-tight tracking-wide">
+          <div className="text-lg font-normal leading-tight tracking-wide text-white">
             {formatMessage(texts.nameConfirmation.message, name)}
           </div>
         </div>

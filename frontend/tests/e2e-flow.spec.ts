@@ -108,8 +108,8 @@ test.describe('Icebreak App E2E Flow', () => {
     // Wait for email page to load by checking for the heading first
     await expect(page.getByRole('heading', { name: /הכנס כתובת אימייל|Enter Email/i })).toBeVisible();
     
-    // Wait for email input to be visible (should be unique now)
-    const emailInput = page.getByTestId('email-input');
+    // Wait for email input to be visible using a more specific selector
+    const emailInput = page.locator('main input[type="email"][data-testid="email-input"]').first();
     await expect(emailInput).toBeVisible();
     
     // Enter email address

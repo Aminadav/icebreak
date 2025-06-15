@@ -26,8 +26,8 @@ export default defineConfig({
     /* Capture screenshot on failure */
     screenshot: 'only-on-failure',
     
-    /* Capture video on failure */
-    video: 'retain-on-failure',
+    /* Capture video for all tests to see successful flows */
+    video: 'on',
   },
 
   /* Configure projects for mobile only */

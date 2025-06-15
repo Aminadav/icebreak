@@ -84,8 +84,73 @@ async function getDevice(deviceId) {
   }
 }
 
+/**
+ * עדכון מצב המסע של המכשיר
+ */
+async function updateJourneyState(deviceId, journeyState, additionalData = {}) {
+  try {
+    const updateFields = ['journey_state = $2'];
+    const values = [deviceId, journeyState];
+    let paramIndex = 3;
+
+    // Handle additional data fields
+    if (additionalData.pendingGameName !== undefined) {
+      updateFields.push(`pending_game_name = $${paramIndex}`);
+      values.push(additionalData.pendingGameName);
+      paramIndex++;
+    }
+
+    if (additionalData.pendingPhoneNumber !== undefined) {
+      updateFields.push(`pending_phone_number = $${paramIndex}`);
+      values.push(additionalData.pendingPhoneNumber);
+      paramIndex++;
+    }
+
+    const query = `UPDATE devices SET ${updateFields.join(', ')}, last_seen = CURRENT_TIMESTAMP WHERE device_id = $1 RETURNING *`;
+    
+    const result = await pool.query(query, values);
+    
+    if (result.rows.length === 0) {
+      throw new Error(`Device ${deviceId} not found`);
+    }
+    
+    console.log(`🎯 Updated device ${deviceId} journey state to: ${journeyState}`);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error updating journey state:', error);
+    throw error;
+  }
+}
+
+/**
+ * קבלת מצב המסע של המכשיר
+ */
+async function getJourneyState(deviceId) {
+  try {
+    const result = await pool.query(
+      'SELECT journey_state, pending_game_name, pending_phone_number FROM devices WHERE device_id = $1',
+      [deviceId]
+    );
+    
+    if (result.rows.length === 0) {
+      return { journeyState: 'INITIAL', pendingGameName: null, pendingPhoneNumber: null };
+    }
+    
+    return {
+      journeyState: result.rows[0].journey_state || 'INITIAL',
+      pendingGameName: result.rows[0].pending_game_name,
+      pendingPhoneNumber: result.rows[0].pending_phone_number
+    };
+  } catch (error) {
+    console.error('Error getting journey state:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   registerDevice,
   updateLastSeen,
-  getDevice
+  getDevice,
+  updateJourneyState,
+  getJourneyState
 };

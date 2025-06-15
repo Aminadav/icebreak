@@ -36,17 +36,41 @@ function setupSocketHandlers(io) {
         socket.deviceId = result.deviceId;
         socket.userId = result.userId; // May be null if device not yet verified
         
+        // Get current journey state
+        const journeyData = await Device.getJourneyState(result.deviceId);
+        
+        // Get user details if userId exists
+        let userDetails = {};
+        if (result.userId) {
+          try {
+            const User = require('../models/User');
+            const user = await User.getUserById(result.userId);
+            if (user) {
+              userDetails = {
+                phoneNumber: user.phone_number,
+                email: user.email
+              };
+            }
+          } catch (error) {
+            console.error('Error getting user details:', error);
+          }
+        }
+        
         socket.emit('device_registered', {
           deviceId: result.deviceId,
           userId: result.userId,
           success: true,
-          isVerified: !!result.userId // True if user already exists (device was verified before)
+          isVerified: !!result.userId,
+          journeyState: journeyData.journeyState,
+          pendingGameName: journeyData.pendingGameName,
+          phoneNumber: journeyData.pendingPhoneNumber,
+          ...userDetails
         });
         
         if (result.userId) {
-          console.log(`✅ Device registered: ${result.deviceId} → Existing User: ${result.userId}`);
+          console.log(`✅ Device registered: ${result.deviceId} → Existing User: ${result.userId}, Journey: ${journeyData.journeyState}`);
         } else {
-          console.log(`✅ Device registered: ${result.deviceId} → No user yet (needs verification)`);
+          console.log(`✅ Device registered: ${result.deviceId} → No user yet (needs verification), Journey: ${journeyData.journeyState}`);
         }
       } catch (error) {
         console.error('Error registering device:', error);
@@ -70,8 +94,13 @@ function setupSocketHandlers(io) {
           throw new Error('Game name is required');
         }
         
-        // שמירת שם המשחק ב-socket עד לאימות
+        // שמירת שם המשחק ב-socket ובמסד הנתונים
         socket.pendingGameName = gameName.trim();
+        
+        // Update journey state to GAME_NAME_SET
+        await Device.updateJourneyState(socket.deviceId, 'GAME_NAME_SET', {
+          pendingGameName: gameName.trim()
+        });
         
         socket.emit('game_name_saved', {
           gameName: socket.pendingGameName,
@@ -89,6 +118,31 @@ function setupSocketHandlers(io) {
       }
     });
 
+    // התחלת תהליך יצירת משחק - מעבר לעמוד הזנת שם המשחק
+    socket.on('start_game_creation', async () => {
+      try {
+        if (!socket.deviceId) {
+          throw new Error('Device not registered');
+        }
+        
+        // Update journey state to GAME_NAME_ENTRY
+        await Device.updateJourneyState(socket.deviceId, 'GAME_NAME_ENTRY');
+        
+        socket.emit('game_creation_started', {
+          success: true,
+          message: 'Game creation flow started'
+        });
+        
+        console.log(`🎮 Game creation flow started for device: ${socket.deviceId}`);
+      } catch (error) {
+        console.error('Error starting game creation:', error);
+        socket.emit('error', {
+          message: 'Failed to start game creation',
+          error: error.message
+        });
+      }
+    });
+    
     // יצירת משחק בפועל (רק לאחר אימות)
     socket.on('create_game_now', async () => {
       try {
@@ -159,6 +213,11 @@ function setupSocketHandlers(io) {
           // שמירת מספר הטלפון ב-socket לשימוש באימות
           socket.phoneNumber = smsResult.phoneNumber;
           
+          // Update journey state to PHONE_SUBMITTED and store phone number in database
+          await Device.updateJourneyState(socket.deviceId, 'PHONE_SUBMITTED', {
+            pendingPhoneNumber: smsResult.phoneNumber
+          });
+          
           socket.emit('sms_sent', {
             phoneNumber: smsResult.phoneNumber,
             success: true,
@@ -190,7 +249,13 @@ function setupSocketHandlers(io) {
         }
         
         if (!socket.phoneNumber) {
-          throw new Error('Phone number not found. Please submit phone number first.');
+          // Try to get phone number from database if not in socket memory
+          const journeyData = await Device.getJourneyState(socket.deviceId);
+          if (journeyData.pendingPhoneNumber) {
+            socket.phoneNumber = journeyData.pendingPhoneNumber;
+          } else {
+            throw new Error('Phone number not found. Please submit phone number first.');
+          }
         }
         
         if (!code || code.trim().length === 0) {
@@ -271,6 +336,11 @@ function setupSocketHandlers(io) {
               // Don't fail the verification if game creation fails
             }
           }
+          
+          // Update journey state to PHONE_VERIFIED and clear pending phone number
+          await Device.updateJourneyState(socket.deviceId, 'PHONE_VERIFIED', {
+            pendingPhoneNumber: null
+          });
           
           socket.emit('2fa_verified', {
             success: true,
@@ -392,6 +462,9 @@ function setupSocketHandlers(io) {
         const result = await User.updateUserEmail(targetUserId, normalizedEmail);
         
         if (result.success) {
+          // Update journey state to EMAIL_SAVED
+          await Device.updateJourneyState(socket.deviceId, 'EMAIL_SAVED');
+          
           socket.emit('email_saved', {
             success: true,
             message: 'Email address saved successfully',
@@ -420,6 +493,34 @@ function setupSocketHandlers(io) {
             context: 'email_save'
           });
         }
+      }
+    });
+    
+    // Reset journey state to INITIAL (used when clicking logo)
+    socket.on('reset_journey_state', async () => {
+      try {
+        if (!socket.deviceId) {
+          throw new Error('Device not registered');
+        }
+        
+        // Reset journey state to INITIAL and clear pending data
+        await Device.updateJourneyState(socket.deviceId, 'INITIAL', {
+          pendingGameName: null
+        });
+        
+        console.log(`🔄 Journey state reset to INITIAL for device: ${socket.deviceId}`);
+        
+        socket.emit('journey_state_reset', {
+          success: true,
+          message: 'Journey state reset successfully'
+        });
+        
+      } catch (error) {
+        console.error('Error resetting journey state:', error);
+        socket.emit('error', {
+          message: 'Failed to reset journey state',
+          error: error.message
+        });
       }
     });
     

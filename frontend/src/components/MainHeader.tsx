@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useNavigation } from '../contexts/NavigationContext';
+import { useSocket } from '../contexts/SocketContext';
+import HomePage from '../pages/HomePage';
 import TopMenu from './TopMenu';
 
-interface IceBreakProps {}
+interface IceBreakProps {
+  onClick?: () => void;
+}
 
-function IceBreak({}: IceBreakProps): JSX.Element {
+function IceBreak({ onClick }: IceBreakProps): JSX.Element {
   return (
-    <div className="relative w-full h-full">
+    <button 
+      onClick={onClick}
+      className="relative w-full h-full bg-transparent border-none cursor-pointer"
+    >
       <div className="relative flex flex-row items-baseline justify-center w-full h-full gap-1 text-center text-white font-bubblegum" dir="ltr">
         <div className="relative shrink-0 text-[22px] whitespace-nowrap order-1">
           <p className="m-0 leading-normal">IceBreak!</p>
@@ -15,7 +23,7 @@ function IceBreak({}: IceBreakProps): JSX.Element {
           <p className="m-0 leading-normal">.cc</p>
         </div>
       </div>
-    </div>
+    </button>
   );
 }
 
@@ -25,8 +33,20 @@ interface MainHeaderProps {
 
 export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Element {
   const { texts } = useLanguage();
+  const { reset } = useNavigation();
+  const { resetJourneyState } = useSocket();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isRTL = texts.direction === 'rtl';
+
+  const handleLogoClick = () => {
+    console.log('🏠 Logo clicked - resetting journey state and navigating to homepage');
+    
+    // Reset the journey state on the backend
+    resetJourneyState();
+    
+    // Navigate to homepage
+    reset(<HomePage />);
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -63,7 +83,7 @@ export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Eleme
         </button>
         
         <div className={`absolute ${isRTL ? 'right-9' : 'left-9'} top-1/2 -translate-y-1/2 w-[80px]`}>
-          <IceBreak />
+          <IceBreak onClick={handleLogoClick} />
         </div>
       </div>
 

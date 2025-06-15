@@ -22,6 +22,24 @@ async function findUserByPhone(phoneNumber) {
 }
 
 /**
+ * Find user by user ID
+ * @param {string} userId - User ID
+ * @returns {Object|null} - User object or null if not found
+ */
+async function getUserById(userId) {
+  try {
+    const result = await pool.query(
+      'SELECT * FROM users WHERE user_id = $1',
+      [userId]
+    );
+    return result.rows[0] || null;
+  } catch (error) {
+    console.error('Error finding user by ID:', error);
+    throw error;
+  }
+}
+
+/**
  * Create a new user with verified phone number
  * @param {string} phoneNumber - Phone number in any format
  * @returns {Object} - Created user object
@@ -181,5 +199,6 @@ module.exports = {
   associateDeviceWithUser,
   getUserDevices,
   getUserStats,
-  updateUserEmail
+  updateUserEmail,
+  getUserById
 };

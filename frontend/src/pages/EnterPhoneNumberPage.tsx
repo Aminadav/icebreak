@@ -63,7 +63,7 @@ export default function EnterPhoneNumberPage(): JSX.Element {
       socket.off('sms_sent', smsSentHandler);
       socket.off('error', errorHandler);
     };
-  }, [socket, phoneNumber, push]);
+  }, [socket, phoneNumber]); // Removed 'push' from dependencies to prevent re-renders
 
   const handleContinue = async () => {
     if (!phoneNumber.trim()) {

@@ -11,7 +11,7 @@ import ComponentsShowcase from './ComponentsShowcase';
 
 export default function HomePage(): JSX.Element {
   const { texts } = useLanguage();
-  const { isConnected, deviceId, userId, error } = useSocket();
+  const { isConnected, deviceId, userId, error, socket } = useSocket();
   const { push } = useNavigation();
   const { trackEvent } = useTracking();
 
@@ -24,6 +24,29 @@ export default function HomePage(): JSX.Element {
       source_page: 'homepage',
       user_authenticated: !!userId
     });
+    
+    // Emit socket event to set journey state to GAME_NAME_ENTRY
+    if (socket) {
+      // Set up one-time listeners for the response
+      const successHandler = (data: any) => {
+        console.log('🎯 Game creation flow started successfully:', data);
+        socket.off('game_creation_started', successHandler);
+        socket.off('error', errorHandler);
+      };
+
+      const errorHandler = (data: any) => {
+        console.error('❌ Failed to start game creation flow:', data);
+        socket.off('game_creation_started', successHandler);
+        socket.off('error', errorHandler);
+        // Continue with navigation anyway
+      };
+
+      socket.once('game_creation_started', successHandler);
+      socket.once('error', errorHandler);
+      
+      socket.emit('start_game_creation');
+    }
+    
     push(<GiveGameNamePage />);
   };
 

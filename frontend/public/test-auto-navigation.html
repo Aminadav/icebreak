@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Auto Navigation & Journey Tracking</title>
+</head>
+<body>
+    <h1>Test Auto Navigation & Journey Tracking</h1>
+    <p>This page will set different device IDs to test journey state progression.</p>
+    
+    <div id="status">Choose a test scenario...</div>
+    
+    <div style="margin: 20px 0;">
+        <h3>Test Scenarios:</h3>
+        
+        <button onclick="setDeviceId('29898d77-9f50-489c-9b32-0eb0f7c4364d')">
+            Test Fresh Device (INITIAL state)
+        </button><br><br>
+        
+        <button onclick="setDeviceId('8cd3f4ea-ab96-43c4-9816-27b6bf6817a5')">
+            Test Device with Game Name Set (GAME_NAME_SET)
+        </button><br><br>
+        
+        <button onclick="setDeviceId('cf72f0a2-547f-49b6-a3fe-5f732fbd0d72')">
+            Test Device with Phone Verified (PHONE_VERIFIED)
+        </button><br><br>
+        
+        <button onclick="setDeviceId('35e40ee6-a890-4f8d-bac1-cd4b0fc89997')">
+            Test Device with Email Saved (EMAIL_SAVED)
+        </button><br><br>
+        
+        <button onclick="clearStorage()">
+            Clear Storage & Test New Device
+        </button><br><br>
+        
+        <button onclick="goToApp()">
+            Go to App Now
+        </button>
+    </div>
+    
+    <div id="deviceInfo"></div>
+    
+    <script>
+        window.setDeviceId = function(deviceId) {
+            localStorage.setItem('deviceId', deviceId);
+            document.getElementById('status').innerHTML = 
+                '<p>✅ Device ID set to: ' + deviceId + '</p>';
+            showDeviceInfo();
+        };
+        
+        window.clearStorage = function() {
+            localStorage.removeItem('deviceId');
+            document.getElementById('status').innerHTML = 
+                '<p>✅ Storage cleared. App will create new device.</p>';
+            document.getElementById('deviceInfo').innerHTML = '';
+        };
+        
+        window.goToApp = function() {
+            window.location.href = '/';
+        };
+        
+        function showDeviceInfo() {
+            const deviceId = localStorage.getItem('deviceId');
+            const deviceInfoMap = {
+                '29898d77-9f50-489c-9b32-0eb0f7c4364d': 'Fresh device - should stay on homepage',
+                '8cd3f4ea-ab96-43c4-9816-27b6bf6817a5': 'Game name set - should go to phone entry',
+                'cf72f0a2-547f-49b6-a3fe-5f732fbd0d72': 'Phone verified - should go to email entry',
+                '35e40ee6-a890-4f8d-bac1-cd4b0fc89997': 'Email saved - should go to name entry'
+            };
+            
+            const expectedBehavior = deviceInfoMap[deviceId] || 'Unknown device';
+            
+            document.getElementById('deviceInfo').innerHTML = 
+                '<h4>Expected Behavior:</h4>' +
+                '<p>' + expectedBehavior + '</p>' +
+                '<p><strong>Current Device ID:</strong> ' + (deviceId || 'None (will create new)') + '</p>';
+        }
+        
+        // Show current device info on load
+        document.addEventListener('DOMContentLoaded', function() {
+            showDeviceInfo();
+        });
+    </script>
+</body>
+</html>

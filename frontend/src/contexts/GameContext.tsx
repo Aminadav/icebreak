@@ -1,6 +1,8 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { simpleSocketService } from '../services/simpleSocketService';
 import { getDeviceId, setDeviceId, generateUUID } from '../utils/deviceManager';
+import { NavigationController, type JourneyState } from '../utils/NavigationController';
+import { useNavigation } from './NavigationContext';
 import type { UserData, GameData, DeviceRegisteredResponse, GameCreatedResponse, ErrorResponse } from '../services/types';
 
 console.log('📁 GameContext module loaded');
@@ -32,6 +34,9 @@ export function GameProvider({ children }: GameProviderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  
+  // Get navigation functions
+  const { reset } = useNavigation();
 
   // Initialize socket connection and device registration
   useEffect(() => {
@@ -62,23 +67,23 @@ export function GameProvider({ children }: GameProviderProps) {
       setError(null);
 
       // Set up socket event listeners
-      socketService.setOnConnect(() => {
+      simpleSocketService.setOnConnect(() => {
         console.log('✅ Socket connected successfully');
-        console.log('✅ Transport type:', socketService.getTransportType());
-        console.log('✅ Socket ID:', socketService.getSocketId());
+        console.log('✅ Transport type:', simpleSocketService.getTransportType());
+        console.log('✅ Socket ID:', simpleSocketService.getSocketId());
         setIsConnected(true);
         
         // Register device when connected
         const existingDeviceId = getDeviceId();
-        socketService.registerDevice(existingDeviceId || generateUUID());
+        simpleSocketService.registerDevice(existingDeviceId || generateUUID());
       });
 
-      socketService.setOnDisconnect(() => {
+      simpleSocketService.setOnDisconnect(() => {
         console.log('📱 Socket disconnected');
         setIsConnected(false);
       });
 
-      socketService.setOnDeviceRegistered((data: DeviceRegisteredResponse) => {
+      simpleSocketService.setOnDeviceRegistered((data: DeviceRegisteredResponse) => {
         // Save device ID to localStorage
         setDeviceId(data.deviceId);
         
@@ -90,9 +95,26 @@ export function GameProvider({ children }: GameProviderProps) {
         
         setIsLoading(false);
         console.log('✅ User registered:', data);
+        
+        // Handle auto-navigation based on journey state
+        if (data.journeyState && NavigationController.shouldAutoNavigate(data.journeyState as JourneyState)) {
+          console.log(`🎯 Auto-navigating to journey state: ${data.journeyState}`);
+          
+          const targetComponent = NavigationController.getComponentForJourneyState(
+            data.journeyState as JourneyState,
+            {
+              phoneNumber: data.phoneNumber,
+              userId: data.userId,
+              email: data.email,
+              pendingGameName: data.pendingGameName
+            }
+          );
+          
+          reset(targetComponent);
+        }
       });
 
-      socketService.setOnGameCreated((data: GameCreatedResponse) => {
+      simpleSocketService.setOnGameCreated((data: GameCreatedResponse) => {
         setCurrentGame({
           gameId: data.gameId,
           gameName: data.gameName,
@@ -108,7 +130,7 @@ export function GameProvider({ children }: GameProviderProps) {
         console.log('🎮 Game created successfully:', data);
       });
 
-      socketService.setOnError((data: ErrorResponse) => {
+      simpleSocketService.setOnError((data: ErrorResponse) => {
         setError(data.message);
         setIsLoading(false);
         console.error('❌ Socket error:', data);
@@ -125,12 +147,12 @@ export function GameProvider({ children }: GameProviderProps) {
       }, 30000); // הגדלנו ל-30 שניות
       
       try {
-        console.log('📡 Calling socketService.connect()...');
-        await socketService.connect();
-        console.log('✅ socketService.connect() completed successfully');
+        console.log('📡 Calling simpleSocketService.connect()...');
+        await simpleSocketService.connect();
+        console.log('✅ simpleSocketService.connect() completed successfully');
         clearTimeout(connectionTimeout);
       } catch (error) {
-        console.error('❌ socketService.connect() failed:', error);
+        console.error('❌ simpleSocketService.connect() failed:', error);
         clearTimeout(connectionTimeout);
         throw error;
       }
@@ -159,8 +181,8 @@ export function GameProvider({ children }: GameProviderProps) {
 
       setIsLoading(true);
       setError(null);
-      
-      socketService.createGame(gameName);
+
+      simpleSocketService.setGameName(gameName);
       
     } catch (error) {
       setError(error instanceof Error ? error.message : 'שגיאה ביצירת המשחק');

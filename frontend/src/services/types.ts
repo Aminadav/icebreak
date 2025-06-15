@@ -4,20 +4,27 @@ export interface SocketEvents {
   register_device: (data: { deviceId?: string }) => void;
   create_game: (data: { gameName: string }) => void;
   submit_phone_number: (data: { phoneNumber: string }) => void;
+  reset_journey_state: () => void;
   ping: () => void;
   
   // Server to Client
   device_registered: (data: DeviceRegisteredResponse) => void;
   game_created: (data: GameCreatedResponse) => void;
   sms_sent: (data: SmsSentResponse) => void;
+  journey_state_reset: (data: { success: boolean; message: string }) => void;
   error: (data: ErrorResponse) => void;
 }
 
 // Response Types
 export interface DeviceRegisteredResponse {
   deviceId: string;
-  userId: string;
+  userId: string | null;
   success: boolean;
+  isVerified: boolean;
+  journeyState?: string;
+  pendingGameName?: string;
+  phoneNumber?: string;
+  email?: string;
 }
 
 export interface GameCreatedResponse {

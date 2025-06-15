@@ -10,15 +10,15 @@ import './App.css';
 function App(): JSX.Element {
   return (
     <LanguageProvider>
-      <SocketProvider>
-        <TrackingProvider>
-          <ModalProvider>
-            <NavigationProvider initialComponent={<HomePage />}>
+      <ModalProvider>
+        <NavigationProvider initialComponent={<HomePage />}>
+          <SocketProvider>
+            <TrackingProvider>
               <AppRouter />
-            </NavigationProvider>
-          </ModalProvider>
-        </TrackingProvider>
-      </SocketProvider>
+            </TrackingProvider>
+          </SocketProvider>
+        </NavigationProvider>
+      </ModalProvider>
     </LanguageProvider>
   );
 }

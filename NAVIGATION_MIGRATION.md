@@ -112,3 +112,43 @@ push(<GamePage
 ```
 
 This migration makes the navigation system much cleaner and more maintainable!
+
+---
+
+# Journey State in Icebreak App
+
+## Overview
+The "journey" tracks a user's progress through the onboarding flow (e.g., phone, email, name, gender, etc.). This state is saved in the database and used to restore the user's position after a refresh or reconnect.
+
+## How It Works
+- **Saving State:**
+  - The backend saves the current journey state in the `devices` table (`journey_state` column) whenever the user advances a step (e.g., after entering email, name, etc.).
+  - The frontend emits events (via socket.io) to update the journey state on the backend.
+  - Pages can use the generic `update_journey_state` event to save their state.
+- **Restoring State:**
+  - On page load or refresh, the frontend requests the current journey state from the backend.
+  - The backend includes all user details (including `gender`) in the `device_registered` response.
+  - The app automatically navigates the user to the correct page based on the saved state and available user data.
+
+## Where to Modify When Adding a New Page
+- **Frontend:**
+  - Update the navigation logic (usually in the main navigation context/provider) to handle the new journey step.
+  - Ensure the new page emits an event to update the journey state after successful completion.
+- **Backend:**
+  - Update the socket event handlers (see `backend/routes/socket.js`) to handle the new journey state value.
+  - Ensure the `devices` table and model support the new state if needed.
+
+## Debugging & Troubleshooting
+- **Frontend:**
+  - Check the navigation context/provider for logic errors.
+  - Inspect socket events in the browser console.
+- **Backend:**
+  - Inspect `backend/routes/socket.js` for event handling and state saving.
+  - Check the `devices` table in the database for the `journey_state` value.
+
+## Quick Reference
+- **Frontend navigation:** `src/contexts/NavigationContext.tsx` (or similar)
+- **Backend journey state logic:** `backend/routes/socket.js`
+- **Database:** `devices` table, `journey_state` column
+
+For more details, see code comments in the relevant files.

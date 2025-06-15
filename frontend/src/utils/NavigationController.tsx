@@ -105,6 +105,8 @@ export class NavigationController {
         return <EnterPhoneNumberPage />;
         
       case 'PICTURE_UPLOAD':
+        console.log(data)
+        debugger
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }

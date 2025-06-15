@@ -50,7 +50,8 @@ function setupSocketHandlers(io) {
               userDetails = {
                 phoneNumber: user.phone_number,
                 email: user.email,
-                name: user.name
+                name: user.name,
+                gender: user.gender
               };
             }
           } catch (error) {

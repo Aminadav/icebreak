@@ -82,25 +82,15 @@ export function SocketProvider({ children }: SocketProviderProps) {
         // Handle auto-navigation based on journey state (only if we haven't already auto-navigated)
         if (data.journeyState && NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) && !hasAutoNavigated) {
           console.log(`🎯 Auto-navigating to journey state: ${data.journeyState}`);
-          console.log('📊 Navigation data:', {
-            phoneNumber: data.phoneNumber,
-            userId: data.userId,
-            email: data.email,
-            name: data.name,
-            pendingGameName: data.pendingGameName
-          });
+          console.log('📊 Navigation data:', data);
           
           try {
+            console.log(0)
             const targetComponent = NavigationController.getComponentForJourneyState(
               data.journeyState as JourneyState,
-              {
-                phoneNumber: data.phoneNumber,
-                userId: data.userId,
-                email: data.email,
-                name: data.name,
-                pendingGameName: data.pendingGameName
-              }
+              data
             );
+            console.log(1)
             
             console.log('🎯 Target component:', typeof targetComponent.type === 'function' ? targetComponent.type.name : targetComponent.type);
             console.log('🎯 Target component props:', targetComponent.props);

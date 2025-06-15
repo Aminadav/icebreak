@@ -8,9 +8,10 @@ import { useLanguage } from '../contexts/LanguageContext';
 interface EnterPhoneNumberPageProps {
   onBack: () => void;
   onContinue: (phoneNumber: string) => void;
+  onMenuAction?: (page: string) => void;
 }
 
-export default function EnterPhoneNumberPage({ onBack, onContinue }: EnterPhoneNumberPageProps): JSX.Element {
+export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction }: EnterPhoneNumberPageProps): JSX.Element {
   const { texts } = useLanguage();
   
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -18,7 +19,6 @@ export default function EnterPhoneNumberPage({ onBack, onContinue }: EnterPhoneN
   const [error, setError] = useState<string | null>(null);
 
   // Silence unused warnings - keeping for future use
-  void onBack;
   void onContinue;
 
   const handleContinue = async () => {
@@ -52,7 +52,7 @@ export default function EnterPhoneNumberPage({ onBack, onContinue }: EnterPhoneN
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={() => {}}
+      onMenuAction={onMenuAction}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* No Entry Icon */}

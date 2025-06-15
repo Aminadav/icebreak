@@ -15,15 +15,7 @@ export default function PageLayout({ children, onBack, title, showHeader, onMenu
   const isRTL = texts.direction === 'rtl';
 
   return (
-    <div 
-      className="min-h-screen bg-cover bg-center bg-no-repeat bg-fixed relative"
-      style={{
-        backgroundImage: "url('/images/backgrounds/background.png')"
-      }}
-    >
-      {/* Dark overlay for better readability */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 via-blue-900/60 to-purple-900/60"></div>
-      
+    <div className="min-h-screen relative">
       {/* Header */}
       {showHeader && (
         <div className="relative z-50">

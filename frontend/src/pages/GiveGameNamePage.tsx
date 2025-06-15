@@ -10,9 +10,10 @@ interface GiveGameNamePageProps {
   onBack: () => void;
   onContinue: (gameName: string) => void;
   onGameCreated: () => void;
+  onMenuAction?: (page: string) => void;
 }
 
-export default function GiveGameNamePage({ onBack, onContinue, onGameCreated }: GiveGameNamePageProps): JSX.Element {
+export default function GiveGameNamePage({ onBack, onContinue, onGameCreated, onMenuAction }: GiveGameNamePageProps): JSX.Element {
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
   
@@ -21,7 +22,6 @@ export default function GiveGameNamePage({ onBack, onContinue, onGameCreated }: 
   const [error, setError] = useState<string | null>(null);
 
   // Silence unused warnings - keeping for future use
-  void onBack;
   void onContinue;
 
   const handleContinue = async () => {
@@ -86,7 +86,7 @@ export default function GiveGameNamePage({ onBack, onContinue, onGameCreated }: 
   // Show connection status
   if (!isConnected) {
     return (
-      <PageLayout showHeader={true} onMenuAction={() => {}}>
+      <PageLayout showHeader={true} onMenuAction={onMenuAction}>
         <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
           <div className="text-center">
             <h1 className="mb-4 text-3xl font-bold text-white">מתחבר לשרת...</h1>
@@ -100,7 +100,7 @@ export default function GiveGameNamePage({ onBack, onContinue, onGameCreated }: 
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={() => {}}
+      onMenuAction={onMenuAction}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Friends illustration */}

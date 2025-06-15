@@ -1,15 +1,16 @@
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SocketProvider } from './contexts/SocketContext';
+import { NavigationProvider } from './contexts/NavigationContext';
+import AppRouter from './components/AppRouter';
 import './App.css';
-import HomePage from './pages/HomePage';
 
 function App(): JSX.Element {
   return (
     <LanguageProvider>
       <SocketProvider>
-        <div className="text-center">
-          <HomePage />
-        </div>
+        <NavigationProvider initialPage="home">
+          <AppRouter />
+        </NavigationProvider>
       </SocketProvider>
     </LanguageProvider>
   );

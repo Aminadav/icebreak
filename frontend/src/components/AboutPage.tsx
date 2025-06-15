@@ -1,17 +1,24 @@
 import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useNavigation } from '../contexts/NavigationContext';
 import PageLayout from './PageLayout';
 import AnswerContainer from './AnswerContainer';
 import { aboutTexts } from '../localization/about';
 
 interface AboutPageProps {
   onBack: () => void;
+  onNavigateToContent?: (contentType: string) => void;
 }
 
-export default function AboutPage({ onBack }: AboutPageProps): JSX.Element {
+export default function AboutPage({ onBack, onNavigateToContent }: AboutPageProps): JSX.Element {
   const { texts } = useLanguage();
+  const { getCurrentProps } = useNavigation();
   const isRTL = texts.direction === 'rtl';
-  const [selectedContent, setSelectedContent] = useState<string | null>(null);
+  
+  // Get selected content from navigation props or local state
+  const navProps = getCurrentProps();
+  const [localSelectedContent, setLocalSelectedContent] = useState<string | null>(null);
+  const selectedContent = navProps?.selectedContent || localSelectedContent;
   
   // Get current language (he or en)
   const currentLang = texts.direction === 'rtl' ? 'he' : 'en';
@@ -53,11 +60,27 @@ export default function AboutPage({ onBack }: AboutPageProps): JSX.Element {
   ];
 
   const handleOptionClick = (optionId: string) => {
-    setSelectedContent(optionId);
+    if (onNavigateToContent) {
+      // Use navigation system for pushing content pages
+      onNavigateToContent(optionId);
+    } else {
+      // Fallback to local state
+      setLocalSelectedContent(optionId);
+    }
+  };
+
+  const handleBackFromContent = () => {
+    if (navProps?.selectedContent) {
+      // If we came from navigation push, go back in navigation
+      onBack();
+    } else {
+      // If using local state, clear it
+      setLocalSelectedContent(null);
+    }
   };
 
   return (
-    <PageLayout onBack={selectedContent ? () => setSelectedContent(null) : onBack} title={texts.about.title}>
+    <PageLayout onBack={selectedContent ? handleBackFromContent : onBack} title={texts.about.title}>
       <div className="px-6 max-w-4xl mx-auto pt-8">
         {!selectedContent ? (
           <>

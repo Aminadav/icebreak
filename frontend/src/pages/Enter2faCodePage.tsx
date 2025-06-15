@@ -303,6 +303,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
             variant="primary-large"
             onClick={handleContinue}
             disabled={!isCodeComplete || isLoading}
+            trackingId="enter_2fa_code_verify_clicked"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               isCodeComplete && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 

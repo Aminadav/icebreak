@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTracking } from '../contexts/TrackingContext';
 
 export type ButtonVariant = 
   | 'primary' 
@@ -17,6 +18,7 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
   icon?: React.ReactNode;
+  trackingId?: string;
 }
 
 const buttonVariants = {
@@ -97,9 +99,11 @@ export default function Button({
   onClick, 
   disabled = false, 
   className = '',
-  icon 
+  icon,
+  trackingId
 }: ButtonProps) {
   const [isVisible, setIsVisible] = useState(false);
+  const { trackEvent } = useTracking();
   
   useEffect(() => {
     // הוספת עיכוב קטן כדי שהאפקט יתחיל אחרי שהקומפוננטה נטענת
@@ -112,6 +116,22 @@ export default function Button({
   
   const isDisabled = disabled || variant === 'disabled';
   
+  const handleClick = () => {
+    // Track the button click if trackingId is provided
+    if (trackingId) {
+      trackEvent(trackingId, {
+        variant,
+        buttonText: typeof children === 'string' ? children : 'non-text-content',
+        hasIcon: !!icon
+      });
+    }
+    
+    // Call the original onClick handler
+    if (!isDisabled && onClick) {
+      onClick();
+    }
+  };
+  
   return (
     <div 
       style={{
@@ -119,7 +139,7 @@ export default function Button({
       }}
     >
       <button
-        onClick={isDisabled ? undefined : onClick}
+        onClick={handleClick}
         disabled={isDisabled}
         className={`
           ${buttonVariants[variant]}

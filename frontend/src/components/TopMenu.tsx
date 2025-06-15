@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useTracking } from '../contexts/TrackingContext';
 
 interface TopMenuProps {
   isOpen: boolean;
@@ -9,6 +10,7 @@ interface TopMenuProps {
 
 export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps): JSX.Element {
   const { texts, language, toggleLanguage } = useLanguage();
+  const { trackEvent } = useTracking();
   const isRTL = texts.direction === 'rtl';
 
   const handleOverlayClick = (e: React.MouseEvent) => {
@@ -69,7 +71,13 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
           {/* Language Toggle Button */}
           <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'} mb-6`}>
             <button
-              onClick={toggleLanguage}
+              onClick={() => {
+                trackEvent('language_toggle_clicked', {
+                  current_language: language,
+                  new_language: language === 'he' ? 'en' : 'he'
+                });
+                toggleLanguage();
+              }}
               className="group flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg shadow-md"
             >
               <span className="text-lg group-hover:scale-110 transition-transform duration-200">
@@ -92,6 +100,14 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
                     : 'hover:-translate-y-1'
                 }`}
                 onClick={() => {
+                  // Track menu item click
+                  const menuItemKey = item.text.toLowerCase().replace(/\s+/g, '_');
+                  trackEvent('menu_item_clicked', {
+                    menu_item: menuItemKey,
+                    has_link: !!item.link,
+                    text: item.text
+                  });
+                  
                   // Handle menu item click
                   console.log(`Clicked: ${item.text}`);
                   

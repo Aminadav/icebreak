@@ -2,6 +2,7 @@ const Device = require('../models/Device');
 const Game = require('../models/Game');
 const User = require('../models/User');
 const { sendVerificationCode, verifyCode } = require('../utils/smsService');
+const { sendToMixpanel, setUserProfile, trackLogin, trackRegistration } = require('../utils/mixpanelService');
 
 function setupSocketHandlers(io) {
   console.log('🔧 Setting up Socket.io handlers...');
@@ -100,6 +101,17 @@ function setupSocketHandlers(io) {
         }
         
         const game = await Game.createGame(socket.pendingGameName, socket.userId);
+        
+        // Track game creation
+        await sendToMixpanel({
+          trackingId: 'game_created',
+          userId: socket.userId,
+          deviceId: socket.deviceId,
+          timestamp: new Date().toISOString(),
+          game_id: game.game_id,
+          game_name: game.name,
+          socketId: socket.id
+        });
         
         // הצטרפות לחדר המשחק
         socket.join(game.game_id);
@@ -207,6 +219,27 @@ function setupSocketHandlers(io) {
           // Get user stats for response
           const userStats = await User.getUserStats(user.user_id);
           
+          // Track user authentication (registration or login)
+          const isNewUser = user.created_at && (Date.now() - new Date(user.created_at).getTime()) < 5000; // Created in last 5 seconds
+          if (isNewUser) {
+            await trackRegistration(user.user_id, socket.deviceId, socket.phoneNumber, {
+              device_count: userStats.deviceCount,
+              games_created: userStats.gamesCreated
+            });
+            await setUserProfile(user.user_id, {
+              phoneNumber: socket.phoneNumber,
+              createdAt: user.created_at,
+              deviceCount: userStats.deviceCount,
+              gamesCreated: userStats.gamesCreated
+            });
+          } else {
+            await trackLogin(user.user_id, socket.deviceId, {
+              device_count: userStats.deviceCount,
+              games_created: userStats.gamesCreated,
+              phone_number: socket.phoneNumber
+            });
+          }
+          
           // אם יש שם משחק ממתין, ניצור את המשחק עכשיו
           let gameCreated = null;
           if (socket.pendingGameName) {
@@ -220,6 +253,18 @@ function setupSocketHandlers(io) {
                 createdAt: game.created_at
               };
               delete socket.pendingGameName;
+              
+              // Track auto game creation after verification
+              await sendToMixpanel({
+                trackingId: 'game_created_after_verification',
+                userId: user.user_id,
+                deviceId: socket.deviceId,
+                timestamp: new Date().toISOString(),
+                game_id: game.game_id,
+                game_name: game.name,
+                socketId: socket.id
+              });
+              
               console.log(`🎮 Auto-created game: ${game.name} (${game.game_id}) after verification`);
             } catch (gameError) {
               console.error('Error auto-creating game after verification:', gameError);
@@ -269,6 +314,50 @@ function setupSocketHandlers(io) {
         } catch (error) {
           console.error('Error updating last seen:', error);
         }
+      }
+    });
+
+    // טיפול באירועי tracking
+    socket.on('trackEvent', async (data) => {
+      try {
+        const { trackingId, deviceId, userId, timestamp, ...eventData } = data;
+        
+        if (!trackingId) {
+          console.warn('⚠️ Tracking event missing trackingId');
+          return;
+        }
+
+        // Get actual user_id from device if not provided or validate
+        let actualUserId = userId;
+        if (deviceId && !actualUserId) {
+          const device = await Device.getDevice(deviceId);
+          actualUserId = device?.user_id || null;
+        }
+
+        const trackingEventData = {
+          trackingId,
+          deviceId: deviceId || socket.deviceId,
+          userId: actualUserId,
+          timestamp: timestamp || new Date().toISOString(),
+          socketId: socket.id,
+          ...eventData
+        };
+
+        console.log('📊 Tracking Event:', JSON.stringify(trackingEventData, null, 2));
+        
+        // שליחה ל-Mixpanel
+        const mixpanelResult = await sendToMixpanel(trackingEventData);
+        if (mixpanelResult.success) {
+          console.log('✅ Event sent to Mixpanel successfully');
+        } else {
+          console.error('❌ Failed to send event to Mixpanel:', mixpanelResult.error);
+        }
+        
+        // אפשר להוסיף שמירה במסד נתונים למעקב מקומי
+        // await saveTrackingEvent(trackingEventData);
+        
+      } catch (error) {
+        console.error('Error processing tracking event:', error);
       }
     });
     

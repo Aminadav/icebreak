@@ -3,6 +3,7 @@ import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
+import PageTracking from '../components/PageTracking';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useNavigation } from '../contexts/NavigationContext';
@@ -88,9 +89,15 @@ export default function GiveGameNamePage(): JSX.Element {
 
   // Show connection status
   if (!isConnected) {
-    return (
-      <PageLayout showHeader={true} onMenuAction={handleMenuAction}>
-        <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
+  return (
+    <PageLayout showHeader={true} onMenuAction={handleMenuAction}>
+      <PageTracking 
+        pageName="give_game_name"
+        pageData={{ 
+          has_connection: isConnected 
+        }}
+      />
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
           <div className="text-center">
             <h1 className="mb-4 text-3xl font-bold text-white">מתחבר לשרת...</h1>
             <div className="w-16 h-16 mx-auto border-b-2 border-white rounded-full animate-spin"></div>
@@ -145,6 +152,7 @@ export default function GiveGameNamePage(): JSX.Element {
           placeholder={texts.giveGameName.placeholder}
           className="mb-8"
           autoFocus
+          trackingId="game_name"
         />
         
         {/* Continue Button */}
@@ -153,6 +161,7 @@ export default function GiveGameNamePage(): JSX.Element {
             variant="primary-large"
             onClick={handleContinue}
             disabled={!gameName.trim() || isLoading}
+            trackingId="give_game_name_continue_clicked"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               gameName.trim() && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 

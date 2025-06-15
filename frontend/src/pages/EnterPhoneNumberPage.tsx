@@ -143,6 +143,7 @@ export default function EnterPhoneNumberPage(): JSX.Element {
           autoFocus
           inputMode="tel"
           autoComplete="tel"
+          trackingId="phone_number"
         />
         
         {/* Continue Button */}
@@ -151,6 +152,7 @@ export default function EnterPhoneNumberPage(): JSX.Element {
             variant="primary-large"
             onClick={handleContinue}
             disabled={!phoneNumber.trim() || isLoading}
+            trackingId="enter_phone_number_continue_clicked"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               phoneNumber.trim() && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 

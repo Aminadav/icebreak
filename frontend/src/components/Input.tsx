@@ -23,7 +23,7 @@ export default function Input({
   onKeyPress,
   placeholder,
   className = '',
-  autoFocus = false,
+  autoFocus = true,
   disabled = false,
   inputMode,
   autoComplete,

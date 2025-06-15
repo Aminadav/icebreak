@@ -7,13 +7,13 @@ import { get2FACode } from './test-utils';
  * This test covers the complete user journey:
  * 1. HomePage - Click "Start a new game"
  * 2. GiveGameNamePage - Enter game name
- * 3. EnterPhoneNumberPage - Enter phone number (0523737233)
- * 4. Enter2faCodePage - Enter 2FA code
+ * 3. EnterPhoneNumberPage - Enter phone number (972523737233)
+ * 4. Enter2faCodePage - Enter 2FA code (123456)
  * 5. EnterEmailPage - Enter email address
- * 6. EnterNamePage - Enter user name
+ * 6. EnterNamePage - Enter user name and test modal
  */
 
-const TEST_PHONE_NUMBER = '0523737233';
+const TEST_PHONE_NUMBER = '972523737233';
 
 test.describe('Icebreak App E2E Flow', () => {
   test('Complete user registration flow from homepage to name entry', async ({ page }) => {
@@ -80,7 +80,7 @@ test.describe('Icebreak App E2E Flow', () => {
     
     // Generate the correct 2FA code for our test phone number
     const validCode = get2FACode(TEST_PHONE_NUMBER);
-    console.log(`📱 Using 2FA code: ${validCode}`);
+    console.log(`📱 Using 2FA code: ${validCode} (should be 123456 for test number)`);
     
     // Enter each digit of the 2FA code
     const codeDigits = validCode.split('');
@@ -145,6 +145,84 @@ test.describe('Icebreak App E2E Flow', () => {
     console.log('✅ Step 6 complete: Entered user name');
     await nameContinueButton.click();
     
+    // Wait for name confirmation modal to appear
+    const modalOverlay = page.getByTestId('modal-overlay');
+    await expect(modalOverlay).toBeVisible();
+    console.log('✅ Name confirmation modal appeared');
+    
+    // Verify modal content
+    await expect(page.locator('text=Test User')).toBeVisible();
+    await expect(page.getByTestId('name-confirmation-yes')).toBeVisible();
+    await expect(page.getByTestId('name-confirmation-no')).toBeVisible();
+    
+    // Test clicking "No" first
+    await page.getByTestId('name-confirmation-no').click();
+    
+    // Modal should close and we should be back on name page
+    await expect(modalOverlay).not.toBeVisible();
+    await expect(nameInput).toBeVisible();
+    console.log('✅ Modal closed after clicking "No"');
+    
+    // Click continue again to show modal
+    await nameContinueButton.click();
+    await expect(modalOverlay).toBeVisible();
+    
+    // Now click "Yes" to confirm
+    await page.getByTestId('name-confirmation-yes').click();
+    
+    // Modal should close
+    await expect(modalOverlay).not.toBeVisible();
+    console.log('✅ Modal closed after clicking "Yes"');
+    
     console.log('🎉 E2E test completed successfully!');
+  });
+
+  test('Name confirmation modal edge cases', async ({ page }) => {
+    console.log('🚀 Starting modal edge cases test');
+    
+    // Navigate to name entry page quickly (reuse flow)
+    await page.goto('http://localhost:3000');
+    
+    // Quick navigation through the flow
+    await page.getByText('יצירת משחק לקבוצה שלי >>').click();
+    await page.getByTestId('game-name-input').fill('Test Game');
+    await page.getByTestId('game-name-continue-button').click();
+    await page.getByTestId('phone-number-input').fill(TEST_PHONE_NUMBER);
+    await page.getByTestId('phone-number-continue-button').click();
+    
+    // Get 2FA code and fill it (should be 123456 for test number)
+    const code2FA = get2FACode(TEST_PHONE_NUMBER);
+    console.log(`📱 Using 2FA code for edge case test: ${code2FA}`);
+    for (let i = 0; i < 6; i++) {
+      await page.getByTestId(`2fa-code-input-${i}`).fill(code2FA[i]);
+    }
+    await page.getByTestId('2fa-code-verify-button').click();
+    
+    await page.getByTestId('email-input').fill('test@example.com');
+    await page.getByTestId('email-continue-button').click();
+    
+    // Now test modal edge cases
+    const nameInput = page.getByTestId('name-input');
+    await nameInput.fill('Modal Test User');
+    await page.getByTestId('name-continue-button').click();
+    
+    // Test 1: Click outside modal to close
+    const modalOverlay = page.getByTestId('modal-overlay');
+    await expect(modalOverlay).toBeVisible();
+    
+    // Click on the overlay background (not the modal content)
+    await modalOverlay.click({ position: { x: 10, y: 10 } });
+    await expect(modalOverlay).not.toBeVisible();
+    console.log('✅ Modal closed by clicking outside');
+    
+    // Test 2: Escape key to close modal
+    await page.getByTestId('name-continue-button').click();
+    await expect(modalOverlay).toBeVisible();
+    
+    await page.keyboard.press('Escape');
+    await expect(modalOverlay).not.toBeVisible();
+    console.log('✅ Modal closed by Escape key');
+    
+    console.log('🎉 Modal edge cases test completed successfully!');
   });
 });

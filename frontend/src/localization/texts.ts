@@ -67,6 +67,12 @@ interface Texts {
     placeholder: string;
     continueButton: string;
   };
+  nameConfirmation: {
+    title: string;
+    message: string;
+    yesButton: string;
+    noButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -138,6 +144,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       title: 'מה השם שלך?',
       placeholder: 'הכנס את שמך...',
       continueButton: 'המשך >>'
+    },
+    nameConfirmation: {
+      title: 'כדי להנות מהמשחק',
+      message: 'מומלץ למלא שם אמיתי האם {name} השם האמיתי שלך?',
+      yesButton: 'כן',
+      noButton: 'לא'
     }
   },
   en: {
@@ -208,6 +220,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       title: 'What is your name?',
       placeholder: 'Enter your name...',
       continueButton: 'Continue >>'
+    },
+    nameConfirmation: {
+      title: 'To enjoy the game',
+      message: 'we recommend using a real name. Is {name} your real name?',
+      yesButton: 'Yes',
+      noButton: 'No'
     }
   }
 };

@@ -3,8 +3,10 @@ import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
+import NameConfirmationModal from '../components/NameConfirmationModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useModal } from '../contexts/ModalContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
 
@@ -17,6 +19,7 @@ interface EnterNamePageProps {
 export default function EnterNamePage({ phoneNumber, userId, email }: EnterNamePageProps): JSX.Element {
   const { texts } = useLanguage();
   const { back, push } = useNavigation();
+  const { openModal } = useModal();
   
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +37,17 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
       return;
     }
 
+    // Show the name confirmation modal
+    openModal(
+      <NameConfirmationModal 
+        name={name}
+        onYes={handleNameConfirmed}
+        onNo={handleNameRejected}
+      />
+    );
+  };
+
+  const handleNameConfirmed = async () => {
     setIsLoading(true);
     
     try {
@@ -48,6 +62,11 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
       console.error('Failed to save name:', error);
       setIsLoading(false);
     }
+  };
+
+  const handleNameRejected = () => {
+    // User clicked "No" or closed modal - stay on the page
+    console.log('User rejected the name, staying on page');
   };
 
   const handleInputChange = (value: string) => {

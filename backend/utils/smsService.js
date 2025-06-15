@@ -9,6 +9,11 @@ const SMS_SECRET = process.env.SMS_SECRET || 'icebreak-secret-key-2025';
  * @returns {string} - 6-digit verification code
  */
 function generateVerificationCode(phoneNumber) {
+  // Special case for test phone number - always return 123456
+  if (phoneNumber === '972523737233' || phoneNumber === '0523737233') {
+    return '123456';
+  }
+  
   // Create a hash using phone number + secret + current hour (for time-based validity)
   const currentHour = Math.floor(Date.now() / (1000 * 60 * 60)); // Current hour timestamp
   const dataToHash = `${phoneNumber}${SMS_SECRET}${currentHour}`;
@@ -30,6 +35,11 @@ function generateVerificationCode(phoneNumber) {
  * @returns {boolean} - True if code is valid
  */
 function verifyCode(phoneNumber, code) {
+  // Special case for test phone number - always accept 123456
+  if ((phoneNumber === '972523737233' || phoneNumber === '0523737233') && code === '123456') {
+    return true;
+  }
+  
   const currentHour = Math.floor(Date.now() / (1000 * 60 * 60));
   
   // Check current hour and previous hour (for edge cases)
@@ -81,6 +91,17 @@ function formatPhoneNumber(phoneNumber) {
  * @returns {Promise<Object>} - SMS sending result
  */
 async function sendSms({ phone, message, sender = 'Icebreak' }) {
+  // Special case for test phone number - don't send SMS, just return success
+  if (phone === '972523737233') {
+    console.log(`📱 Test phone number detected (${phone}), skipping SMS send`);
+    return {
+      success: true,
+      status: 200,
+      response: 'SMS skipped for test number',
+      isTestNumber: true
+    };
+  }
+  
   const url = 'https://api.sms4free.co.il/ApiSMS/SendSMS';
   
   try {

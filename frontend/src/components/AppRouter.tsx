@@ -1,4 +1,5 @@
 import { useNavigation } from '../contexts/NavigationContext';
+import { useModal } from '../contexts/ModalContext';
 import type { NavigationEntry } from '../contexts/NavigationContext';
 import NavigationDebugger from './NavigationDebugger';
 
@@ -9,6 +10,7 @@ const ANIMATION_EASING = 'ease-in-out';
 
 export default function AppRouter(): JSX.Element {
   const { navigationStack } = useNavigation();
+  const { modalContent } = useModal();
 
   const renderPage = (entry: NavigationEntry, index: number) => {
     const isCurrentPage = index === navigationStack.length - 1;
@@ -49,6 +51,9 @@ export default function AppRouter(): JSX.Element {
     <div className="relative w-full h-screen overflow-hidden">
       {/* Render all pages in the stack */}
       {navigationStack.map((entry, index) => renderPage(entry, index))}
+      
+      {/* Modal content overlay */}
+      {modalContent}
       
       {/* Navigation debugger */}
       <NavigationDebugger show={false} />

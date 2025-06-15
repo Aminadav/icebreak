@@ -102,8 +102,8 @@ export function GameProvider({ children }: GameProviderProps) {
         
         setIsLoading(false);
         
-        // Show success alert
-        alert(`✅ המשחק "${data.gameName}" נוצרה בהצלחה!`);
+        // Show success in console
+        console.log(`✅ המשחק "${data.gameName}" נוצר בהצלחה!`);
         
         console.log('🎮 Game created successfully:', data);
       });

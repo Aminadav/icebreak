@@ -44,7 +44,7 @@
   - img "Email Icon"
   - heading "הכנס כתובת אימייל" [level=1]
   - paragraph: נשלח לך עדכונים על המשחק
-  - textbox "כתובת אימייל..."
-  - button "המשך" [disabled]
+  - textbox "כתובת אימייל...": test2@example.com
+  - button "המשך"
   - text: "טלפון: 0523737233 | משתמש: 9a9ee174-fac4-4b12-86f9-c99f10bb2302"
 ```

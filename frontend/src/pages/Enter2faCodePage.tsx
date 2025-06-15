@@ -54,7 +54,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
         console.log('🎮 Game auto-created after verification:', gameCreated);
       }
       
-      alert(successMessage);
+      console.log('✅ Success:', successMessage);
       
       // Store user information if available
       if (userInfo) {

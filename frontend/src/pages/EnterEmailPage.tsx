@@ -75,7 +75,7 @@ export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPagePr
         console.log('✅ Email saved successfully:', data);
         
         // Show success message
-        alert('✅ כתובת האימייל נשמרה בהצלחה!');
+        console.log('✅ Email saved successfully');
         
         // TODO: Navigate to next step or complete the flow
         // This might be the dashboard, game lobby, or completion page

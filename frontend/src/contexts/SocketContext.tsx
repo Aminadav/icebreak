@@ -86,6 +86,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
             phoneNumber: data.phoneNumber,
             userId: data.userId,
             email: data.email,
+            name: data.name,
             pendingGameName: data.pendingGameName
           });
           
@@ -96,6 +97,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
                 phoneNumber: data.phoneNumber,
                 userId: data.userId,
                 email: data.email,
+                name: data.name,
                 pendingGameName: data.pendingGameName
               }
             );

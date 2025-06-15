@@ -5,6 +5,8 @@ import EnterPhoneNumberPage from '../pages/EnterPhoneNumberPage';
 import Enter2faCodePage from '../pages/Enter2faCodePage';
 import EnterEmailPage from '../pages/EnterEmailPage';
 import EnterNamePage from '../pages/EnterNamePage';
+import SelectGenderPage from '../pages/SelectGenderPage';
+import PictureUploadPage from '../pages/PictureUploadPage';
 
 // Journey states that match the backend
 export type JourneyState = 
@@ -14,6 +16,9 @@ export type JourneyState =
   | 'PHONE_SUBMITTED' 
   | 'PHONE_VERIFIED' 
   | 'EMAIL_SAVED' 
+  | 'NAME_SAVED'
+  | 'GENDER_SELECTION'
+  | 'PICTURE_UPLOAD'
   | 'COMPLETED';
 
 export interface NavigationData {
@@ -21,6 +26,8 @@ export interface NavigationData {
   userId?: string;
   email?: string;
   pendingGameName?: string;
+  name?: string;
+  gender?: string;
 }
 
 /**
@@ -73,6 +80,40 @@ export class NavigationController {
         // Ultimate fallback
         return <EnterPhoneNumberPage />;
         
+      case 'NAME_SAVED':
+        if (data.phoneNumber && data.userId && data.email && data.name) {
+          return <SelectGenderPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} />;
+        }
+        // Fallback to name entry if missing data
+        if (data.phoneNumber && data.userId && data.email) {
+          return <EnterNamePage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} />;
+        }
+        // Further fallbacks
+        if (data.phoneNumber && data.userId) {
+          return <EnterEmailPage phoneNumber={data.phoneNumber} userId={data.userId} />;
+        }
+        return <EnterPhoneNumberPage />;
+        
+      case 'GENDER_SELECTION':
+        if (data.phoneNumber && data.userId && data.email && data.name) {
+          return <SelectGenderPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} />;
+        }
+        // Fallback to name entry if missing data
+        if (data.phoneNumber && data.userId && data.email) {
+          return <EnterNamePage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} />;
+        }
+        return <EnterPhoneNumberPage />;
+        
+      case 'PICTURE_UPLOAD':
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
+        }
+        // Fallback to gender selection if missing data
+        if (data.phoneNumber && data.userId && data.email && data.name) {
+          return <SelectGenderPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} />;
+        }
+        return <EnterPhoneNumberPage />;
+        
       case 'COMPLETED':
         // Could navigate to game lobby or dashboard
         return <HomePage />;
@@ -102,6 +143,9 @@ export class NavigationController {
       'PHONE_SUBMITTED': 'Phone submitted, waiting for 2FA verification',
       'PHONE_VERIFIED': 'Phone verified, ready for email',
       'EMAIL_SAVED': 'Email saved, ready for name entry',
+      'NAME_SAVED': 'Name saved, ready for gender selection',
+      'GENDER_SELECTION': 'Gender selection in progress',
+      'PICTURE_UPLOAD': 'Picture upload in progress',
       'COMPLETED': 'Registration completed'
     };
     

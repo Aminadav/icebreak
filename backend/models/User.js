@@ -192,6 +192,68 @@ async function updateUserEmail(userId, email) {
   }
 }
 
+/**
+ * Update user name and gender
+ * @param {string} userId - User ID
+ * @param {string} name - User name
+ * @param {string} gender - User gender ('male' or 'female')
+ * @returns {Object} - Success result or error
+ */
+async function updateUserNameAndGender(userId, name, gender) {
+  try {
+    // Validate gender
+    if (gender && !['male', 'female'].includes(gender)) {
+      return { success: false, error: 'Invalid gender. Must be "male" or "female"' };
+    }
+
+    const result = await pool.query(
+      'UPDATE users SET name = $1, gender = $2 WHERE user_id = $3 RETURNING *',
+      [name, gender, userId]
+    );
+    
+    if (result.rows.length === 0) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    return { 
+      success: true, 
+      user: result.rows[0],
+      message: 'Name and gender updated successfully'
+    };
+  } catch (error) {
+    console.error('Error updating user name and gender:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Update user name only
+ * @param {string} userId - User ID
+ * @param {string} name - User name
+ * @returns {Object} - Success result or error
+ */
+async function updateUserName(userId, name) {
+  try {
+    const result = await pool.query(
+      'UPDATE users SET name = $1 WHERE user_id = $2 RETURNING *',
+      [name, userId]
+    );
+    
+    if (result.rows.length === 0) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    return { 
+      success: true, 
+      user: result.rows[0],
+      message: 'Name updated successfully'
+    };
+  } catch (error) {
+    console.error('Error updating user name:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   findUserByPhone,
   createUser,
@@ -200,5 +262,7 @@ module.exports = {
   getUserDevices,
   getUserStats,
   updateUserEmail,
+  updateUserNameAndGender,
+  updateUserName,
   getUserById
 };

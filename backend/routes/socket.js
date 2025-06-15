@@ -1,6 +1,7 @@
 const Device = require('../models/Device');
 const Game = require('../models/Game');
 const User = require('../models/User');
+const pool = require('../config/database');
 const { sendVerificationCode, verifyCode } = require('../utils/smsService');
 const { sendToMixpanel, setUserProfile, trackLogin, trackRegistration } = require('../utils/mixpanelService');
 
@@ -48,7 +49,8 @@ function setupSocketHandlers(io) {
             if (user) {
               userDetails = {
                 phoneNumber: user.phone_number,
-                email: user.email
+                email: user.email,
+                name: user.name
               };
             }
           } catch (error) {
@@ -523,7 +525,166 @@ function setupSocketHandlers(io) {
         });
       }
     });
+
+    // Update journey state (generic handler)
+    socket.on('update_journey_state', async (data) => {
+      try {
+        const { journeyState } = data;
+        
+        if (!socket.deviceId) {
+          throw new Error('Device not registered');
+        }
+        
+        if (!journeyState) {
+          throw new Error('Journey state is required');
+        }
+        
+        // Update journey state
+        await Device.updateJourneyState(socket.deviceId, journeyState);
+        
+        console.log(`🎯 Journey state updated to ${journeyState} for device: ${socket.deviceId}`);
+        
+        socket.emit('journey_state_updated', {
+          success: true,
+          journeyState: journeyState,
+          message: `Journey state updated to ${journeyState}`
+        });
+        
+      } catch (error) {
+        console.error('Error updating journey state:', error);
+        socket.emit('error', {
+          message: 'Failed to update journey state',
+          error: error.message
+        });
+      }
+    });
     
+    // שמירת שם המשתמש
+    socket.on('save_user_name', async (data) => {
+      try {
+        const { name, userId } = data;
+        
+        if (!name || !name.trim()) {
+          throw new Error('Name is required');
+        }
+        
+        // Use userId from data if provided, otherwise use socket's userId
+        const targetUserId = userId || socket.userId;
+        
+        if (!targetUserId) {
+          throw new Error('User not authenticated. Please complete phone verification first.');
+        }
+        
+        // Validate name length
+        if (name.trim().length < 2) {
+          throw new Error('Name must be at least 2 characters long');
+        }
+        
+        if (name.trim().length > 50) {
+          throw new Error('Name must be less than 50 characters');
+        }
+        
+        const trimmedName = name.trim();
+        
+        console.log(`👤 Saving name for user ${targetUserId}: ${trimmedName}`);
+        
+        // Update user name in database
+        const result = await User.updateUserName(targetUserId, trimmedName);
+        
+        if (result.success) {
+          // Update journey state to NAME_SAVED
+          await Device.updateJourneyState(socket.deviceId, 'NAME_SAVED');
+          
+          socket.emit('name_saved', {
+            success: true,
+            message: 'Name saved successfully',
+            name: trimmedName,
+            userId: targetUserId
+          });
+          
+          console.log(`✅ Name saved successfully for user ${targetUserId}: ${trimmedName}`);
+        } else {
+          throw new Error(result.error || 'Failed to save name');
+        }
+        
+      } catch (error) {
+        console.error('Error saving name:', error);
+        
+        socket.emit('name_save_error', {
+          success: false,
+          message: error.message || 'Failed to save name',
+          context: 'name_save'
+        });
+      }
+    });
+
+    // שמירת מגדר המשתמש
+    socket.on('save_user_gender', async (data) => {
+      try {
+        const { gender, userId, name } = data;
+        
+        if (!gender || !['male', 'female'].includes(gender)) {
+          throw new Error('Invalid gender. Must be "male" or "female"');
+        }
+        
+        // Use userId from data if provided, otherwise use socket's userId
+        const targetUserId = userId || socket.userId;
+        
+        if (!targetUserId) {
+          throw new Error('User not authenticated. Please complete phone verification first.');
+        }
+        
+        console.log(`⚤ Saving gender for user ${targetUserId}: ${gender}`);
+        
+        // If name is provided, update both name and gender, otherwise just gender
+        let result;
+        if (name && name.trim()) {
+          result = await User.updateUserNameAndGender(targetUserId, name.trim(), gender);
+        } else {
+          result = await pool.query(
+            'UPDATE users SET gender = $1 WHERE user_id = $2 RETURNING *',
+            [gender, targetUserId]
+          );
+          
+          if (result.rows.length === 0) {
+            throw new Error('User not found');
+          }
+          
+          result = {
+            success: true,
+            user: result.rows[0],
+            message: 'Gender updated successfully'
+          };
+        }
+        
+        if (result.success) {
+          // Update journey state to PICTURE_UPLOAD instead of COMPLETED
+          await Device.updateJourneyState(socket.deviceId, 'PICTURE_UPLOAD');
+          
+          socket.emit('gender_saved', {
+            success: true,
+            message: 'Gender saved successfully',
+            gender: gender,
+            name: name,
+            userId: targetUserId
+          });
+          
+          console.log(`✅ Gender saved successfully for user ${targetUserId}: ${gender}`);
+        } else {
+          throw new Error(result.error || 'Failed to save gender');
+        }
+        
+      } catch (error) {
+        console.error('Error saving gender:', error);
+        
+        socket.emit('gender_save_error', {
+          success: false,
+          message: error.message || 'Failed to save gender',
+          context: 'gender_save'
+        });
+      }
+    });
+
     // התנתקות
     socket.on('disconnect', (reason) => {
       console.log(`❌ Socket.io client disconnected: ${socket.id}, Reason: ${reason}`);

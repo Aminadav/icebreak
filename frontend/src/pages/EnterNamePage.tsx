@@ -7,8 +7,10 @@ import NameConfirmationModal from '../components/NameConfirmationModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useModal } from '../contexts/ModalContext';
+import { useSocket } from '../contexts/SocketContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
+import SelectGenderPage from './SelectGenderPage';
 
 interface EnterNamePageProps {
   phoneNumber?: string;
@@ -20,6 +22,7 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
   const { texts } = useLanguage();
   const { back, push } = useNavigation();
   const { openModal } = useModal();
+  const { socket } = useSocket();
   
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -53,10 +56,57 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
     try {
       console.log('📤 Saving name:', name);
       
-      // TODO: Save name and navigate to next step
-      // This might be the dashboard, game lobby, or completion page
-      
-      setIsLoading(false);
+      if (socket && userId) {
+        // Save name to backend via socket
+        socket.emit('save_user_name', {
+          name: name.trim(),
+          userId
+        });
+        
+        // Listen for response
+        const handleNameSaved = (data: any) => {
+          console.log('✅ Name saved successfully:', data);
+          setIsLoading(false);
+          
+          // Navigate to gender selection page
+          push(<SelectGenderPage 
+            phoneNumber={phoneNumber}
+            userId={userId}
+            email={email}
+            name={name}
+          />);
+          
+          // Clean up listener
+          socket.off('name_saved', handleNameSaved);
+          socket.off('name_save_error', handleNameError);
+        };
+        
+        const handleNameError = (error: any) => {
+          console.error('❌ Failed to save name:', error);
+          setIsLoading(false);
+          // Clean up listener
+          socket.off('name_saved', handleNameSaved);
+          socket.off('name_save_error', handleNameError);
+        };
+        
+        socket.on('name_saved', handleNameSaved);
+        socket.on('name_save_error', handleNameError);
+        
+      } else {
+        console.warn('⚠️ No socket connection or userId available');
+        // Fallback: simulate saving and navigate
+        await new Promise(resolve => setTimeout(resolve, 500));
+        console.log('✅ Name saved successfully (fallback)');
+        setIsLoading(false);
+        
+        // Navigate to gender selection page
+        push(<SelectGenderPage 
+          phoneNumber={phoneNumber}
+          userId={userId}
+          email={email}
+          name={name}
+        />);
+      }
       
     } catch (error) {
       console.error('Failed to save name:', error);

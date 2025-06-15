@@ -107,17 +107,134 @@ backend/
 └── .env               # משתני סביבה
 ```
 
-## Socket.io Events
+## Socket.io Events & User Flow
 
-### Client → Server:
-- `register_device` - רישום מכשיר
-- `create_game` - יצירת משחק חדש
-- `ping` - עדכון זמן ביקור
+### New 2FA User Management Flow
 
-### Server → Client:
-- `device_registered` - אישור רישום מכשיר
-- `game_created` - פרטי משחק חדש
-- `error` - הודעות שגיאה
+The application now implements a secure 2FA (Two-Factor Authentication) flow for user registration and game creation:
+
+#### 1. Device Registration
+```javascript
+// Client sends
+socket.emit('register_device', { deviceId: 'optional-existing-id' });
+
+// Server responds
+socket.on('device_registered', (data) => {
+  // data: { deviceId, userId: null, success: true, isVerified: false }
+});
+```
+
+#### 2. Game Name Setting (Memory Only)
+```javascript
+// Client sends
+socket.emit('set_game_name', { gameName: 'My Awesome Game' });
+
+// Server responds  
+socket.on('game_name_saved', (data) => {
+  // data: { gameName, success: true, message: 'Game name saved...' }
+});
+```
+
+#### 3. Phone Number Submission
+```javascript
+// Client sends
+socket.emit('submit_phone_number', { phoneNumber: '0523737233' });
+
+// Server responds
+socket.on('sms_sent', (data) => {
+  // data: { phoneNumber: '972523737233', success: true }
+});
+```
+
+#### 4. 2FA Code Verification & User Creation
+```javascript
+// Client sends
+socket.emit('verify_2fa_code', { code: '123456' });
+
+// Server responds (Success)
+socket.on('2fa_verified', (data) => {
+  // data: {
+  //   success: true,
+  //   phoneNumber: '972523737233',
+  //   user: {
+  //     userId: 'uuid',
+  //     phoneNumber: '972523737233', 
+  //     createdAt: 'timestamp',
+  //     deviceCount: 1,
+  //     gamesCreated: 1
+  //   },
+  //   gameCreated: {  // Auto-created if game name was set
+  //     gameId: 'uuid',
+  //     gameName: 'My Awesome Game',
+  //     status: 'waiting',
+  //     createdAt: 'timestamp'
+  //   }
+  // }
+});
+
+// Server responds (Failure)
+socket.on('2fa_verification_failed', (data) => {
+  // data: { success: false, message: 'Invalid verification code' }
+});
+```
+
+### Complete User Flow
+1. **Device Registration** → Creates device without user
+2. **Set Game Name** → Stores name in memory (no DB write)
+3. **Phone Submission** → Sends SMS with verification code
+4. **2FA Verification** → Creates user + auto-creates game + links device
+
+### Key Features
+- **Users created only after phone verification** 
+- **Multiple devices per user supported**
+- **Existing users can login from new devices**
+- **Games auto-created after successful verification**
+- **Phone numbers stored in normalized format (972XXXXXXXXX)**
+
+### Database Schema
+```sql
+-- Users table (created only after verification)
+users (
+  user_id UUID PRIMARY KEY,
+  phone_number VARCHAR(20) UNIQUE NOT NULL,
+  created_at TIMESTAMP,
+  updated_at TIMESTAMP
+)
+
+-- Devices linked to users after verification
+devices (
+  device_id UUID PRIMARY KEY,
+  user_id UUID REFERENCES users(user_id),
+  created_at TIMESTAMP,
+  last_seen TIMESTAMP
+)
+
+-- Games linked to verified users
+games (
+  game_id UUID PRIMARY KEY,
+  name TEXT NOT NULL,
+  creator_user_id UUID REFERENCES users(user_id),
+  status VARCHAR(50),
+  created_at TIMESTAMP
+)
+```
+
+### Legacy Socket Events (Still Supported)
+
+#### Client → Server:
+- `register_device` - Device registration
+- `set_game_name` - Save game name in memory
+- `submit_phone_number` - Submit phone for SMS verification
+- `verify_2fa_code` - Verify SMS code and create user
+- `ping` - Update last seen timestamp
+
+#### Server → Client:
+- `device_registered` - Device registration confirmation
+- `game_name_saved` - Game name saved confirmation
+- `sms_sent` - SMS sent confirmation
+- `2fa_verified` - Successful verification + user/game creation
+- `2fa_verification_failed` - Failed verification
+- `error` - Error messages
 
 ## פתרון בעיות
 

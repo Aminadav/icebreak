@@ -51,4 +51,25 @@ export interface GameData {
 export interface UserData {
   deviceId: string;
   userId: string;
+  isVerified?: boolean;
+}
+
+export interface VerifiedUserData {
+  userId: string;
+  phoneNumber: string;
+  createdAt: string;
+  deviceCount: number;
+  gamesCreated: number;
+}
+
+export interface TwoFAVerificationSuccess {
+  success: true;
+  message: string;
+  phoneNumber: string;
+  user: VerifiedUserData;
+}
+
+export interface TwoFAVerificationFailure {
+  success: false;
+  message: string;
 }

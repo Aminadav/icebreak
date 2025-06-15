@@ -1,5 +1,6 @@
 const Device = require('../models/Device');
 const Game = require('../models/Game');
+const User = require('../models/User');
 const { sendVerificationCode, verifyCode } = require('../utils/smsService');
 
 function setupSocketHandlers(io) {
@@ -32,15 +33,20 @@ function setupSocketHandlers(io) {
         
         // שמירת המידע בsocket לשימוש עתידי
         socket.deviceId = result.deviceId;
-        socket.userId = result.userId;
+        socket.userId = result.userId; // May be null if device not yet verified
         
         socket.emit('device_registered', {
           deviceId: result.deviceId,
           userId: result.userId,
-          success: true
+          success: true,
+          isVerified: !!result.userId // True if user already exists (device was verified before)
         });
         
-        console.log(`✅ Device registered: ${result.deviceId} → User: ${result.userId}`);
+        if (result.userId) {
+          console.log(`✅ Device registered: ${result.deviceId} → Existing User: ${result.userId}`);
+        } else {
+          console.log(`✅ Device registered: ${result.deviceId} → No user yet (needs verification)`);
+        }
       } catch (error) {
         console.error('Error registering device:', error);
         socket.emit('error', {
@@ -50,20 +56,50 @@ function setupSocketHandlers(io) {
       }
     });
     
-    // יצירת משחק חדש
-    socket.on('create_game', async (data) => {
+    // שמירת שם המשחק בזיכרון (לא ביצירה מיידית)
+    socket.on('set_game_name', async (data) => {
       try {
         const { gameName } = data;
         
-        if (!socket.userId) {
-          throw new Error('User not registered');
+        if (!socket.deviceId) {
+          throw new Error('Device not registered');
         }
         
         if (!gameName || gameName.trim().length === 0) {
           throw new Error('Game name is required');
         }
         
-        const game = await Game.createGame(gameName.trim(), socket.userId);
+        // שמירת שם המשחק ב-socket עד לאימות
+        socket.pendingGameName = gameName.trim();
+        
+        socket.emit('game_name_saved', {
+          gameName: socket.pendingGameName,
+          success: true,
+          message: 'Game name saved. Please verify your phone number to create the game.'
+        });
+        
+        console.log(`🎮 Game name saved: "${socket.pendingGameName}" for device: ${socket.deviceId}`);
+      } catch (error) {
+        console.error('Error saving game name:', error);
+        socket.emit('error', {
+          message: 'Failed to save game name',
+          error: error.message
+        });
+      }
+    });
+
+    // יצירת משחק בפועל (רק לאחר אימות)
+    socket.on('create_game_now', async () => {
+      try {
+        if (!socket.userId || !socket.isPhoneVerified) {
+          throw new Error('User must be verified with phone number to create games');
+        }
+        
+        if (!socket.pendingGameName) {
+          throw new Error('No game name found. Please set a game name first.');
+        }
+        
+        const game = await Game.createGame(socket.pendingGameName, socket.userId);
         
         // הצטרפות לחדר המשחק
         socket.join(game.game_id);
@@ -75,6 +111,9 @@ function setupSocketHandlers(io) {
           createdAt: game.created_at,
           success: true
         });
+        
+        // מחיקת שם המשחק הממתין
+        delete socket.pendingGameName;
         
         console.log(`🎮 Game created: ${game.name} (${game.game_id}) by user: ${socket.userId}`);
       } catch (error) {
@@ -91,15 +130,15 @@ function setupSocketHandlers(io) {
       try {
         const { phoneNumber } = data;
         
-        if (!socket.userId) {
-          throw new Error('User not registered');
+        if (!socket.deviceId) {
+          throw new Error('Device not registered');
         }
         
         if (!phoneNumber || phoneNumber.trim().length === 0) {
           throw new Error('Phone number is required');
         }
         
-        console.log(`📱 Phone number submitted: ${phoneNumber} by user: ${socket.userId}`);
+        console.log(`📱 Phone number submitted: ${phoneNumber} by device: ${socket.deviceId}`);
         
         // שליחת SMS אמיתי עם קוד אימות
         const smsResult = await sendVerificationCode(phoneNumber);
@@ -134,8 +173,8 @@ function setupSocketHandlers(io) {
       try {
         const { code } = data;
         
-        if (!socket.userId) {
-          throw new Error('User not registered');
+        if (!socket.deviceId) {
+          throw new Error('Device not registered');
         }
         
         if (!socket.phoneNumber) {
@@ -152,16 +191,57 @@ function setupSocketHandlers(io) {
         const isValid = verifyCode(socket.phoneNumber, code.trim());
         
         if (isValid) {
-          // הקוד נכון - המשתמש אומת
+          // הקוד נכון - יצירת או איתור משתמש
+          console.log(`✅ 2FA verification successful for: ${socket.phoneNumber}`);
+          
+          // Find or create user with verified phone
+          const user = await User.findOrCreateUser(socket.phoneNumber);
+          
+          // Associate the current device with this user
+          await User.associateDeviceWithUser(socket.deviceId, user.user_id);
+          
+          // Update socket with user information
+          socket.userId = user.user_id;
           socket.isPhoneVerified = true;
+          
+          // Get user stats for response
+          const userStats = await User.getUserStats(user.user_id);
+          
+          // אם יש שם משחק ממתין, ניצור את המשחק עכשיו
+          let gameCreated = null;
+          if (socket.pendingGameName) {
+            try {
+              const game = await Game.createGame(socket.pendingGameName, user.user_id);
+              socket.join(game.game_id);
+              gameCreated = {
+                gameId: game.game_id,
+                gameName: game.name,
+                status: game.status,
+                createdAt: game.created_at
+              };
+              delete socket.pendingGameName;
+              console.log(`🎮 Auto-created game: ${game.name} (${game.game_id}) after verification`);
+            } catch (gameError) {
+              console.error('Error auto-creating game after verification:', gameError);
+              // Don't fail the verification if game creation fails
+            }
+          }
           
           socket.emit('2fa_verified', {
             success: true,
             message: 'Phone number verified successfully',
-            phoneNumber: socket.phoneNumber
+            phoneNumber: socket.phoneNumber,
+            user: {
+              userId: user.user_id,
+              phoneNumber: user.phone_number,
+              createdAt: user.created_at,
+              deviceCount: userStats.deviceCount,
+              gamesCreated: userStats.gamesCreated
+            },
+            gameCreated: gameCreated // Will be null if no pending game
           });
           
-          console.log(`✅ 2FA verification successful for: ${socket.phoneNumber}`);
+          console.log(`🎉 User logged in successfully: ${user.user_id} with ${userStats.deviceCount} devices`);
         } else {
           socket.emit('2fa_verification_failed', {
             success: false,

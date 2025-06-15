@@ -38,7 +38,28 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
     const verificationSuccessHandler = (data: any) => {
       setIsLoading(false);
       console.log('✅ 2FA verification successful:', data);
-      alert(`✅ קוד האימות אומת בהצלחה!`);
+      
+      // Show success message with user info and game creation
+      const userInfo = data.user;
+      const gameCreated = data.gameCreated;
+      
+      let successMessage = userInfo 
+        ? `✅ ברוך הבא! ${userInfo.deviceCount > 1 ? `מצאנו ${userInfo.deviceCount} מכשירים שלך` : 'זהו המכשיר הראשון שלך'}`
+        : '✅ קוד האימות אומת בהצלחה!';
+      
+      // Add game creation message if applicable
+      if (gameCreated) {
+        successMessage += `\n🎮 המשחק "${gameCreated.gameName}" נוצר בהצלחה!`;
+        console.log('🎮 Game auto-created after verification:', gameCreated);
+      }
+      
+      alert(successMessage);
+      
+      // Store user information if available
+      if (userInfo) {
+        console.log(`👤 User logged in: ${userInfo.userId}, Games: ${userInfo.gamesCreated}, Devices: ${userInfo.deviceCount}`);
+      }
+      
       // TODO: Navigate to next step or complete flow
     };
 

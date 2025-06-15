@@ -1,8 +1,8 @@
 const pool = require('../config/database');
-const { generateDeviceId, generateUserId } = require('../utils/idGenerator');
+const { generateDeviceId } = require('../utils/idGenerator');
 
 /**
- * יצירת מכשיר חדש או החזרת קיים
+ * יצירת מכשיר חדש או החזרת קיים (ללא user_id עד לאימות)
  */
 async function registerDevice(existingDeviceId = null) {
   try {
@@ -19,27 +19,34 @@ async function registerDevice(existingDeviceId = null) {
       [deviceId]
     );
     
-    // יצירת user_id חדש בכל מקרה
-    const userId = generateUserId();
-    
     if (existingDevice.rows.length > 0) {
-      // עדכון המכשיר הקיים עם user_id חדש
+      // עדכון המכשיר הקיים עם זמן ביקור חדש
       await pool.query(
-        'UPDATE devices SET user_id = $1, last_seen = CURRENT_TIMESTAMP WHERE device_id = $2',
-        [userId, deviceId]
+        'UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE device_id = $1',
+        [deviceId]
       );
+      
+      const device = existingDevice.rows[0];
+      console.log(`📱 Device reconnected: ${deviceId}${device.user_id ? ` (User: ${device.user_id})` : ' (No user yet)'}`);
+      
+      return {
+        deviceId,
+        userId: device.user_id // May be null if not verified yet
+      };
     } else {
-      // יצירת מכשיר חדש
+      // יצירת מכשיר חדש ללא user_id (ימולא לאחר אימות)
       await pool.query(
         'INSERT INTO devices (device_id, user_id) VALUES ($1, $2)',
-        [deviceId, userId]
+        [deviceId, null]
       );
+      
+      console.log(`📱 New device created: ${deviceId} (No user yet)`);
+      
+      return {
+        deviceId,
+        userId: null // Will be set after 2FA verification
+      };
     }
-    
-    return {
-      deviceId,
-      userId
-    };
   } catch (error) {
     console.error('Error registering device:', error);
     throw error;

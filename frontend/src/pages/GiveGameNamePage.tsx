@@ -42,40 +42,40 @@ export default function GiveGameNamePage(): JSX.Element {
     setError(null);
     
     try {
-      // Set up listener for game_created response
-      const gameCreatedHandler = (data: any) => {
+      // Set up listener for game_name_saved response
+      const gameNameSavedHandler = (data: any) => {
         setIsLoading(false);
         if (data.success) {
-          console.log('🎮 Game created successfully:', data);
+          console.log('📝 Game name saved successfully:', data);
           // Navigate to phone number page
           push(<EnterPhoneNumberPage />);
         } else {
-          setError('שגיאה ביצירת המשחק');
+          setError('שגיאה בשמירת שם המשחק');
         }
         // Remove the listener after use
-        socket.off('game_created', gameCreatedHandler);
+        socket.off('game_name_saved', gameNameSavedHandler);
       };
 
       // Set up error handler
       const errorHandler = (data: any) => {
         setIsLoading(false);
-        setError(data.message || 'שגיאה ביצירת המשחק');
-        console.error('❌ Game creation error:', data);
+        setError(data.message || 'שגיאה בשמירת שם המשחק');
+        console.error('❌ Game name save error:', data);
         // Remove the listener after use
         socket.off('error', errorHandler);
       };
 
       // Add event listeners
-      socket.on('game_created', gameCreatedHandler);
+      socket.on('game_name_saved', gameNameSavedHandler);
       socket.on('error', errorHandler);
       
-      // Emit the create_game event
-      console.log('📤 Emitting create_game event with name:', gameName.trim());
-      socket.emit('create_game', { gameName: gameName.trim() });
+      // Emit the set_game_name event (save name, don't create game yet)
+      console.log('📤 Emitting set_game_name event with name:', gameName.trim());
+      socket.emit('set_game_name', { gameName: gameName.trim() });
       
     } catch (error) {
-      console.error('Failed to create game:', error);
-      setError('שגיאה ביצירת המשחק');
+      console.error('Failed to save game name:', error);
+      setError('שגיאה בשמירת שם המשחק');
       setIsLoading(false);
     }
   };

@@ -32,19 +32,26 @@ export default function NameConfirmationModal({ name, onYes, onNo }: NameConfirm
   // Format the message with the name in orange and handle line breaks
   const formatMessage = (message: string, userName: string) => {
     const parts = message.split('{name}');
-    const lines = parts[0].split('\n');
+    
+    // Process the entire message to handle \n properly
+    const beforeName = parts[0];
+    const afterName = parts[1] || '';
     
     return (
       <>
-        {lines.map((line, index) => (
-          <div key={index} className="mb-1">
+        {beforeName.split('\n').map((line, index, array) => (
+          <span key={`before-${index}`}>
             {line}
-          </div>
+            {index < array.length - 1 && <br />}
+          </span>
         ))}
-        <>
-          <span className="text-[#F3A257] font-bold text-3xl">{userName}</span>
-          <span> {parts[1]}</span>
-        </>
+        <span className="text-[#F3A257] font-bold text-3xl align-middle">{userName}</span>
+        {afterName.split('\n').map((line, index, array) => (
+          <span key={`after-${index}`}>
+            {line}
+            {index < array.length - 1 && <br />}
+          </span>
+        ))}
       </>
     );
   };

@@ -1,0 +1,14 @@
+
+> icebreak-frontend@0.1.0 dev /Users/Aminadav.Glickshtein/icebreak-app/frontend
+> pkill -f 'vite' || true && vite
+
+
+  VITE v5.4.19  ready in 2333 ms
+
+  ➜  Local:   http://localhost:3000/
+  ➜  Network: use --host to expose
+9:06:57 AM [vite] page reload playwright-report/index.html
+9:06:57 AM [vite] page reload playwright-report/index.html
+9:06:57 AM [vite] page reload playwright-report/index.html
+9:06:57 AM [vite] page reload playwright-report/index.html
+ ELIFECYCLE  Command failed.

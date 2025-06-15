@@ -71,6 +71,7 @@ export default function HomePage(): JSX.Element {
             onClick={handleCreateGame}
             className="text-xl px-12 py-5 min-w-[300px] border-6 border-white bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 rounded-3xl shadow-xl"
             trackingId="homepage_create_game_clicked"
+            data-testid="create-game-button"
           >
             {texts.homepage.createGameButton}
           </Button>

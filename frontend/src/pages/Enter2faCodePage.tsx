@@ -268,7 +268,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
         />
         
         {/* Code Input Fields */}
-        <div className={`flex gap-2 mb-8 sm:mb-12 transition-transform duration-300 ${shake ? 'animate-pulse' : ''}`} dir="ltr">
+        <div className={`flex gap-2 mb-8 sm:mb-12 transition-transform duration-300 ${shake ? 'animate-pulse' : ''}`} dir="ltr" data-testid="2fa-code-inputs">
           {code.map((digit, index) => (
             <input
               key={index}
@@ -288,6 +288,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
               maxLength={6}
               placeholder="●"
               aria-label={`Verification code digit ${index + 1}`}
+              data-testid={`2fa-code-input-${index}`}
             />
           ))}
         </div>
@@ -306,6 +307,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
             onClick={handleContinue}
             disabled={!isCodeComplete || isLoading}
             trackingId="enter_2fa_code_verify_clicked"
+            data-testid="2fa-code-verify-button"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               isCodeComplete && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 

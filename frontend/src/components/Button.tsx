@@ -19,6 +19,7 @@ interface ButtonProps {
   className?: string;
   icon?: React.ReactNode;
   trackingId?: string;
+  'data-testid'?: string;
 }
 
 const buttonVariants = {
@@ -100,7 +101,8 @@ export default function Button({
   disabled = false, 
   className = '',
   icon,
-  trackingId
+  trackingId,
+  'data-testid': testId
 }: ButtonProps) {
   const [isVisible, setIsVisible] = useState(false);
   const { trackEvent } = useTracking();
@@ -141,6 +143,7 @@ export default function Button({
       <button
         onClick={handleClick}
         disabled={isDisabled}
+        data-testid={testId}
         className={`
           ${buttonVariants[variant]}
           ${className}

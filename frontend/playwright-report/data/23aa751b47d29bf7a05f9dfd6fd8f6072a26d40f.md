@@ -1,0 +1,50 @@
+# Page snapshot
+
+```yaml
+- button:
+  - img
+- button "→"
+- paragraph: IceBreak!
+- paragraph: .cc
+- text: 🎮 תפריט משחק
+- button "🇺🇸 English"
+- button "👋 שלום שלמה! ✨"
+- button "השתק השתק ✨":
+  - img "השתק"
+  - text: השתק ✨
+- button "הזמנה למשחק זה הזמנה למשחק זה ✨":
+  - img "הזמנה למשחק זה"
+  - text: הזמנה למשחק זה ✨
+- button "אלופי הקבוצה אלופי הקבוצה ✨":
+  - img "אלופי הקבוצה"
+  - text: אלופי הקבוצה ✨
+- button "דשבורד דשבורד ✨":
+  - img "דשבורד"
+  - text: דשבורד ✨
+- button "המשחקים שלי המשחקים שלי ✨":
+  - img "המשחקים שלי"
+  - text: המשחקים שלי ✨
+- button "יצירת משחק חדש יצירת משחק חדש ✨":
+  - img "יצירת משחק חדש"
+  - text: יצירת משחק חדש ✨
+- button "🎨 דוגמאות קומפוננטות ✨"
+- button "עזרה וצור קשר עזרה וצור קשר ✨":
+  - img "עזרה וצור קשר"
+  - text: עזרה וצור קשר ✨
+- button "אודות IceBreak אודות IceBreak ✨":
+  - img "אודות IceBreak"
+  - text: אודות IceBreak ✨
+- button "עידכונים וחדשות עידכונים וחדשות ✨":
+  - img "עידכונים וחדשות"
+  - text: עידכונים וחדשות ✨
+- button "התנתקות התנתקות ✨":
+  - img "התנתקות"
+  - text: התנתקות ✨
+- main:
+  - img "Email Icon"
+  - heading "הכנס כתובת אימייל" [level=1]
+  - paragraph: נשלח לך עדכונים על המשחק
+  - textbox "כתובת אימייל..."
+  - button "המשך" [disabled]
+  - text: "טלפון: 0523737233 | משתמש: 9a9ee174-fac4-4b12-86f9-c99f10bb2302"
+```

@@ -157,6 +157,7 @@ export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPagePr
             type="email"
             disabled={isLoading}
             className="w-full"
+            data-testid="email-input"
             onKeyPress={(e: React.KeyboardEvent) => {
               if (e.key === 'Enter' && isEmailValid) {
                 handleContinue();
@@ -172,6 +173,7 @@ export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPagePr
             onClick={handleContinue}
             disabled={!isEmailValid || isLoading}
             trackingId="enter_email_continue_clicked"
+            data-testid="email-continue-button"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               isEmailValid && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 

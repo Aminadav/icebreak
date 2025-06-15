@@ -1,1 +1,1 @@
-For packages use pnpm
+For packages use pnpm.

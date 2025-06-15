@@ -153,6 +153,7 @@ export default function GiveGameNamePage(): JSX.Element {
           className="mb-8"
           autoFocus
           trackingId="game_name"
+          data-testid="game-name-input"
         />
         
         {/* Continue Button */}
@@ -162,6 +163,7 @@ export default function GiveGameNamePage(): JSX.Element {
             onClick={handleContinue}
             disabled={!gameName.trim() || isLoading}
             trackingId="give_game_name_continue_clicked"
+            data-testid="game-name-continue-button"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               gameName.trim() && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 

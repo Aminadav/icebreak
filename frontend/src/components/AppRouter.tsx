@@ -121,7 +121,7 @@ export default function AppRouter(): JSX.Element {
         }}
       >
         {/* Dark overlay for better readability */}
-        <div className="absolute inset-0 bg-gradient-to-br from-purple-900/60 via-blue-900/60 to-purple-900/60 pointer-events-none"></div>
+        <div className="absolute inset-0 pointer-events-none bg-gradient-to-br from-purple-900/60 via-blue-900/60 to-purple-900/60"></div>
         
         {/* Page content */}
         <div className="relative z-10 min-h-full">
@@ -137,7 +137,7 @@ export default function AppRouter(): JSX.Element {
       {navigationStack.map((entry, index) => renderPage(entry, index))}
       
       {/* Navigation debugger */}
-      <NavigationDebugger />
+      <NavigationDebugger show={false} />
     </div>
   );
 }

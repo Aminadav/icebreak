@@ -6,7 +6,7 @@ interface NavigationDebuggerProps {
 
 export default function NavigationDebugger({ show = true }: NavigationDebuggerProps): JSX.Element | null {
   const { navigationStack, currentPage, canGoBack } = useNavigation();
-
+  
   if (!show) return null;
 
   return (

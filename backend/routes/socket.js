@@ -123,7 +123,8 @@ function setupSocketHandlers(io) {
         console.error('Error processing phone number:', error);
         socket.emit('error', {
           message: 'Failed to process phone number',
-          error: error.message
+          error: error.message,
+          context: 'sms'
         });
       }
     });
@@ -174,7 +175,8 @@ function setupSocketHandlers(io) {
         console.error('Error verifying 2FA code:', error);
         socket.emit('error', {
           message: 'Failed to verify code',
-          error: error.message
+          error: error.message,
+          context: '2fa'
         });
       }
     });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
@@ -27,6 +27,44 @@ export default function EnterPhoneNumberPage(): JSX.Element {
     }
   };
 
+  // Set up socket event listeners once when component mounts
+  useEffect(() => {
+    if (!socket) return;
+
+    const smsSentHandler = (data: any) => {
+      setIsLoading(false);
+      if (data.success) {
+        console.log('📱 SMS sent successfully:', data);
+        // Navigate to 2FA page
+        push(<Enter2faCodePage phoneNumber={phoneNumber} />);
+      } else {
+        setError(data.message || 'שגיאה בשליחת SMS');
+      }
+    };
+
+    const errorHandler = (data: any) => {
+      // Only handle errors that don't have a specific handler
+      if (data.context === 'sms' || !data.context) {
+        setIsLoading(false);
+        setError(data.message || 'שגיאה בשליחת מספר הטלפון');
+        console.error('❌ Phone number submission error:', data);
+      }
+    };
+
+    // Remove any existing listeners first to prevent duplicates
+    socket.off('sms_sent');
+    
+    // Add event listeners
+    socket.on('sms_sent', smsSentHandler);
+    socket.on('error', errorHandler);
+
+    // Cleanup function to remove listeners when component unmounts
+    return () => {
+      socket.off('sms_sent', smsSentHandler);
+      socket.off('error', errorHandler);
+    };
+  }, [socket, phoneNumber, push]);
+
   const handleContinue = async () => {
     if (!phoneNumber.trim()) {
       setError('מספר טלפון נדרש');
@@ -42,34 +80,7 @@ export default function EnterPhoneNumberPage(): JSX.Element {
     setError(null);
     
     try {
-      // Set up SMS sent handler
-      const smsSentHandler = (data: any) => {
-        setIsLoading(false);
-        if (data.success) {
-          console.log('📱 SMS sent successfully:', data);
-          // Navigate to 2FA page
-          push(<Enter2faCodePage phoneNumber={phoneNumber} />);
-        } else {
-          setError(data.message || 'שגיאה בשליחת SMS');
-        }
-        // Remove the listener after use
-        socket.off('sms_sent', smsSentHandler);
-      };
-
-      // Set up error handler
-      const errorHandler = (data: any) => {
-        setIsLoading(false);
-        setError(data.message || 'שגיאה בשליחת מספר הטלפון');
-        console.error('❌ Phone number submission error:', data);
-        // Remove the listener after use
-        socket.off('error', errorHandler);
-      };
-
-      // Add event listeners
-      socket.on('sms_sent', smsSentHandler);
-      socket.on('error', errorHandler);
-
-      // Emit phone number
+      // Emit phone number (listeners are already set up in useEffect)
       console.log('📤 Emitting submit_phone_number:', phoneNumber);
       socket.emit('submit_phone_number', { phoneNumber });
     } catch (error) {
@@ -130,6 +141,8 @@ export default function EnterPhoneNumberPage(): JSX.Element {
           placeholder={texts.enterPhoneNumber.placeholder}
           className="mb-8"
           autoFocus
+          inputMode="tel"
+          autoComplete="tel"
         />
         
         {/* Continue Button */}

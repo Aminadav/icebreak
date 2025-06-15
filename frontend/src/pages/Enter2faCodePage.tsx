@@ -20,6 +20,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [shake, setShake] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleMenuAction = (page: string) => {
@@ -30,6 +31,51 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
     }
   };
 
+  // Set up socket event listeners once when component mounts
+  useEffect(() => {
+    if (!socket) return;
+
+    const verificationSuccessHandler = (data: any) => {
+      setIsLoading(false);
+      console.log('✅ 2FA verification successful:', data);
+      alert(`✅ קוד האימות אומת בהצלחה!`);
+      // TODO: Navigate to next step or complete flow
+    };
+
+    const verificationFailureHandler = (data: any) => {
+      setIsLoading(false);
+      setError('קוד האימות שגוי');
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+      console.log('❌ 2FA verification failed:', data);
+    };
+
+    const errorHandler = (data: any) => {
+      // Only handle errors that don't have a specific handler
+      if (data.context === '2fa') {
+        setIsLoading(false);
+        setError(data.message || 'שגיאה באימות הקוד');
+        console.error('❌ 2FA verification error:', data);
+      }
+    };
+
+    // Remove any existing listeners first to prevent duplicates
+    socket.off('2fa_verified');
+    socket.off('2fa_verification_failed');
+    
+    // Add event listeners
+    socket.on('2fa_verified', verificationSuccessHandler);
+    socket.on('2fa_verification_failed', verificationFailureHandler);
+    socket.on('error', errorHandler);
+
+    // Cleanup function to remove listeners when component unmounts
+    return () => {
+      socket.off('2fa_verified', verificationSuccessHandler);
+      socket.off('2fa_verification_failed', verificationFailureHandler);
+      socket.off('error', errorHandler);
+    };
+  }, [socket]);
+
   useEffect(() => {
     // Focus on first input when component mounts
     if (inputRefs.current[0]) {
@@ -38,15 +84,44 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
   }, []);
 
   const handleInputChange = (index: number, value: string) => {
-    if (value.length > 1) return; // Only allow single character
+    // Handle pasted content (especially for mobile SMS auto-fill)
+    if (value.length > 1) {
+      // Extract only digits
+      const digits = value.replace(/\D/g, '');
+      if (digits.length >= 6) {
+        // If we have 6 or more digits, fill all inputs
+        const newCode = [...code];
+        for (let i = 0; i < 6; i++) {
+          newCode[i] = digits[i] || '';
+        }
+        setCode(newCode);
+        // Focus on last input or blur if complete
+        if (inputRefs.current[5]) {
+          inputRefs.current[5].focus();
+        }
+        // Auto-submit if code is complete with the new code
+        setTimeout(() => {
+          handleContinueWithCode(newCode);
+        }, 100);
+        return;
+      }
+    }
 
+    // Handle single character input
     const newCode = [...code];
-    newCode[index] = value;
+    newCode[index] = value.replace(/\D/g, '');
     setCode(newCode);
 
     // Auto-focus next input
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-submit when code is complete
+    if (newCode.every(digit => digit !== '') && newCode.length === 6) {
+      setTimeout(() => {
+        handleContinueWithCode(newCode);
+      }, 100);
     }
   };
 
@@ -59,8 +134,26 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
     }
   };
 
-  const handleContinue = async () => {
-    const fullCode = code.join('');
+  const handlePaste = (_index: number, e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text');
+    const digits = pastedData.replace(/\D/g, '');
+    
+    if (digits.length >= 6) {
+      const newCode = [...code];
+      for (let i = 0; i < 6; i++) {
+        newCode[i] = digits[i] || '';
+      }
+      setCode(newCode);
+      // Focus on last input
+      if (inputRefs.current[5]) {
+        inputRefs.current[5].focus();
+      }
+    }
+  };
+
+  const handleContinueWithCode = async (codeArray?: string[]) => {
+    const fullCode = codeArray ? codeArray.join('') : code.join('');
     if (fullCode.length !== 6) {
       setError('יש להכניס קוד בן 6 ספרות');
       return;
@@ -70,45 +163,17 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
       setError('אין חיבור לשרת');
       return;
     }
+
+    // Prevent multiple submissions
+    if (isLoading) {
+      return;
+    }
     
     setIsLoading(true);
     setError(null);
     
     try {
-      // Set up verification success handler
-      const verificationSuccessHandler = (data: any) => {
-        setIsLoading(false);
-        console.log('✅ 2FA verification successful:', data);
-        alert(`✅ קוד האימות אומת בהצלחה!`);
-        // TODO: Navigate to next step or complete flow
-        // Remove the listener after use
-        socket.off('2fa_verified', verificationSuccessHandler);
-      };
-
-      // Set up verification failure handler
-      const verificationFailureHandler = (data: any) => {
-        setIsLoading(false);
-        setError('קוד האימות שגוי');
-        console.log('❌ 2FA verification failed:', data);
-        // Remove the listener after use
-        socket.off('2fa_verification_failed', verificationFailureHandler);
-      };
-
-      // Set up error handler
-      const errorHandler = (data: any) => {
-        setIsLoading(false);
-        setError(data.message || 'שגיאה באימות הקוד');
-        console.error('❌ 2FA verification error:', data);
-        // Remove the listener after use
-        socket.off('error', errorHandler);
-      };
-
-      // Add event listeners
-      socket.on('2fa_verified', verificationSuccessHandler);
-      socket.on('2fa_verification_failed', verificationFailureHandler);
-      socket.on('error', errorHandler);
-
-      // Emit verification request
+      // Emit verification request (listeners are already set up in useEffect)
       console.log('📤 Emitting verify_2fa_code:', fullCode);
       socket.emit('verify_2fa_code', { code: fullCode });
     } catch (error) {
@@ -116,6 +181,10 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
       setError('שגיאה באימות הקוד');
       setIsLoading(false);
     }
+  };
+
+  const handleContinue = async () => {
+    await handleContinueWithCode();
   };
 
   const isCodeComplete = code.every(digit => digit !== '');
@@ -150,8 +219,33 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
           </div>
         )}
         
+        {/* Hidden input for SMS auto-fill support on mobile */}
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          style={{ 
+            position: 'absolute', 
+            left: '-9999px', 
+            opacity: 0, 
+            pointerEvents: 'none',
+            height: '1px',
+            width: '1px'
+          }}
+          onChange={(e) => {
+            const value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 6) {
+              const newCode = [...code];
+              for (let i = 0; i < 6; i++) {
+                newCode[i] = value[i] || '';
+              }
+              setCode(newCode);
+            }
+          }}
+        />
+        
         {/* Code Input Fields */}
-        <div className="flex gap-2 mb-12" dir="ltr" >
+        <div className={`flex gap-2 mb-8 sm:mb-12 transition-transform duration-300 ${shake ? 'animate-pulse' : ''}`} dir="ltr">
           {code.map((digit, index) => (
             <input
               key={index}
@@ -159,13 +253,27 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
               type="text"
               inputMode="numeric"
               pattern="[0-9]*"
+              autoComplete={index === 0 ? "one-time-code" : "off"}
               value={digit}
-              onChange={(e) => handleInputChange(index, e.target.value.replace(/\D/g, ''))}
+              onChange={(e) => handleInputChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
-              className="w-12 h-16 text-2xl font-bold text-center text-black bg-white border-2 border-gray-300 rounded-lg focus:outline-none focus:border-orange-400"
-              maxLength={1}
+              onPaste={(e) => handlePaste(index, e)}
+              onFocus={(e) => e.target.select()}
+              className={`w-10 h-12 sm:w-12 sm:h-16 text-xl sm:text-2xl font-bold text-center text-black bg-white border-2 rounded-lg focus:outline-none focus:border-orange-400 transition-colors touch-manipulation ${
+                error ? 'border-red-400' : 'border-gray-300'
+              }`}
+              maxLength={6}
+              placeholder="●"
+              aria-label={`Verification code digit ${index + 1}`}
             />
           ))}
+        </div>
+        
+        {/* Tap to paste hint for mobile */}
+        <div className="mb-4 text-center sm:hidden">
+          <p className="text-sm text-white opacity-70">
+            💡 קיבלת SMS? לחץ על שדה הקוד כדי להדביק
+          </p>
         </div>
         
         {/* Continue Button */}

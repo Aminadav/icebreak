@@ -5,24 +5,27 @@ import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
+import { useNavigation } from '../contexts/NavigationContext';
+import EnterPhoneNumberPage from './EnterPhoneNumberPage';
+import AboutPage from '../components/AboutPage';
+import ComponentsShowcase from './ComponentsShowcase';
 
-interface GiveGameNamePageProps {
-  onBack: () => void;
-  onContinue: (gameName: string) => void;
-  onGameCreated: () => void;
-  onMenuAction?: (page: string) => void;
-}
-
-export default function GiveGameNamePage({ onBack, onContinue, onGameCreated, onMenuAction }: GiveGameNamePageProps): JSX.Element {
+export default function GiveGameNamePage(): JSX.Element {
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
+  const { push } = useNavigation();
   
   const [gameName, setGameName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Silence unused warnings - keeping for future use
-  void onContinue;
+  const handleMenuAction = (page: string) => {
+    if (page === 'about') {
+      push(<AboutPage />);
+    } else if (page === 'components') {
+      push(<ComponentsShowcase />);
+    }
+  };
 
   const handleContinue = async () => {
     if (!gameName.trim()) {
@@ -44,8 +47,8 @@ export default function GiveGameNamePage({ onBack, onContinue, onGameCreated, on
         setIsLoading(false);
         if (data.success) {
           console.log('🎮 Game created successfully:', data);
-          // Navigate to phone number page instead of showing alert
-          onGameCreated();
+          // Navigate to phone number page
+          push(<EnterPhoneNumberPage />);
         } else {
           setError('שגיאה ביצירת המשחק');
         }
@@ -86,7 +89,7 @@ export default function GiveGameNamePage({ onBack, onContinue, onGameCreated, on
   // Show connection status
   if (!isConnected) {
     return (
-      <PageLayout showHeader={true} onMenuAction={onMenuAction}>
+      <PageLayout showHeader={true} onMenuAction={handleMenuAction}>
         <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
           <div className="text-center">
             <h1 className="mb-4 text-3xl font-bold text-white">מתחבר לשרת...</h1>
@@ -100,7 +103,7 @@ export default function GiveGameNamePage({ onBack, onContinue, onGameCreated, on
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={onMenuAction}
+      onMenuAction={handleMenuAction}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Friends illustration */}

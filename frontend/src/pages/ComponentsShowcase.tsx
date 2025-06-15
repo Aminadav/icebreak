@@ -6,6 +6,7 @@ import TopMenu from '../components/TopMenu';
 import Answer from '../components/Answer';
 import AnswerContainer from '../components/AnswerContainer';
 import AnimatedImage from '../components/AnimatedImage';
+import { useNavigation } from '../contexts/NavigationContext';
 
 // WhatsApp icon component for examples
 const WhatsAppIcon = () => (
@@ -14,11 +15,8 @@ const WhatsAppIcon = () => (
   </svg>
 );
 
-interface ComponentsShowcaseProps {
-  onBack?: () => void;
-}
-
-export default function ComponentsShowcase({ onBack }: ComponentsShowcaseProps) {
+export default function ComponentsShowcase() {
+  const { back } = useNavigation();
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   
@@ -43,17 +41,15 @@ export default function ComponentsShowcase({ onBack }: ComponentsShowcaseProps) 
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800">
       {/* Header */}
       <div className="bg-white bg-opacity-10 backdrop-blur-sm border-b border-white border-opacity-20 p-6">
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="mb-4 flex items-center gap-2 text-white hover:text-purple-200 transition-colors duration-200"
-          >
+        <button
+          onClick={back}
+          className="mb-4 flex items-center gap-2 text-white hover:text-purple-200 transition-colors duration-200"
+        >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
             </svg>
             חזור לדף הבית
           </button>
-        )}
         <h1 className="text-4xl font-bold text-white text-center mb-2">
           🎨 דוגמאות קומפוננטות
         </h1>

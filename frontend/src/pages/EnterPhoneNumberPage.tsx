@@ -6,14 +6,11 @@ import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import Enter2faCodePage from './Enter2faCodePage';
+import AboutPage from '../components/AboutPage';
+import ComponentsShowcase from './ComponentsShowcase';
 
-interface EnterPhoneNumberPageProps {
-  onBack: () => void;
-  onContinue: (phoneNumber: string) => void;
-  onMenuAction?: (page: string) => void;
-}
-
-export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction }: EnterPhoneNumberPageProps): JSX.Element {
+export default function EnterPhoneNumberPage(): JSX.Element {
   const { texts } = useLanguage();
   const { socket } = useSocket();
   const { push } = useNavigation();
@@ -22,9 +19,13 @@ export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Silence unused warnings - keeping for future use
-  void onContinue;
-  void onBack;
+  const handleMenuAction = (page: string) => {
+    if (page === 'about') {
+      push(<AboutPage />);
+    } else if (page === 'components') {
+      push(<ComponentsShowcase />);
+    }
+  };
 
   const handleContinue = async () => {
     if (!phoneNumber.trim()) {
@@ -47,7 +48,7 @@ export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction 
         if (data.success) {
           console.log('📱 SMS sent successfully:', data);
           // Navigate to 2FA page
-          push('enter2faCode', { phoneNumber });
+          push(<Enter2faCodePage phoneNumber={phoneNumber} />);
         } else {
           setError(data.message || 'שגיאה בשליחת SMS');
         }
@@ -87,7 +88,7 @@ export default function EnterPhoneNumberPage({ onBack, onContinue, onMenuAction 
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={onMenuAction}
+      onMenuAction={handleMenuAction}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* No Entry Icon */}

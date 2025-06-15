@@ -4,24 +4,29 @@ import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import AboutPage from '../components/AboutPage';
+import ComponentsShowcase from './ComponentsShowcase';
 
 interface Enter2faCodePageProps {
-  onBack: () => void;
-  onMenuAction?: (page: string) => void;
   phoneNumber?: string;
 }
 
-export default function Enter2faCodePage({ onBack, onMenuAction, phoneNumber }: Enter2faCodePageProps): JSX.Element {
+export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps): JSX.Element {
   const { texts } = useLanguage();
-  const { back } = useNavigation();
+  const { back, push } = useNavigation();
   
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Silence unused warnings - keeping for future use
-  void onBack;
+  const handleMenuAction = (page: string) => {
+    if (page === 'about') {
+      push(<AboutPage />);
+    } else if (page === 'components') {
+      push(<ComponentsShowcase />);
+    }
+  };
 
   useEffect(() => {
     // Focus on first input when component mounts
@@ -81,7 +86,7 @@ export default function Enter2faCodePage({ onBack, onMenuAction, phoneNumber }: 
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={onMenuAction}
+      onMenuAction={handleMenuAction}
       onBack={back}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
@@ -109,7 +114,7 @@ export default function Enter2faCodePage({ onBack, onMenuAction, phoneNumber }: 
         )}
         
         {/* Code Input Fields */}
-        <div className="flex gap-2 mb-12">
+        <div className="flex gap-2 mb-12" dir="ltr" >
           {code.map((digit, index) => (
             <input
               key={index}

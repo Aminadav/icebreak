@@ -1,64 +1,62 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, ReactElement } from 'react';
 
-// Define page types
-export type PageType = 'home' | 'about' | 'components' | 'giveGameName' | 'enterPhoneNumber' | 'enter2faCode';
-
-// Define navigation entry
+// Define navigation entry with React component
 export interface NavigationEntry {
-  page: PageType;
-  props?: Record<string, any>;
+  component: ReactElement;
   timestamp: number;
+  key: string; // Unique key for React rendering
 }
 
 // Define navigation actions
 interface NavigationContextType {
-  currentPage: PageType;
   navigationStack: NavigationEntry[];
   canGoBack: boolean;
   
   // Navigation methods
-  push: (page: PageType, props?: Record<string, any>) => void;
-  replace: (page: PageType, props?: Record<string, any>) => void;
+  push: (component: ReactElement) => void;
+  replace: (component: ReactElement) => void;
   back: () => void;
-  reset: (page: PageType, props?: Record<string, any>) => void;
+  reset: (component: ReactElement) => void;
   
   // Helper methods
-  getCurrentProps: () => Record<string, any> | undefined;
   getStackSize: () => number;
+  getCurrentComponent: () => ReactElement | undefined;
 }
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 interface NavigationProviderProps {
   children: ReactNode;
-  initialPage?: PageType;
+  initialComponent: ReactElement;
 }
 
-export function NavigationProvider({ children, initialPage = 'home' }: NavigationProviderProps): JSX.Element {
+export function NavigationProvider({ children, initialComponent }: NavigationProviderProps): JSX.Element {
   const [navigationStack, setNavigationStack] = useState<NavigationEntry[]>([
-    { page: initialPage, props: {}, timestamp: Date.now() }
+    { 
+      component: initialComponent, 
+      timestamp: Date.now(),
+      key: `initial-${Date.now()}`
+    }
   ]);
 
-  const currentEntry = navigationStack[navigationStack.length - 1];
-  const currentPage = currentEntry?.page || initialPage;
   const canGoBack = navigationStack.length > 1;
 
-  const push = (page: PageType, props?: Record<string, any>) => {
-    console.log(`📱 Navigation: Push ${page}`, props);
+  const push = (component: ReactElement) => {
+    console.log('📱 Navigation: Push component', component.type);
     const newEntry: NavigationEntry = {
-      page,
-      props: props || {},
-      timestamp: Date.now()
+      component,
+      timestamp: Date.now(),
+      key: `push-${Date.now()}`
     };
     setNavigationStack(prev => [...prev, newEntry]);
   };
 
-  const replace = (page: PageType, props?: Record<string, any>) => {
-    console.log(`📱 Navigation: Replace current page with ${page}`, props);
+  const replace = (component: ReactElement) => {
+    console.log('📱 Navigation: Replace current component with', component.type);
     const newEntry: NavigationEntry = {
-      page,
-      props: props || {},
-      timestamp: Date.now()
+      component,
+      timestamp: Date.now(),
+      key: `replace-${Date.now()}`
     };
     setNavigationStack(prev => {
       const newStack = [...prev];
@@ -76,18 +74,18 @@ export function NavigationProvider({ children, initialPage = 'home' }: Navigatio
     }
   };
 
-  const reset = (page: PageType, props?: Record<string, any>) => {
-    console.log(`📱 Navigation: Reset to ${page}`, props);
+  const reset = (component: ReactElement) => {
+    console.log('📱 Navigation: Reset to component', component.type);
     const newEntry: NavigationEntry = {
-      page,
-      props: props || {},
-      timestamp: Date.now()
+      component,
+      timestamp: Date.now(),
+      key: `reset-${Date.now()}`
     };
     setNavigationStack([newEntry]);
   };
 
-  const getCurrentProps = () => {
-    return currentEntry?.props;
+  const getCurrentComponent = () => {
+    return navigationStack[navigationStack.length - 1]?.component;
   };
 
   const getStackSize = () => {
@@ -95,22 +93,22 @@ export function NavigationProvider({ children, initialPage = 'home' }: Navigatio
   };
 
   const value: NavigationContextType = {
-    currentPage,
     navigationStack,
     canGoBack,
     push,
     replace,
     back,
     reset,
-    getCurrentProps,
+    getCurrentComponent,
     getStackSize
   };
-
   // Debug logging
   React.useEffect(() => {
     console.log('📱 Navigation Stack:', navigationStack.map(entry => ({ 
-      page: entry.page, 
-      props: entry.props,
+      component: typeof entry.component.type === 'string' 
+        ? entry.component.type 
+        : entry.component.type?.name || 'Anonymous', 
+      timestamp: entry.timestamp,
       time: new Date(entry.timestamp).toLocaleTimeString()
     })));
   }, [navigationStack]);

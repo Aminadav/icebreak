@@ -10,6 +10,8 @@ The buttons should not work yet. only the visibility and effects.
 Keep this page in joureny so if click refresh come back to the same page.
 
 
+.I want to be sure when user on this new page, it's save in the state journey in the database, and that on reload if this is the page, it will navigate to it.
+
 Use PageLayout, and input component, and animatedImage, and save the user journey. Update the test to ensiture it goes to that page.
 if there is text in multi color and multi size ensure to keep those colors and sizes.
 תעשה את זה בצורה משחקית וכייפית

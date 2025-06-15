@@ -29,14 +29,20 @@ export default function Modal({ children, onClose, closeOnOverlayClick = true }:
   }, [isModalOpen]);
 
   const handleClose = () => {
+    console.log('Modal handleClose called');
     if (onClose) {
+      console.log('Calling onClose callback');
       onClose();
     }
+    console.log('Calling closeModal');
     closeModal();
   };
 
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget && closeOnOverlayClick) {
+  const handleOverlayClick = () => {
+    // Always close when clicking on the background overlay
+    console.log('Modal overlay clicked, closeOnOverlayClick:', closeOnOverlayClick);
+    if (closeOnOverlayClick) {
+      console.log('Closing modal...');
       handleClose();
     }
   };
@@ -45,23 +51,38 @@ export default function Modal({ children, onClose, closeOnOverlayClick = true }:
 
   return (
     <div 
-      className={`fixed inset-0 z-[9999] flex items-center justify-center transition-all duration-300 ${
+      className={`fixed inset-0 z-[9999] transition-all duration-300 ${
         isModalOpen ? 'opacity-100' : 'opacity-0'
       }`}
-      onClick={handleOverlayClick}
       data-testid="modal-overlay"
     >
-      {/* Background overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300" />
-      
-      {/* Modal content */}
+      {/* Background overlay - clickable to close */}
       <div 
-        className={`relative z-10 transform transition-all duration-300 ${
-          isModalOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
-        }`}
-        onClick={(e) => e.stopPropagation()}
+        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300 cursor-pointer"
+        onClick={handleOverlayClick}
+        onMouseDown={(e) => {
+          console.log('Mouse down on overlay');
+          e.preventDefault();
+        }}
+      />
+      
+      {/* Modal container - centered */}
+      <div 
+        className="relative z-10 h-full flex items-center justify-center p-4"
+        onClick={handleOverlayClick}
       >
-        {children}
+        {/* Modal content */}
+        <div 
+          className={`transform transition-all duration-300 w-full max-w-md ${
+            isModalOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
+          }`}
+          onClick={(e) => {
+            console.log('Click on modal content, stopping propagation');
+            e.stopPropagation();
+          }}
+        >
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -147,7 +147,7 @@ export const texts: Record<'he' | 'en', Texts> = {
     },
     nameConfirmation: {
       title: 'כדי להנות מהמשחק',
-      message: 'מומלץ למלא שם אמיתי האם {name} השם האמיתי שלך?',
+      message: 'מומלץ למלא שם אמיתי\nהאם {name} השם האמיתי שלך?',
       yesButton: 'כן',
       noButton: 'לא'
     }

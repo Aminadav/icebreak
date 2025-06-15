@@ -111,7 +111,7 @@ export default function ComponentsShowcase() {
             {/* Secondary Small */}
             <div className="space-y-3">
               <h4 className="text-white font-semibold">Secondary Small</h4>
-              <Button variant="seoncdary-small" icon={<WhatsAppIcon />}>
+              <Button variant="secondary-small" icon={<WhatsAppIcon />}>
                 כפתור קטן
               </Button>
             </div>

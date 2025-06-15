@@ -92,6 +92,7 @@ function formatPhoneNumber(phoneNumber) {
  */
 async function sendSms({ phone, message, sender = 'Icebreak' }) {
   // Special case for test phone number - don't send SMS, just return success
+  console.log('sendSms',{ phone, message, sender });
   if (phone === '972523737233') {
     console.log(`📱 Test phone number detected (${phone}), skipping SMS send`);
     return {

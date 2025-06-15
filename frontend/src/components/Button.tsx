@@ -7,7 +7,7 @@ export type ButtonVariant =
   | 'ghost' 
   | 'disabled' 
   | 'primary-large' 
-  | 'seoncdary-small' 
+  | 'secondary-small' 
   | 'outline-purple' 
   | 'outline-purple-icon';
 
@@ -64,7 +64,7 @@ const buttonVariants = {
     flex items-center justify-center gap-3
     min-h-[60px]
   `,
-  'seoncdary-small': `
+  'secondary-small': `
     bg-gradient-to-r from-orange-400 to-orange-500 
     text-white font-semibold py-2 px-6 rounded-xl
     hover:from-orange-500 hover:to-orange-600 

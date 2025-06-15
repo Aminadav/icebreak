@@ -91,7 +91,7 @@ export default function ButtonShowcase() {
             <h3 className="text-xl font-semibold text-white mb-4">Secondary Small</h3>
             <p className="text-purple-200 mb-4 text-sm">כפתור קטן עם אייקון</p>
             <Button 
-              variant="seoncdary-small" 
+              variant="secondary-small" 
               icon={<WhatsAppIcon />}
               onClick={() => handleButtonClick('secondary-small')}
             >
@@ -137,7 +137,7 @@ export default function ButtonShowcase() {
             <Button variant="secondary" onClick={() => alert('Secondary clicked!')}>
               Secondary
             </Button>
-            <Button variant="seoncdary-small" icon={<WhatsAppIcon />}>
+            <Button variant="secondary-small" icon={<WhatsAppIcon />}>
               WhatsApp
             </Button>
             <Button variant="outline-purple" onClick={() => alert('Outline clicked!')}>

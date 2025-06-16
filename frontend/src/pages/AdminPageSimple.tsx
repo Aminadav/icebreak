@@ -146,45 +146,32 @@ export default function AdminPageSimple(): JSX.Element {
         
         {/* State Selector */}
         <div className="p-6 mb-6 bg-gray-800 rounded-lg">
-          <h2 className="mb-4 text-xl font-semibold">🎯 Change Journey State</h2>
-          
-          <div className="space-y-4">
-            <div>
-              <label htmlFor="journey-state" className="block mb-2 text-sm font-medium">
-                Select Journey State (auto-updates):
-              </label>
-              <select
-                id="journey-state"
-                value={selectedState}
-                onChange={(e) => handleStateChange(e.target.value)}
-                className="w-full px-4 py-3 text-white bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                disabled={isLoading}
-              >
-                {JOURNEY_STATES.map(state => (
-                  <option key={state} value={state}>
-                    {state} - {STATE_DESCRIPTIONS[state]}
-                  </option>
-                ))}
-              </select>
-            </div>
 
-            <div className="flex gap-4">
+        {/* Status Message */}
+        <div className={`${message ? '' : 'invisible'} rounded-lg p-4 mb-6 ${
+          message.includes('Error') ? 'bg-red-900 border border-red-600' : 'bg-green-900 border border-green-600'
+        }`}>
+          <div className="font-medium">{message}&nbsp;</div>
+        </div>
+
+        {/* Available States Reference */}
+        <div className="p-6 bg-gray-800 rounded-lg">
+          <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
+            {JOURNEY_STATES.map(state => (
               <button
-                onClick={handleRefresh}
+                key={state}
+                onClick={() => handleStateChange(state)}
                 disabled={isLoading}
-                className="flex-1 px-6 py-3 font-semibold text-white transition-colors bg-green-600 rounded-lg hover:bg-green-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                className={`p-2 rounded text-left transition-colors hover:bg-opacity-80 disabled:cursor-not-allowed ${
+                  state === currentState 
+                    ? 'bg-green-900 border border-green-600' 
+                    : 'bg-gray-700 hover:bg-gray-600'
+                }`}
               >
-                {isLoading ? '⏳ Refreshing...' : 'Refresh'}
+                <div className="font-mono text-blue-300">{state}</div>
+                <div className="text-xs text-gray-400">{STATE_DESCRIPTIONS[state]}</div>
               </button>
-              
-              <button
-                onClick={handleResetToInitial}
-                disabled={isLoading}
-                className="px-6 py-3 font-semibold text-white transition-colors bg-red-600 rounded-lg hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed"
-              >
-                Reset
-              </button>
-            </div>
+            ))}
           </div>
         </div>
 
@@ -199,31 +186,7 @@ export default function AdminPageSimple(): JSX.Element {
             <div><strong>Email:</strong> {deviceInfo?.email || 'Not set'}</div>
             <div><strong>Name:</strong> {deviceInfo?.name || 'Not set'}</div>
             <div><strong>Gender:</strong> {deviceInfo?.gender || 'Not set'}</div>
-            
-          </div>
-        </div>
-
-        {/* Status Message */}
-        {message && (
-          <div className={`rounded-lg p-4 mb-6 ${
-            message.includes('Error') ? 'bg-red-900 border border-red-600' : 'bg-green-900 border border-green-600'
-          }`}>
-            <div className="font-medium">{message}</div>
-          </div>
-        )}
-
-        {/* Available States Reference */}
-        <div className="p-6 bg-gray-800 rounded-lg">
-          <h2 className="mb-4 text-xl font-semibold">📋 Journey States Reference</h2>
-          <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-            {JOURNEY_STATES.map(state => (
-              <div key={state} className={`p-2 rounded ${
-                state === currentState ? 'bg-green-900 border border-green-600' : 'bg-gray-700'
-              }`}>
-                <div className="font-mono text-blue-300">{state}</div>
-                <div className="text-xs text-gray-400">{STATE_DESCRIPTIONS[state]}</div>
-              </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>

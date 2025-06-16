@@ -195,7 +195,7 @@ export const texts: Record<'he' | 'en', Texts> = {
       cameraButtonText: 'לחצו לצילום',
       whatsappButtonText: 'שימוש בתמונות וואצפ',
       skipOption: 'משחק בלי תמונות',
-      cameraSmileText: 'תן חיוך...'
+      cameraSmileText: 'תן חיוך'
     }
   },
   en: {
@@ -294,7 +294,7 @@ export const texts: Record<'he' | 'en', Texts> = {
       cameraButtonText: 'Click to Shoot',
       whatsappButtonText: 'Use WhatsApp Photos',
       skipOption: 'Game without photos',
-      cameraSmileText: 'Give a smile...'
+      cameraSmileText: 'Give a smile'
     }
   }
 };

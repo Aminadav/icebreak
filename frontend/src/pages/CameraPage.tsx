@@ -30,6 +30,7 @@ export default function CameraPage({
   name, 
   gender 
 }: CameraPageProps): JSX.Element {
+  const DEBUG=false
   const { back, push } = useNavigation();
   const { socket } = useSocket();
   const { texts } = useLanguage();
@@ -51,10 +52,12 @@ export default function CameraPage({
     height: number;
     confidence: number;
   } | null>(null);
+  const [croppedFaceImage, setCroppedFaceImage] = useState<string | null>(null);
   
   const faceDetectionRef = useRef<any | null>(null);
   const detectionCanvasRef = useRef<HTMLCanvasElement>(null);
   const detectionIntervalRef = useRef<number | null>(null);
+  const cropCanvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     // Initialize face detection with fallback approach
@@ -83,18 +86,31 @@ export default function CameraPage({
                     const face = faces[0];
                     const bbox = face.boundingBox;
                     
+                    // Don't mirror for native API either - use original coordinates
+                    const videoWidth = videoRef.current.videoWidth || 640;
+                    const centerX = bbox.x + bbox.width / 2;
+                    
                     setFacePosition({
-                      x: Math.round(bbox.x + bbox.width / 2),
+                      x: Math.round(centerX),
                       y: Math.round(bbox.y + bbox.height / 2),
                       width: Math.round(bbox.width),
                       height: Math.round(bbox.height),
                       confidence: 0.8 // Native API doesn't provide confidence
                     });
                     
-                    console.log('👁️ Face detected with native API!', {
-                      center: { x: Math.round(bbox.x + bbox.width / 2), y: Math.round(bbox.y + bbox.height / 2) },
-                      size: { width: Math.round(bbox.width), height: Math.round(bbox.height) }
-                    });
+                    // Crop the face area for debugging - mirror X coordinate to match display
+                    const mirroredCropX = videoWidth - centerX;
+                    cropFaceFromVideo(
+                      mirroredCropX - bbox.width/2, 
+                      bbox.y, 
+                      bbox.width, 
+                      bbox.height
+                    );
+                    
+                    // console.log('👁️ Face detected with native API!', {
+                    //   center: { x: Math.round(centerX), y: Math.round(bbox.y + bbox.height / 2) },
+                    //   size: { width: Math.round(bbox.width), height: Math.round(bbox.height) }
+                    // });
                   } else {
                     setFacePosition(null);
                   }
@@ -161,6 +177,7 @@ export default function CameraPage({
             const faceWidth = boundingBox.width * videoWidth;
             const faceHeight = boundingBox.height * videoHeight;
             
+            // Don't mirror the X coordinate for MediaPipe - it already handles selfieMode correctly
             setFacePosition({
               x: Math.round(faceX),
               y: Math.round(faceY),
@@ -169,11 +186,20 @@ export default function CameraPage({
               confidence: detection.score?.[0] || 0.5
             });
             
-            console.log('👁️ MediaPipe face detected!', {
-              confidence: detection.score?.[0],
-              center: { x: Math.round(faceX), y: Math.round(faceY) },
-              size: { width: Math.round(faceWidth), height: Math.round(faceHeight) }
-            });
+            // Crop the face area for debugging - mirror X coordinate to match display
+            const mirroredCropX = videoWidth - faceX;
+            cropFaceFromVideo(
+              mirroredCropX - faceWidth/2, 
+              faceY - faceHeight/2, 
+              faceWidth, 
+              faceHeight
+            );
+            
+            // console.log('👁️ MediaPipe face detected!', {
+            //   confidence: detection.score?.[0],
+            //   center: { x: Math.round(faceX), y: Math.round(faceY) },
+            //   size: { width: Math.round(faceWidth), height: Math.round(faceHeight) }
+            // });
           } else {
             setFacePosition(null);
           }
@@ -369,6 +395,67 @@ export default function CameraPage({
     console.log('👁️ Face detection started (100ms interval)');
   };
 
+  const cropFaceFromVideo = (x: number, y: number, width: number, height: number) => {
+    if (!videoRef.current || !cropCanvasRef.current) return;
+
+    const video = videoRef.current;
+    const canvas = cropCanvasRef.current;
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) return;
+
+    // Add padding around the face (50% on each side for better visibility)
+    const padding = 0.5;
+    const paddedWidth = width * (1 + padding * 2);
+    const paddedHeight = height * (1 + padding * 2);
+    let paddedX = x - width * padding;
+    let paddedY = y - height * padding;
+
+    // Ensure we don't go outside video bounds and adjust if needed
+    paddedX = Math.max(0, paddedX);
+    paddedY = Math.max(0, paddedY);
+    
+    const maxWidth = Math.min(paddedWidth, video.videoWidth - paddedX);
+    const maxHeight = Math.min(paddedHeight, video.videoHeight - paddedY);
+    
+    // If the crop area is too small, expand it by reducing constraints
+    const actualWidth = Math.max(width, maxWidth);
+    const actualHeight = Math.max(height, maxHeight);
+
+    // Set canvas size to the cropped area
+    canvas.width = actualWidth;
+    canvas.height = actualHeight;
+
+    // console.log('🖼️ Cropping face:', {
+    //   original: { x, y, width, height },
+    //   padded: { x: paddedX, y: paddedY, width: actualWidth, height: actualHeight },
+    //   video: { width: video.videoWidth, height: video.videoHeight }
+    // });
+
+    // Draw the cropped face area as it actually appears (no mirroring)
+    // This shows the actual image that will be uploaded
+    ctx.drawImage(
+      video,
+      paddedX, paddedY, actualWidth, actualHeight, // Source coordinates
+      0, 0, actualWidth, actualHeight               // Destination coordinates
+    );
+
+    // Convert to data URL for preview
+    const croppedImageData = canvas.toDataURL('image/jpeg', 0.9);
+    setCroppedFaceImage(croppedImageData);
+  };
+
+  const downloadCroppedFace = () => {
+    if (!croppedFaceImage) return;
+
+    const link = document.createElement('a');
+    link.href = croppedFaceImage;
+    link.download = `face-crop-${Date.now()}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const capturePhoto = async () => {
     if (!videoRef.current || !canvasRef.current || isCapturing) return;
 
@@ -435,7 +522,7 @@ export default function CameraPage({
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
+    <div className="relative w-full h-screen overflow-hidden bg-black" dir="ltr">
       {/* Camera View */}
       <video
         ref={videoRef}
@@ -495,37 +582,38 @@ export default function CameraPage({
       )}
 
       {/* Face Detection Debug Overlay */}
-      {hasPermission && !error && facePosition && (
+      {DEBUG && hasPermission && !error && facePosition && (
         <div className="absolute inset-0 z-10 pointer-events-none">
-          <div 
-            className="absolute border-2 border-red-500 bg-red-500/20"
-            style={{
-              left: `${facePosition.x - facePosition.width/2}px`,
-              top: `${facePosition.y - facePosition.height/2}px`,
-              width: `${facePosition.width}px`,
-              height: `${facePosition.height}px`,
-              transform: 'scaleX(-1)', // Mirror to match video
-            }}
-          >
-            {/* Face center dot */}
-            <div 
-              className="absolute w-2 h-2 bg-red-500 rounded-full"
-              style={{
-                left: '50%',
-                top: '50%',
-                transform: 'translate(-50%, -50%)'
-              }}
-            />
-          </div>
-          
-          {/* Face position info */}
-          <div className="absolute p-2 text-sm text-white rounded top-4 left-4 bg-black/70">
+          {/* Face position info and cropped face image */}
+          <div className="absolute max-w-xs p-2 text-sm text-white rounded top-4 left-4 bg-black/70">
             <div>Face: {facePosition.x}, {facePosition.y}</div>
             <div>Size: {facePosition.width} × {facePosition.height}</div>
             <div>Confidence: {(facePosition.confidence * 100).toFixed(1)}%</div>
+            <div className="mt-1 text-xs text-gray-300">
+              Move left → X should decrease<br/>
+              Move right → X should increase
+            </div>
+            
+            {/* Cropped face preview */}
+            {croppedFaceImage && (
+              <div className="mt-2">
+                <div className="mb-1 text-xs text-gray-300">Cropped Face:</div>
+                <img 
+                  src={croppedFaceImage} 
+                  alt="Cropped face" 
+                  className="border border-gray-400 rounded max-w-24 max-h-24"
+                  style={{
+                    objectFit: 'cover'
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* Hidden canvas for face cropping */}
+      <canvas ref={cropCanvasRef} className="hidden" />
 
       {/* Hidden canvas for capturing */}
       <canvas ref={canvasRef} className="hidden" />
@@ -583,7 +671,7 @@ export default function CameraPage({
 
       {/* Capture Button */}
       {hasPermission && !error && (
-        <div className="absolute z-10 transform -translate-x-1/2 bottom-8 left-1/2">
+        <div className="absolute z-10 text-center transform -translate-x-1/2 bottom-8 left-1/2">
           <button
             onClick={capturePhoto}
             disabled={isCapturing || !faceDetected}

@@ -1,5 +1,5 @@
 const Device = require('../../models/Device');
-const pool = require('../../config/database');
+const User = require('../../models/User');
 const { getUserIdFromDevice } = require('./utils');
 
 async function handleConfirmImageSelection(socket, data) {
@@ -19,16 +19,14 @@ async function handleConfirmImageSelection(socket, data) {
     
     console.log(`✅ User ${targetUserId} confirmed image selection: ${selectedImageHash}`);
     
-    // Update user's profile with the selected image
-    // For now, we'll update the pending_image field with the selected image
-    const result = await pool.query(
-      'UPDATE users SET pending_image = $1 WHERE user_id = $2 RETURNING *',
-      [selectedImageHash, targetUserId]
-    );
+    // Update user's profile with the selected image in the new image column
+    const updateResult = await User.updateUserImage(targetUserId, selectedImageHash);
     
-    if (result.rows.length === 0) {
-      throw new Error('User not found');
+    if (!updateResult.success) {
+      throw new Error(updateResult.error || 'Failed to update user image');
     }
+    
+    console.log(`📸 User image updated successfully for user ${targetUserId}: ${selectedImageHash}`);
     
     // Update journey state to CREATOR_GAME_READY
     await Device.updateJourneyState(socket.deviceId, 'CREATOR_GAME_READY');

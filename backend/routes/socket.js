@@ -15,6 +15,8 @@ const {
   handleSaveUserGender,
   handleUploadPendingImage,
   handleDownloadWhatsappImage,
+  handleBackgroundWhatsappDownload,
+  handleUseWhatsappImage,
   handleLoadExistingGalleryImages,
   handleGenerateImageGallery,
   handleConfirmImageSelection
@@ -57,6 +59,8 @@ function setupSocketHandlers(io) {
     socket.on('save_user_gender', (data) => handleSaveUserGender(socket, data));
     socket.on('upload_pending_image', (data) => handleUploadPendingImage(socket, data));
     socket.on('download_whatsapp_image', (data) => handleDownloadWhatsappImage(socket, data));
+    socket.on('background_whatsapp_download', (data) => handleBackgroundWhatsappDownload(socket, data));
+    socket.on('use_whatsapp_image', (data) => handleUseWhatsappImage(socket, data));
     socket.on('load_existing_gallery_images', (data) => handleLoadExistingGalleryImages(socket, data));
     socket.on('generate_image_gallery', (data) => handleGenerateImageGallery(socket, data));
     socket.on('confirm_image_selection', (data) => handleConfirmImageSelection(socket, data));

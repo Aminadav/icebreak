@@ -8,3 +8,4 @@ build/
 coverage/
 **/sample-results
 **/cache
+**/image_per_whatsapp

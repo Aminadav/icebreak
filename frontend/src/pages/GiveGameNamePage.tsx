@@ -90,7 +90,7 @@ export default function GiveGameNamePage(): JSX.Element {
   // Show connection status
   if (!isConnected) {
   return (
-    <PageLayout showHeader={true} onMenuAction={handleMenuAction}>
+    <PageLayout showHeader={true} onMenuAction={handleMenuAction} suspenseForImages={true}>
       <PageTracking 
         pageName="give_game_name"
         pageData={{ 
@@ -111,6 +111,7 @@ export default function GiveGameNamePage(): JSX.Element {
     <PageLayout 
       showHeader={true} 
       onMenuAction={handleMenuAction}
+      suspenseForImages={true}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Friends illustration */}
@@ -118,6 +119,7 @@ export default function GiveGameNamePage(): JSX.Element {
           src="/images/game-assets/give-game-name.png"
           alt="Friends sitting together"
           size="large"
+          suspense={true}
         />
         
         {/* Title */}

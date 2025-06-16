@@ -17,7 +17,6 @@ export default {
         'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'ping': 'ping 1s cubic-bezier(0, 0, 0.2, 1) infinite',
         'float-in': 'float-in 1.5s ease-out forwards',
-        'float-in-stable': 'float-in-stable 1.5s ease-out forwards',
         'gentle-float': 'gentle-float 3s ease-in-out infinite',
         'entrance': 'entrance 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards',
         'zoom-in': 'zoom-in 0.5s ease-out forwards',
@@ -54,20 +53,6 @@ export default {
           '100%': {
             opacity: '1',
             transform: 'translateY(0) scale(1) rotate(0deg)',
-          },
-        },
-        'float-in-stable': {
-          '0%': {
-            opacity: '0',
-            transform: 'translateY(20px) rotate(-3deg)',
-          },
-          '50%': {
-            opacity: '0.7',
-            transform: 'translateY(-5px) rotate(1deg)',
-          },
-          '100%': {
-            opacity: '1',
-            transform: 'translateY(0) rotate(0deg)',
           },
         },
         'gentle-float': {

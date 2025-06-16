@@ -254,6 +254,34 @@ async function updateUserName(userId, name) {
   }
 }
 
+/**
+ * Update user selected image
+ * @param {string} userId - User ID
+ * @param {string} imageHash - Selected image hash
+ * @returns {Object} - Success result or error
+ */
+async function updateUserImage(userId, imageHash) {
+  try {
+    const result = await pool.query(
+      'UPDATE users SET image = $1, has_image = TRUE WHERE user_id = $2 RETURNING *',
+      [imageHash, userId]
+    );
+    
+    if (result.rows.length === 0) {
+      return { success: false, error: 'User not found' };
+    }
+    
+    return { 
+      success: true, 
+      user: result.rows[0],
+      message: 'User image updated successfully'
+    };
+  } catch (error) {
+    console.error('Error updating user image:', error);
+    return { success: false, error: error.message };
+  }
+}
+
 module.exports = {
   findUserByPhone,
   createUser,
@@ -264,5 +292,6 @@ module.exports = {
   updateUserEmail,
   updateUserNameAndGender,
   updateUserName,
-  getUserById
+  getUserById,
+  updateUserImage
 };

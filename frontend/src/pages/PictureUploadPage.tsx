@@ -28,6 +28,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   const [isLoading, setIsLoading] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<'camera' | 'gallery' | null>(null);
   const [whatsappError, setWhatsappError] = useState<string | null>(null);
+  const [whatsappAvailable, setWhatsappAvailable] = useState(false);
 
   // Update journey state when component mounts
   useEffect(() => {
@@ -63,6 +64,84 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       });
     }
   }, [socket, phoneNumber, userId, email, name, gender]);
+
+  // Background WhatsApp download when component mounts
+  useEffect(() => {
+    if (!socket) return;
+
+    const triggerBackgroundDownload = async () => {
+      // Only trigger if we have the necessary data
+      if (phoneNumber && userId && email && name && gender) {
+        console.log('🔄 Triggering background WhatsApp download...');
+        socket.emit('background_whatsapp_download', {});
+      }
+    };
+
+    // Trigger background download after a short delay to ensure socket is ready
+    const timeoutId = setTimeout(triggerBackgroundDownload, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [socket, phoneNumber, userId, email, name, gender]);
+
+  // Handle background WhatsApp download status
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleBackgroundWhatsappStatus = (response: any) => {
+      console.log('📊 Background WhatsApp status:', response);
+      
+      if (response.success && response.available) {
+        setWhatsappAvailable(true);
+        console.log('✅ WhatsApp image is available for use');
+      } else {
+        setWhatsappAvailable(false);
+        console.log('❌ WhatsApp image not available:', response.message);
+      }
+    };
+
+    const handleWhatsappImageUsed = (response: any) => {
+      console.log('📱 WhatsApp image used:', response);
+      setIsLoading(false);
+      setUploadMethod(null);
+      setWhatsappError(null);
+      
+      if (response.success) {
+        console.log('✅ WhatsApp image used successfully:', response.imageHash);
+        
+        // Navigate to gallery page immediately
+        push(
+          <ImageGalleryPage 
+            originalImageHash={response.imageHash}
+            phoneNumber={phoneNumber || ''}
+            userId={userId || ''}
+            email={email || ''}
+            name={name || ''}
+            gender={gender || ''}
+          />
+        );
+      } else {
+        console.error('❌ WhatsApp image use failed:', response.error);
+        setWhatsappError(response.message || 'Failed to use WhatsApp image');
+      }
+    };
+
+    const handleWhatsappImageUseError = (error: any) => {
+      console.error('❌ WhatsApp image use error:', error);
+      setIsLoading(false);
+      setUploadMethod(null);
+      setWhatsappError(error.message || 'Failed to use WhatsApp image');
+    };
+
+    socket.on('background_whatsapp_status', handleBackgroundWhatsappStatus);
+    socket.on('whatsapp_image_used', handleWhatsappImageUsed);
+    socket.on('whatsapp_image_use_error', handleWhatsappImageUseError);
+
+    return () => {
+      socket.off('background_whatsapp_status', handleBackgroundWhatsappStatus);
+      socket.off('whatsapp_image_used', handleWhatsappImageUsed);
+      socket.off('whatsapp_image_use_error', handleWhatsappImageUseError);
+    };
+  }, [socket, push, phoneNumber, userId, email, name, gender]);
 
   // Handle WhatsApp image download events
   useEffect(() => {
@@ -164,7 +243,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
     setIsLoading(true);
     setWhatsappError(null);
     
-    console.log('📱 WhatsApp image download selected');
+    console.log('📱 Using pre-downloaded WhatsApp image');
     
     if (!socket) {
       console.error('❌ Socket not available');
@@ -174,8 +253,16 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       return;
     }
     
-    // Emit WhatsApp image download request - no user data needed, backend gets it from database
-    socket.emit('download_whatsapp_image', {});
+    if (!whatsappAvailable) {
+      console.error('❌ WhatsApp image not available');
+      setIsLoading(false);
+      setUploadMethod(null);
+      setWhatsappError('WhatsApp image not available. Please try again later.');
+      return;
+    }
+    
+    // Use pre-downloaded WhatsApp image
+    socket.emit('use_whatsapp_image', {});
   };
 
   const handleSkip = () => {
@@ -208,7 +295,6 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       showHeader={true} 
       onMenuAction={handleMenuAction}
       onBack={back}
-      suspenseForImages={true}
     >
       <main className="flex flex-col items-center justify-between w-full min-h-[calc(100vh-88px)] py-8 px-4">
         
@@ -284,50 +370,52 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
           </button>
         </div>
 
-        {/* WhatsApp Button */}
-        <div className="flex justify-center w-full mb-5">
-          <button
-            onClick={handleGalleryUpload}
-            disabled={isLoading}
-            data-testid="gallery-upload-button"
-            className="min-w-[250px] rounded-[20px] border-2 border-white bg-transparent transition-all duration-300 hover:scale-105 hover:bg-white hover:text-purple-700 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed group"
-          >
-            <div className="flex flex-row items-center justify-center gap-2.5 p-[10px]">
-              {/* WhatsApp icon on the right for RTL */}
-              <div className="w-[22px] h-[22px] transition-transform duration-300 group-hover:scale-125">
-                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22 22">
-                  <g clipPath="url(#clip0_333_2146)">
-                    <path d="M0.469477 10.9532C0.468961 12.8161 0.955711 14.6351 1.88126 16.2383L0.380961 21.7161L5.98684 20.2463C7.53735 21.0903 9.27458 21.5326 11.04 21.5328H11.0446C16.8725 21.5328 21.6165 16.7905 21.619 10.9616C21.6201 8.13708 20.5211 5.48109 18.5244 3.48288C16.5281 1.48483 13.8731 0.383883 11.0442 0.382594C5.21563 0.382594 0.471969 5.12463 0.469563 10.9532" fill="url(#paint0_linear_333_2146)" />
-                    <path d="M0.0919531 10.9498C0.0913516 12.8797 0.595547 14.7637 1.55409 16.4244L0 22.0986L5.80688 20.576C7.40687 21.4484 9.20829 21.9083 11.0413 21.909H11.0461C17.083 21.909 21.9974 16.9961 22 10.9586C22.001 8.03258 20.8625 5.28112 18.7945 3.21131C16.7263 1.14177 13.9763 0.00120313 11.0461 0C5.00809 0 0.0943594 4.91219 0.0919531 10.9498ZM3.55016 16.1384L3.33334 15.7942C2.42189 14.3449 1.94081 12.6702 1.9415 10.9505C1.94339 5.93218 6.02748 1.84938 11.0495 1.84938C13.4815 1.85041 15.7671 2.79847 17.4862 4.51859C19.2052 6.23889 20.1511 8.52569 20.1505 10.9579C20.1483 15.9762 16.0641 20.0595 11.0461 20.0595H11.0425C9.40852 20.0587 7.80605 19.6199 6.40853 18.7907L6.07595 18.5934L2.63003 19.4969L3.55016 16.1384Z" fill="url(#paint1_linear_333_2146)" />
-                    <path d="M8.30827 6.37209C8.10322 5.91637 7.88743 5.90717 7.69244 5.89918C7.53277 5.8923 7.35023 5.89282 7.16788 5.89282C6.98534 5.89282 6.68877 5.96148 6.43809 6.2352C6.18716 6.50916 5.48006 7.17123 5.48006 8.51778C5.48006 9.86434 6.46087 11.1658 6.59759 11.3486C6.73449 11.531 8.49106 14.3828 11.273 15.4798C13.5851 16.3915 14.0556 16.2102 14.5574 16.1645C15.0593 16.119 16.1768 15.5026 16.4048 14.8635C16.6329 14.2245 16.6329 13.6767 16.5645 13.5622C16.4961 13.4482 16.3136 13.3797 16.0399 13.2429C15.7662 13.1061 14.4205 12.4438 14.1696 12.3525C13.9187 12.2612 13.7363 12.2157 13.5537 12.4897C13.3712 12.7634 12.8471 13.3797 12.6873 13.5622C12.5277 13.7452 12.368 13.768 12.0943 13.6311C11.8204 13.4937 10.939 13.2051 9.89321 12.2727C9.07956 11.5473 8.53024 10.6514 8.37057 10.3773C8.2109 10.1037 8.35347 9.95534 8.49071 9.81896C8.61369 9.69633 8.76451 9.49936 8.90149 9.3396C9.03796 9.17976 9.08351 9.06572 9.17477 8.88319C9.26613 8.70048 9.22041 8.54064 9.15209 8.40374C9.08351 8.26684 8.55164 6.91324 8.30827 6.37209Z" fill="white" />
-                  </g>
-                  <defs>
-                    <linearGradient gradientUnits="userSpaceOnUse" id="paint0_linear_333_2146" x1="1062.28" x2="1062.28" y1="2133.74" y2="0.382594">
-                      <stop stopColor="#1EAF38" />
-                      <stop offset="1" stopColor="#60D669" />
-                    </linearGradient>
-                    <linearGradient gradientUnits="userSpaceOnUse" id="paint1_linear_333_2146" x1="1100" x2="1100" y1="2209.86" y2="0">
-                      <stop stopColor="#F9F9F9" />
-                      <stop offset="1" stopColor="white" />
-                    </linearGradient>
-                    <clipPath id="clip0_333_2146">
-                      <rect fill="white" height="22" width="22" />
-                    </clipPath>
-                  </defs>
-                </svg>
+        {/* WhatsApp Button - Only show if WhatsApp image is available */}
+        {whatsappAvailable && (
+          <div className="flex justify-center w-full mb-5">
+            <button
+              onClick={handleGalleryUpload}
+              disabled={isLoading}
+              data-testid="gallery-upload-button"
+              className="min-w-[250px] rounded-[20px] border-2 border-white bg-transparent transition-all duration-300 hover:scale-105 hover:bg-white hover:text-purple-700 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed group"
+            >
+              <div className="flex flex-row items-center justify-center gap-2.5 p-[10px]">
+                {/* WhatsApp icon on the right for RTL */}
+                <div className="w-[22px] h-[22px] transition-transform duration-300 group-hover:scale-125">
+                  <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 22 22">
+                    <g clipPath="url(#clip0_333_2146)">
+                      <path d="M0.469477 10.9532C0.468961 12.8161 0.955711 14.6351 1.88126 16.2383L0.380961 21.7161L5.98684 20.2463C7.53735 21.0903 9.27458 21.5326 11.04 21.5328H11.0446C16.8725 21.5328 21.6165 16.7905 21.619 10.9616C21.6201 8.13708 20.5211 5.48109 18.5244 3.48288C16.5281 1.48483 13.8731 0.383883 11.0442 0.382594C5.21563 0.382594 0.471969 5.12463 0.469563 10.9532" fill="url(#paint0_linear_333_2146)" />
+                      <path d="M0.0919531 10.9498C0.0913516 12.8797 0.595547 14.7637 1.55409 16.4244L0 22.0986L5.80688 20.576C7.40687 21.4484 9.20829 21.9083 11.0413 21.909H11.0461C17.083 21.909 21.9974 16.9961 22 10.9586C22.001 8.03258 20.8625 5.28112 18.7945 3.21131C16.7263 1.14177 13.9763 0.00120313 11.0461 0C5.00809 0 0.0943594 4.91219 0.0919531 10.9498ZM3.55016 16.1384L3.33334 15.7942C2.42189 14.3449 1.94081 12.6702 1.9415 10.9505C1.94339 5.93218 6.02748 1.84938 11.0495 1.84938C13.4815 1.85041 15.7671 2.79847 17.4862 4.51859C19.2052 6.23889 20.1511 8.52569 20.1505 10.9579C20.1483 15.9762 16.0641 20.0595 11.0461 20.0595H11.0425C9.40852 20.0587 7.80605 19.6199 6.40853 18.7907L6.07595 18.5934L2.63003 19.4969L3.55016 16.1384Z" fill="url(#paint1_linear_333_2146)" />
+                      <path d="M8.30827 6.37209C8.10322 5.91637 7.88743 5.90717 7.69244 5.89918C7.53277 5.8923 7.35023 5.89282 7.16788 5.89282C6.98534 5.89282 6.68877 5.96148 6.43809 6.2352C6.18716 6.50916 5.48006 7.17123 5.48006 8.51778C5.48006 9.86434 6.46087 11.1658 6.59759 11.3486C6.73449 11.531 8.49106 14.3828 11.273 15.4798C13.5851 16.3915 14.0556 16.2102 14.5574 16.1645C15.0593 16.119 16.1768 15.5026 16.4048 14.8635C16.6329 14.2245 16.6329 13.6767 16.5645 13.5622C16.4961 13.4482 16.3136 13.3797 16.0399 13.2429C15.7662 13.1061 14.4205 12.4438 14.1696 12.3525C13.9187 12.2612 13.7363 12.2157 13.5537 12.4897C13.3712 12.7634 12.8471 13.3797 12.6873 13.5622C12.5277 13.7452 12.368 13.768 12.0943 13.6311C11.8204 13.4937 10.939 13.2051 9.89321 12.2727C9.07956 11.5473 8.53024 10.6514 8.37057 10.3773C8.2109 10.1037 8.35347 9.95534 8.49071 9.81896C8.61369 9.69633 8.76451 9.49936 8.90149 9.3396C9.03796 9.17976 9.08351 9.06572 9.17477 8.88319C9.26613 8.70048 9.22041 8.54064 9.15209 8.40374C9.08351 8.26684 8.55164 6.91324 8.30827 6.37209Z" fill="white" />
+                    </g>
+                    <defs>
+                      <linearGradient gradientUnits="userSpaceOnUse" id="paint0_linear_333_2146" x1="1062.28" x2="1062.28" y1="2133.74" y2="0.382594">
+                        <stop stopColor="#1EAF38" />
+                        <stop offset="1" stopColor="#60D669" />
+                      </linearGradient>
+                      <linearGradient gradientUnits="userSpaceOnUse" id="paint1_linear_333_2146" x1="1100" x2="1100" y1="2209.86" y2="0">
+                        <stop stopColor="#F9F9F9" />
+                        <stop offset="1" stopColor="white" />
+                      </linearGradient>
+                      <clipPath id="clip0_333_2146">
+                        <rect fill="white" height="22" width="22" />
+                      </clipPath>
+                    </defs>
+                  </svg>
+                </div>
+                <div className="text-white text-[17px] text-center group-hover:text-purple-700 transition-colors duration-300">
+                  {uploadMethod === 'gallery' && isLoading ? (
+                    <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin group-hover:border-purple-700 group-hover:border-t-transparent"></div>
+                  ) : (
+                    <p className="leading-normal whitespace-pre" dir="auto">
+                      שימוש בתמונה מווצאפ
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="text-white text-[17px] text-center group-hover:text-purple-700 transition-colors duration-300">
-                {uploadMethod === 'gallery' && isLoading ? (
-                  <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin group-hover:border-purple-700 group-hover:border-t-transparent"></div>
-                ) : (
-                  <p className="leading-normal whitespace-pre" dir="auto">
-                    {texts.pictureUpload.whatsappButtonText}
-                  </p>
-                )}
-              </div>
-            </div>
-          </button>
-        </div>
+            </button>
+          </div>
+        )}
 
         {/* Skip Option - Bottom underlined text */}
         <div className="pt-4 mt-auto">
@@ -360,13 +448,13 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
         {/* WhatsApp Error Display */}
         {whatsappError && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="bg-red-600 text-white p-6 rounded-lg max-w-sm mx-4 text-center">
+            <div className="max-w-sm p-6 mx-4 text-center text-white bg-red-600 rounded-lg">
               <div className="mb-4 text-4xl">⚠️</div>
-              <h3 className="text-lg font-bold mb-2">שגיאה בהורדת תמונה</h3>
-              <p className="text-sm mb-4">{whatsappError}</p>
+              <h3 className="mb-2 text-lg font-bold">שגיאה בהורדת תמונה</h3>
+              <p className="mb-4 text-sm">{whatsappError}</p>
               <button
                 onClick={() => setWhatsappError(null)}
-                className="bg-white text-red-600 px-4 py-2 rounded font-medium hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 font-medium text-red-600 transition-colors bg-white rounded hover:bg-gray-100"
               >
                 סגור
               </button>

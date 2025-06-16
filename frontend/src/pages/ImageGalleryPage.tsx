@@ -106,6 +106,15 @@ export default function ImageGalleryPage({
 
     updateJourneyState();
 
+    // Load existing images first
+    if (socket && originalImageHash && userId) {
+      console.log('🔍 Loading existing gallery images...');
+      socket.emit('load_existing_gallery_images', {
+        originalImageHash,
+        userId
+      });
+    }
+
     // Start image generation IMMEDIATELY when component mounts
     startImageGeneration();
   }, [socket, originalImageHash, phoneNumber, userId, email, name, gender]);
@@ -184,11 +193,29 @@ export default function ImageGalleryPage({
       setIsConfirming(false);
     };
 
+    // Listen for existing images loaded
+    const handleExistingImagesLoaded = (data: { success: boolean; imageCount: number }) => {
+      console.log('📂 Existing images loaded:', data);
+      if (data.imageCount > 0) {
+        // If we have existing images, hide the modal immediately
+        console.log('🎬 Found existing images, hiding processing modal');
+        setShowProcessingModal(false);
+      }
+    };
+
+    // Listen for existing images errors
+    const handleExistingImagesError = (data: { success: boolean; error: string }) => {
+      console.error('❌ Failed to load existing images:', data.error);
+      // Continue with normal flow even if loading existing images fails
+    };
+
     if (socket) {
       socket.on('gallery_image_ready', handleImageReady);
       socket.on('gallery_image_error', handleGenerationError);
       socket.on('image_selection_confirmed', handleSelectionConfirmed);
       socket.on('image_selection_error', handleSelectionError);
+      socket.on('existing_images_loaded', handleExistingImagesLoaded);
+      socket.on('existing_images_error', handleExistingImagesError);
     }
 
     return () => {
@@ -197,6 +224,8 @@ export default function ImageGalleryPage({
         socket.off('gallery_image_error', handleGenerationError);
         socket.off('image_selection_confirmed', handleSelectionConfirmed);
         socket.off('image_selection_error', handleSelectionError);
+        socket.off('existing_images_loaded', handleExistingImagesLoaded);
+        socket.off('existing_images_error', handleExistingImagesError);
       }
     };
   }, [socket, originalImageHash, phoneNumber, userId, email, name, gender]);

@@ -36,6 +36,29 @@ async function generateSquareImage(options) {
     console.log(`Prompt: ${prompt}`);
     console.log(`Output size: ${size}x${size}`);
     console.log(`⏱️  Generation started at: ${new Date().toLocaleTimeString()}`);
+
+    // Check if mock mode is enabled
+    if (process.env.MOCK_GENERATE === 'true') {
+      console.log('🎭 Mock mode enabled - simulating image generation...');
+      
+      // Wait 5 seconds to simulate processing time
+      await new Promise(resolve => setTimeout(resolve, 10000));
+      
+      // Copy mock output file to destination
+      const mockOutputPath = path.join(__dirname, 'mock-output.png');
+      
+      if (!fs.existsSync(mockOutputPath)) {
+        throw new Error(`Mock output file not found: ${mockOutputPath}`);
+      }
+      
+      // Copy mock file to destination
+      fs.copyFileSync(mockOutputPath, dstPath);
+      
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🎭 Mock image copied to: ${dstPath}`);
+      console.log(`⏱️  Mock generation completed in: ${duration} seconds`);
+      return dstPath;
+    }
     // Prepare form data
     const formData = new FormData();
 

@@ -10,7 +10,6 @@
     "db:stop": "docker-compose down",
     "db:restart": "docker-compose restart",
     "db:logs": "docker-compose logs postgres",
-    "migrate": "node scripts/migrate.js",
     "migrate:run": "node scripts/migrate.js run",
     "migrate:create": "node scripts/migrate.js create",
     "migrate:status": "node scripts/migrate.js status",

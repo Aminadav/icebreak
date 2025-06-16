@@ -765,6 +765,62 @@ function setupSocketHandlers(io) {
       }
     });
 
+    // Load existing gallery images
+    socket.on('load_existing_gallery_images', async (data) => {
+      try {
+        const { originalImageHash, userId } = data;
+        
+        if (!originalImageHash) {
+          throw new Error('Original image hash is required');
+        }
+        
+        // Use userId from data if provided, otherwise use socket's userId
+        const targetUserId = userId || socket.userId;
+        
+        if (!targetUserId) {
+          throw new Error('User not authenticated. Please complete phone verification first.');
+        }
+        
+        console.log(`🔍 Loading existing gallery images for user ${targetUserId}`);
+        
+        // Query existing completed images for this user
+        const result = await pool.query(`
+          SELECT image_hash, prompt_used, prompt_index, generation_status, file_path, created_at, completed_at
+          FROM user_generated_images 
+          WHERE user_id = $1 AND generation_status = 'completed'
+          ORDER BY prompt_index ASC
+        `, [targetUserId]);
+        
+        console.log(`🔍 Found ${result.rows.length} existing images`);
+        
+        // Emit existing images to client
+        result.rows.forEach((row, index) => {
+          if (row.generation_status === 'completed' && row.image_hash) {
+            socket.emit('gallery_image_ready', {
+              imageIndex: row.prompt_index,
+              imageHash: row.image_hash
+            });
+            console.log(`📤 Sent existing image ${row.prompt_index}: ${row.image_hash}`);
+          }
+        });
+        
+        socket.emit('existing_images_loaded', {
+          success: true,
+          imageCount: result.rows.length,
+          message: 'Existing images loaded successfully'
+        });
+        
+      } catch (error) {
+        console.error('Error loading existing gallery images:', error);
+        
+        socket.emit('existing_images_error', {
+          success: false,
+          message: error.message || 'Failed to load existing images',
+          error: error.message
+        });
+      }
+    });
+
     // Image gallery generation
     socket.on('generate_image_gallery', async (data) => {
       try {
@@ -782,6 +838,50 @@ function setupSocketHandlers(io) {
         }
         
         console.log(`🎨 Starting image gallery generation for user ${targetUserId} with original image: ${originalImageHash}`);
+        
+        // First check if user already has completed images
+        try {
+          const existingImages = await pool.query(`
+            SELECT image_hash, prompt_used, prompt_index, generation_status, file_path, created_at, completed_at
+            FROM user_generated_images 
+            WHERE user_id = $1 AND generation_status = 'completed'
+            ORDER BY prompt_index ASC
+          `, [targetUserId]);
+          
+          if (existingImages.rows.length > 0) {
+            console.log(`✅ Found ${existingImages.rows.length} existing completed images for user ${targetUserId}, using existing images`);
+            
+            // Emit existing images to client
+            existingImages.rows.forEach((row) => {
+              socket.emit('gallery_image_ready', {
+                imageIndex: row.prompt_index,
+                imageHash: row.image_hash
+              });
+              console.log(`📤 Sent existing image ${row.prompt_index}: ${row.image_hash}`);
+            });
+            
+            return; // Exit early, no need to generate new images
+          } else {
+            console.log(`🎨 No existing completed images found for user ${targetUserId}, starting generation`);
+            
+            // Clean up any incomplete generations for this user
+            try {
+              const cleanupResult = await pool.query(`
+                DELETE FROM user_generated_images 
+                WHERE user_id = $1 AND generation_status != 'completed'
+              `, [targetUserId]);
+              
+              if (cleanupResult.rowCount > 0) {
+                console.log(`🧹 Cleaned up ${cleanupResult.rowCount} incomplete generations for user ${targetUserId}`);
+              }
+            } catch (cleanupError) {
+              console.error('Error cleaning up incomplete generations:', cleanupError.message);
+            }
+          }
+        } catch (dbError) {
+          console.error('Error checking existing images:', dbError.message);
+          // Continue with generation if database check fails
+        }
         
         // Load prompts from prompts.json
         const promptsPath = path.join(__dirname, '..', 'deep-image', 'prompts.json');
@@ -848,6 +948,26 @@ function setupSocketHandlers(io) {
             });
             
             console.log(`✅ [${index + 1}/6] Generation completed: ${output.imageHash}`);
+            
+            // Save to database
+            try {
+              await pool.query(`
+                INSERT INTO user_generated_images (
+                  user_id, image_hash, prompt_used, prompt_index, 
+                  generation_status, file_path, completed_at
+                ) VALUES ($1, $2, $3, $4, $5, $6, NOW())
+              `, [
+                targetUserId,
+                output.imageHash,
+                output.prompt,
+                index,
+                'completed',
+                output.dstPath
+              ]);
+              console.log(`💾 [${index + 1}/6] Saved to database: ${output.imageHash}`);
+            } catch (dbError) {
+              console.error(`❌ [${index + 1}/6] Database save failed:`, dbError.message);
+            }
             
             // Emit immediate update to client
             socket.emit('gallery_image_ready', {

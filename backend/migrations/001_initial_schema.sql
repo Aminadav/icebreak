@@ -54,19 +54,6 @@ CREATE TABLE IF NOT EXISTS games (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Table: generated_images
--- Stores information about AI-generated images
-CREATE TABLE IF NOT EXISTS generated_images (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL,
-    original_image_hash VARCHAR(64) NOT NULL,
-    generated_image_hash VARCHAR(64) NOT NULL,
-    prompt_text TEXT NOT NULL,
-    image_index INTEGER NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT generated_images_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-);
-
 -- Table: user_generated_images
 -- Stores user's generated image processing status and selection
 CREATE TABLE IF NOT EXISTS user_generated_images (
@@ -81,19 +68,6 @@ CREATE TABLE IF NOT EXISTS user_generated_images (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP,
     CONSTRAINT user_generated_images_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
-);
-
--- Table: user_generation_sessions
--- Stores user's image generation session information
-CREATE TABLE IF NOT EXISTS user_generation_sessions (
-    id SERIAL PRIMARY KEY,
-    user_id UUID,
-    original_image_hash VARCHAR(255) NOT NULL,
-    prompts_used JSONB,
-    session_status VARCHAR(50) DEFAULT 'in_progress',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    completed_at TIMESTAMP,
-    CONSTRAINT user_generation_sessions_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Table: schema_migrations
@@ -127,15 +101,7 @@ CREATE INDEX IF NOT EXISTS idx_devices_pending_phone ON devices(pending_phone_nu
 CREATE INDEX IF NOT EXISTS idx_games_creator ON games(creator_user_id);
 CREATE INDEX IF NOT EXISTS idx_games_status ON games(status);
 
--- Generated images table indexes
-CREATE INDEX IF NOT EXISTS idx_generated_images_user_id ON generated_images(user_id);
-CREATE INDEX IF NOT EXISTS idx_generated_images_original_hash ON generated_images(original_image_hash);
-CREATE INDEX IF NOT EXISTS idx_generated_images_generated_hash ON generated_images(generated_image_hash);
-CREATE INDEX IF NOT EXISTS idx_generated_images_user_original ON generated_images(user_id, original_image_hash);
 
 -- User generated images table indexes
 CREATE INDEX IF NOT EXISTS idx_user_generated_images_user_id ON user_generated_images(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_generated_images_status ON user_generated_images(generation_status);
-
--- User generation sessions table indexes
-CREATE INDEX IF NOT EXISTS idx_user_generation_sessions_user_id ON user_generation_sessions(user_id);

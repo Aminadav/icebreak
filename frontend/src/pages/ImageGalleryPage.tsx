@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
 import ProcessingModal from '../components/ProcessingModal';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useLanguage } from '../contexts/LanguageContext';
 
 interface ImageGalleryPageProps {
   originalImageHash: string;
@@ -33,22 +31,23 @@ export default function ImageGalleryPage({
   gender,
   capturedImageUrl 
 }: ImageGalleryPageProps): JSX.Element {
-  const { back, push } = useNavigation();
   const { socket } = useSocket();
-  const { texts } = useLanguage();
   
   // Get backend URL from environment
-  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+  const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:3001';
   
-  // State for 6 gallery images (1 original + 5 generated)
-  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>(() => 
-    Array.from({ length: 6 }, (_, index) => ({
+  // State for gallery images (dynamic count based on backend)
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  
+  // Initialize gallery images when count is known
+  const initializeGalleryImages = (count: number) => {
+    setGalleryImages(Array.from({ length: count }, (_, index) => ({
       id: index,
       isLoading: true,
       isReady: false,
       progress: 0
-    }))
-  );
+    })));
+  };
   
   const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
@@ -60,13 +59,6 @@ export default function ImageGalleryPage({
     if (socket && originalImageHash && !generationStarted) {
       console.log('🎨 Starting image generation process...');
       setGenerationStarted(true);
-      
-      // Mark all images as started and record start times
-      const now = Date.now();
-      setGalleryImages(prev => prev.map(img => ({
-        ...img,
-        startTime: now + (img.id * 1000) // Stagger start times by 1 second
-      })));
 
       socket.emit('generate_image_gallery', {
         originalImageHash,
@@ -105,6 +97,11 @@ export default function ImageGalleryPage({
 
     updateJourneyState();
 
+    // Initialize with default number of images (will be updated by backend)
+    if (galleryImages.length === 0) {
+      initializeGalleryImages(6); // Default fallback
+    }
+
     // Load existing images first
     if (socket && originalImageHash && userId) {
       console.log('🔍 Loading existing gallery images...');
@@ -134,7 +131,7 @@ export default function ImageGalleryPage({
         if (!img.startTime || img.isReady) return img;
         
         const elapsed = Date.now() - img.startTime;
-        const progress = Math.min((elapsed / 25000) * 100, 99); // 15 seconds = 100%
+        const progress = Math.min((elapsed / 30000) * 100, 99); // 30 seconds = 100%
         
         return {
           ...img,
@@ -148,6 +145,19 @@ export default function ImageGalleryPage({
 
   useEffect(() => {
     if (!socket) return;
+
+    // Listen for generation started event (with image count)
+    const handleGenerationStarted = (data: { imageCount: number; userId: string }) => {
+      console.log(`🎬 Generation started with ${data.imageCount} images for user ${data.userId}`);
+      initializeGalleryImages(data.imageCount);
+      
+      // Mark all images as started and record start times
+      const now = Date.now();
+      setGalleryImages(prev => prev.map(img => ({
+        ...img,
+        startTime: now + (img.id * 1000) // Stagger start times by 1 second
+      })));
+    };
 
     // Listen for individual image completion
     const handleImageReady = (data: { imageIndex: number; imageHash: string }) => {
@@ -209,6 +219,7 @@ export default function ImageGalleryPage({
     };
 
     if (socket) {
+      socket.on('gallery_generation_started', handleGenerationStarted);
       socket.on('gallery_image_ready', handleImageReady);
       socket.on('gallery_image_error', handleGenerationError);
       socket.on('image_selection_confirmed', handleSelectionConfirmed);
@@ -219,6 +230,7 @@ export default function ImageGalleryPage({
 
     return () => {
       if (socket) {
+        socket.off('gallery_generation_started', handleGenerationStarted);
         socket.off('gallery_image_ready', handleImageReady);
         socket.off('gallery_image_error', handleGenerationError);
         socket.off('image_selection_confirmed', handleSelectionConfirmed);

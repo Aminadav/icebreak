@@ -42,7 +42,8 @@ async function generateSquareImage(options) {
       console.log('🎭 Mock mode enabled - simulating image generation...');
       
       // Wait 5 seconds to simulate processing time
-      await new Promise(resolve => setTimeout(resolve, 10000));
+      // a random number between 3 seconds and 10 seconds
+      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 7000) + 3000));
       
       // Copy mock output file to destination
       const mockOutputPath = path.join(__dirname, 'mock-output.png');
@@ -232,6 +233,7 @@ async function main() {
 
   if (args.length === 0) {
     // Use default parameters when no arguments provided
+    process.env.MOCK_GENERATE = 'true'; 
     srcPath = 'test-deep-face.jpg';
     dstPath = 'output-professional-portrait.png';
     prompt = 'Generate a professional portrait of a man wearing a business suit, in an office background. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image.';

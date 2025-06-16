@@ -1,33 +1,17 @@
 [
   {
     "gender": "both",
-    "description": "Make it Accurate."
-  },
-  {
-    "gender": "male",
-    "description": "Make it Accurate. Generate a professional portrait of a man wearing a business suit, in an office background. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
-  },
-  {
-    "gender": "female",
-    "description": "Make it Accurate. Generate a professional portrait of a woman wearing a business suit, in an office background. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
+    "description": ""
   },
   {
     "gender": "both",
     "description": "Make it Accurate. In a red scarf and beanie, building a snowman in a snowy park, cheerful and adventurous atmosphere. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
   },
-  {
-    "gender": "male",
-    "description": "Make it Accurate. dressed as a Classic Cowboy stands confidently with a wide-brimmed hat, a red bandana around his neck, a leather vest, and chaps over his jeans. He holds a toy lasso in one hand and a toy pistol in a holster at his side. In the background, a vast, colorful landscape of the Wild West stretches out, with rolling plains, distant mountains, and a clear blue sky dotted with fluffy white clouds. The scene is vibrant and full of life, capturing the spirit of adventure and freedom. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
-  },
-  {
-    "gender": "female",
-    "description": "Make it Accurate. dressed as a Classic Cowgirl stands confidently with a wide-brimmed hat, a red bandana around her neck, a leather vest, and chaps over her jeans. She holds a toy lasso in one hand and a toy pistol in a holster at her side. In the background, a vast, colorful landscape of the Wild West stretches out, with rolling plains, distant mountains, and a clear blue sky dotted with fluffy white clouds. The scene is vibrant and full of life, capturing the spirit of adventure and freedom. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
-  },
-  {
+    {
     "gender": "both",
     "description": "Make it Accurate. Dressed as an Adventurous Explorer stands proudly in a dense, colorful jungle. They wear a wide-brimmed hat, a khaki vest with multiple pockets, cargo shorts, and sturdy boots. They hold a map in one hand and a magnifying glass in the other. In the background, lush green foliage, vibrant tropical flowers, and towering trees create a vivid, immersive environment. A distant waterfall cascades down rocky cliffs under a bright blue sky. The scene is lively and full of rich colors, capturing the spirit of exploration and discovery. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
   },
-  {
+    {
     "gender": "both",
     "description": "Make it Accurate. portrait of a firefighter posing for a photo, showcasing their courageous and heroic spirit. Envision the firefighter in uniform, with a confident and determined expression, conveying the essence of their profession. The background features a depot with ladder fire truck. firefighter's gear, helmet and protective clothing. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
   },
@@ -35,17 +19,43 @@
     "gender": "both",
     "description": "Make it Accurate. The outfit should reflect a (relaxed) and (eclectic) vibe, incorporating (loose-fitting) and (comfortable) clothing. red, green, yellow colors. (dreadlocks) on the head. (spacey background) and (bright colors), capturing the essence of the (ocean beach) in (Reggae fashion). in the background: Caribbean (beach) with palms. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
   },
+
+
+
+  
+  {
+    "gender": "male",
+    "description": "Make it Accurate. Generate a professional portrait of a man wearing a business suit, in an office background. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
+  },
+  {
+    "gender": "male",
+    "description": "Make it Accurate. dressed as a Classic Cowboy stands confidently with a wide-brimmed hat, a red bandana around his neck, a leather vest, and chaps over his jeans. He holds a toy lasso in one hand and a toy pistol in a holster at his side. In the background, a vast, colorful landscape of the Wild West stretches out, with rolling plains, distant mountains, and a clear blue sky dotted with fluffy white clouds. The scene is vibrant and full of life, capturing the spirit of adventure and freedom. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
+  },
   {
     "gender": "male",
     "description": "Make it Accurate. A caring husband holding his newborn baby in a hospital room, wearing casual clothes, with a gentle and loving expression. The background shows a modern hospital room with soft lighting. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
   },
   {
-    "gender": "female",
-    "description": "Make it Accurate. A caring wife holding her newborn baby in a hospital room, wearing casual clothes, with a gentle and loving expression. The background shows a modern hospital room with soft lighting. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
-  },
-  {
     "gender": "male",
     "description": "Make it Accurate. A successful businessman in a modern office setting, wearing an elegant suit and tie, standing confidently with arms crossed. Behind him, floor-to-ceiling windows show a city skyline. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
+  },
+
+
+  
+  {
+    "gender": "female",
+    "description": "Make it Accurate. Generate a professional portrait of a woman wearing a business suit, in an office background. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
+  },
+  {
+    "gender": "female",
+    "description": "Make it Accurate. dressed as a Classic Cowgirl stands confidently with a wide-brimmed hat, a red bandana around her neck, a leather vest, and chaps over her jeans. She holds a toy lasso in one hand and a toy pistol in a holster at her side. In the background, a vast, colorful landscape of the Wild West stretches out, with rolling plains, distant mountains, and a clear blue sky dotted with fluffy white clouds. The scene is vibrant and full of life, capturing the spirit of adventure and freedom. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
+  },
+
+
+  
+  {
+    "gender": "female",
+    "description": "Make it Accurate. A caring wife holding her newborn baby in a hospital room, wearing casual clothes, with a gentle and loving expression. The background shows a modern hospital room with soft lighting. The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image."
   },
   {
     "gender": "female",

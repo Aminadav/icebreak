@@ -5,6 +5,12 @@ const path = require('path');
 const crypto = require('crypto');
 const { getUserIdFromDevice } = require('./utils');
 
+// Load environment variables
+require('dotenv').config();
+
+// Get number of images to generate from environment variable, default to 6 if not set
+const GENERATED_IMAGES = parseInt(process.env.GENERATED_IMAGES) || 6;
+
 async function handleGenerateImageGallery(socket, data) {
   try {
     const { originalImageHash, phoneNumber, email, name } = data;
@@ -46,6 +52,12 @@ async function handleGenerateImageGallery(socket, data) {
       
       if (existingImages.rows.length > 0) {
         console.log(`✅ Found ${existingImages.rows.length} existing completed images for user ${targetUserId}, using existing images`);
+        
+        // Inform frontend about the number of existing images
+        socket.emit('gallery_generation_started', {
+          imageCount: existingImages.rows.length,
+          userId: targetUserId
+        });
         
         // Emit existing images to client
         existingImages.rows.forEach((row) => {
@@ -90,20 +102,26 @@ async function handleGenerateImageGallery(socket, data) {
       prompt.gender === 'both' || prompt.gender === userGender
     );
     
-    if (availablePrompts.length < 6) {
-      throw new Error(`Not enough prompts available for gender "${userGender}". Found ${availablePrompts.length}, need at least 6.`);
+    if (availablePrompts.length < GENERATED_IMAGES) {
+      throw new Error(`Not enough prompts available for gender "${userGender}". Found ${availablePrompts.length}, need at least ${GENERATED_IMAGES}.`);
     }
     
-    // Prepare 6 generations: first prompt + 5 random others
+    // Prepare generations: first prompt + random others
     const firstPrompt = availablePrompts[0]; // First gender-appropriate prompt
     const otherPrompts = availablePrompts.slice(1); // All others
     
-    // Select 5 random prompts from the remaining ones
+    // Select random prompts from the remaining ones (GENERATED_IMAGES - 1 for the first prompt)
     const selectedPrompts = [firstPrompt];
     const shuffledOthers = [...otherPrompts].sort(() => Math.random() - 0.5);
-    selectedPrompts.push(...shuffledOthers.slice(0, 5));
+    selectedPrompts.push(...shuffledOthers.slice(0, GENERATED_IMAGES - 1));
     
     console.log(`🎯 Selected ${selectedPrompts.length} prompts for ${userGender}:`, selectedPrompts.map((p, i) => `[${i}] ${p.description.substring(0, 50)}...`));
+    
+    // Inform frontend about the number of images to be generated
+    socket.emit('gallery_generation_started', {
+      imageCount: GENERATED_IMAGES,
+      userId: targetUserId
+    });
     
     // Original image path
     const originalImagePath = path.join(__dirname, '..', '..', 'uploads', `${originalImageHash}.jpg`);
@@ -135,7 +153,7 @@ async function handleGenerateImageGallery(socket, data) {
     // Function to process images with real-time updates
     const processImageWithUpdates = async (output, index) => {
       try {
-        console.log(`📸 [${index + 1}/6] Starting generation: ${output.prompt.substring(0, 60)}...`);
+        console.log(`📸 [${index + 1}/${GENERATED_IMAGES}] Starting generation: ${output.prompt.substring(0, 60)}...`);
         
         // Use the generateSquareImage function directly for real-time updates
         const { generateSquareImage } = require('../../deep-image/deep-image-ai');
@@ -147,7 +165,7 @@ async function handleGenerateImageGallery(socket, data) {
           size: 1024
         });
         
-        console.log(`✅ [${index + 1}/6] Generation completed: ${output.imageHash}`);
+        console.log(`✅ [${index + 1}/${GENERATED_IMAGES}] Generation completed: ${output.imageHash}`);
         
         // Save to database
         try {
@@ -164,9 +182,9 @@ async function handleGenerateImageGallery(socket, data) {
             'completed',
             output.dstPath
           ]);
-          console.log(`💾 [${index + 1}/6] Saved to database: ${output.imageHash}`);
+          console.log(`💾 [${index + 1}/${GENERATED_IMAGES}] Saved to database: ${output.imageHash}`);
         } catch (dbError) {
-          console.error(`❌ [${index + 1}/6] Database save failed:`, dbError.message);
+          console.error(`❌ [${index + 1}/${GENERATED_IMAGES}] Database save failed:`, dbError.message);
         }
         
         // Emit immediate update to client
@@ -178,7 +196,7 @@ async function handleGenerateImageGallery(socket, data) {
         return { success: true, imageIndex: index, imageHash: output.imageHash };
         
       } catch (error) {
-        console.error(`❌ [${index + 1}/6] Generation failed:`, error.message);
+        console.error(`❌ [${index + 1}/${GENERATED_IMAGES}] Generation failed:`, error.message);
         
         // Emit error to client
         socket.emit('gallery_image_error', {

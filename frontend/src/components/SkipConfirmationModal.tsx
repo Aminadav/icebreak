@@ -52,14 +52,14 @@ export default function SkipConfirmationModal({ onTakePhoto, onSkip }: SkipConfi
             <img
               src="/images/icons/sad.png"
               alt="Sad character"
-              className="w-full h-full object-contain"
+              className="object-contain w-full h-full"
             />
           </div>
         </div>
 
         {/* Title */}
         <div className="mb-4 text-center">
-          <h2 className="text-2xl font-bold text-white mb-4">
+          <h2 className="mb-4 text-2xl font-bold text-white">
             {texts.skipConfirmationModal.title}
           </h2>
         </div>

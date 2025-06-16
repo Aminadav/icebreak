@@ -45,7 +45,7 @@ export default function NameConfirmationModal({ name, onYes, onNo }: NameConfirm
             {index < array.length - 1 && <br />}
           </span>
         ))}
-        <span className="text-[#F3A257] font-bold text-3xl align-middle">{userName}</span>
+        <span className="text-[#F3A257] font-bold text-3xl align-sub">{userName}</span>
         {afterName.split('\n').map((line, index, array) => (
           <span key={`after-${index}`}>
             {line}

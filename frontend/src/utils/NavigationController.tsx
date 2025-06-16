@@ -160,14 +160,21 @@ export class NavigationController {
         return <EnterPhoneNumberPage />;
         
       case 'CREATOR_GAME_READY':
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <CreatorGameReadyPage 
-            phoneNumber={data.phoneNumber!} 
-            userId={data.userId!} 
-            email={data.email!} 
-            name={data.name!} 
-            gender={data.gender!}
-            selectedImageHash={data.selectedImageHash!}
+            phoneNumber={data.phoneNumber} 
+            userId={data.userId} 
+            email={data.email} 
+            name={data.name} 
+            gender={data.gender}
+            selectedImageHash={data.selectedImageHash || 'no-image'}
           />;
+        }
+        // Fallback to picture upload if missing data
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
+        }
+        return <EnterPhoneNumberPage />;
 
         
       default:

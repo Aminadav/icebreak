@@ -14,6 +14,7 @@ interface Enter2faCodePageProps {
 }
 
 export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps): JSX.Element {
+  const DEBUG=false
   const { texts } = useLanguage();
   const { back, push } = useNavigation();
   const { socket } = useSocket();
@@ -301,7 +302,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
         </div>
         
         {/* Continue Button */}
-        <div className="mb-20">
+        {/* <div className="mb-20">
           <Button
             variant="primary-large"
             onClick={handleContinue}
@@ -323,10 +324,10 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
               texts.enter2faCode.continueButton
             )}
           </Button>
-        </div>
+        </div> */}
 
         {/* Debug info - only show in development */}
-        {phoneNumber && (
+        {DEBUG && phoneNumber && (
           <div className="mt-4 text-sm text-white opacity-70">
             SMS נשלח ל: {phoneNumber}
           </div>

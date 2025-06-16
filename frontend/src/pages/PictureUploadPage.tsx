@@ -9,6 +9,7 @@ import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
 import CameraPage from './CameraPage';
 import ImageGalleryPage from './ImageGalleryPage';
+import CreatorGameReadyPage from './CreatorGameReadyPage';
 import SkipConfirmationModal from '../components/SkipConfirmationModal';
 
 interface PictureUploadPageProps {
@@ -283,11 +284,18 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   };
 
   const handleConfirmedSkip = () => {
-    console.log('⏭️ User confirmed skip - navigating to next step');
+    console.log('⏭️ User confirmed skip - navigating to Creator Game Ready page');
     
-    // TODO: Navigate to next step (dashboard/lobby)
-    // For now, navigate back
-    back();
+    // Navigate directly to Creator Game Ready page with a placeholder image hash
+    // When skipping, we use 'no-image' as a placeholder to indicate no image was selected
+    push(<CreatorGameReadyPage 
+      phoneNumber={phoneNumber || ''}
+      userId={userId || ''}
+      email={email || ''}
+      name={name || ''}
+      gender={gender || ''}
+      selectedImageHash="no-image"
+    />);
   };
 
   return (

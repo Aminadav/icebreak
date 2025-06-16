@@ -4,6 +4,9 @@ const User = require('../models/User');
 const pool = require('../config/database');
 const { sendVerificationCode, verifyCode } = require('../utils/smsService');
 const { sendToMixpanel, setUserProfile, trackLogin, trackRegistration } = require('../utils/mixpanelService');
+const fs = require('fs');
+const path = require('path');
+const crypto = require('crypto');
 
 function setupSocketHandlers(io) {
   console.log('🔧 Setting up Socket.io handlers...');
@@ -682,6 +685,81 @@ function setupSocketHandlers(io) {
           success: false,
           message: error.message || 'Failed to save gender',
           context: 'gender_save'
+        });
+      }
+    });
+
+    // העלאת תמונה ממתינה
+    socket.on('upload_pending_image', async (data) => {
+      try {
+        const { imageData, phoneNumber, userId, email, name, gender } = data;
+        
+        if (!imageData) {
+          throw new Error('Image data is required');
+        }
+        
+        // Use userId from data if provided, otherwise use socket's userId
+        const targetUserId = userId || socket.userId;
+        
+        if (!targetUserId) {
+          throw new Error('User not authenticated. Please complete phone verification first.');
+        }
+        
+        console.log(`📸 Processing image upload for user ${targetUserId}`);
+        
+        // Create unique filename with timestamp and user ID
+        const timestamp = Date.now();
+        const imageHash = crypto
+          .createHash('md5')
+          .update(`${targetUserId}-${timestamp}`)
+          .digest('hex');
+        
+        const filename = `${imageHash}.jpg`;
+        
+        // Ensure upload directory exists
+        const uploadDir = path.join(__dirname, '..', 'uploads', 'users', 'pending_images');
+        if (!fs.existsSync(uploadDir)) {
+          fs.mkdirSync(uploadDir, { recursive: true });
+        }
+        
+        // Write image file
+        const filePath = path.join(uploadDir, filename);
+        const imageBuffer = Buffer.from(imageData, 'base64');
+        fs.writeFileSync(filePath, imageBuffer);
+        
+        console.log(`📸 Image saved to: ${filePath}`);
+        
+        // Update user's pending_image field in database
+        const result = await pool.query(
+          'UPDATE users SET pending_image = $1 WHERE user_id = $2 RETURNING *',
+          [imageHash, targetUserId]
+        );
+        
+        if (result.rows.length === 0) {
+          // Clean up the file if user update failed
+          fs.unlinkSync(filePath);
+          throw new Error('User not found');
+        }
+        
+        // Update journey state to PICTURE_ENHANCEMENT
+        await Device.updateJourneyState(socket.deviceId, 'PICTURE_ENHANCEMENT');
+        
+        socket.emit('upload_pending_image_response', {
+          success: true,
+          message: 'Image uploaded successfully',
+          imageHash: imageHash,
+          userId: targetUserId
+        });
+        
+        console.log(`✅ Image uploaded successfully for user ${targetUserId}: ${imageHash}`);
+        
+      } catch (error) {
+        console.error('Error uploading image:', error);
+        
+        socket.emit('upload_pending_image_response', {
+          success: false,
+          message: error.message || 'Failed to upload image',
+          error: error.message
         });
       }
     });

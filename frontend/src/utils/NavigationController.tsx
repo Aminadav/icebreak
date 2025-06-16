@@ -8,6 +8,7 @@ import EnterNamePage from '../pages/EnterNamePage';
 import SelectGenderPage from '../pages/SelectGenderPage';
 import PictureUploadPage from '../pages/PictureUploadPage';
 import CameraPage from '../pages/CameraPage';
+import PictureEnhancementPage from '../pages/PictureEnhancementPage';
 
 // Journey states that match the backend
 export type JourneyState = 
@@ -21,6 +22,7 @@ export type JourneyState =
   | 'GENDER_SELECTION'
   | 'PICTURE_UPLOAD'
   | 'CAMERA_ACTIVE'
+  | 'PICTURE_ENHANCEMENT'
   | 'COMPLETED';
 
 export interface NavigationData {
@@ -126,6 +128,15 @@ export class NavigationController {
         }
         return <EnterPhoneNumberPage />;
         
+      case 'PICTURE_ENHANCEMENT':
+        // For picture enhancement, we need a captured image blob, but since we can't store blobs in navigation data,
+        // this state should only be reached through camera capture flow, not auto-navigation
+        // Fallback to camera or picture upload page
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <CameraPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
+        }
+        return <EnterPhoneNumberPage />;
+        
       case 'COMPLETED':
         // Could navigate to game lobby or dashboard
         return <HomePage />;
@@ -159,6 +170,7 @@ export class NavigationController {
       'GENDER_SELECTION': 'Gender selection in progress',
       'PICTURE_UPLOAD': 'Picture upload in progress',
       'CAMERA_ACTIVE': 'Camera active for photo capture',
+      'PICTURE_ENHANCEMENT': 'Picture enhancement in progress',
       'COMPLETED': 'Registration completed'
     };
     

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
+import PictureEnhancementPage from './PictureEnhancementPage';
 
 interface CameraPageProps {
   onPictureCapture?: (imageBlob: Blob) => void;
@@ -19,7 +20,7 @@ export default function CameraPage({
   name, 
   gender 
 }: CameraPageProps): JSX.Element {
-  const { back } = useNavigation();
+  const { back, push } = useNavigation();
   const { socket } = useSocket();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -151,14 +152,32 @@ export default function CameraPage({
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
 
-      // Draw the video frame to canvas
-      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      // Draw the video frame to canvas (mirror it back to normal)
+      context.scale(-1, 1);
+      context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
 
       // Convert canvas to blob
       return new Promise<void>((resolve) => {
         canvas.toBlob((blob) => {
-          if (blob && onPictureCapture) {
-            onPictureCapture(blob);
+          if (blob) {
+            // Call the onPictureCapture callback if provided
+            if (onPictureCapture) {
+              onPictureCapture(blob);
+            }
+            
+            // Navigate to picture enhancement page
+            if (phoneNumber && userId && email && name && gender) {
+              push(
+                <PictureEnhancementPage 
+                  capturedImage={blob}
+                  phoneNumber={phoneNumber}
+                  userId={userId}
+                  email={email}
+                  name={name}
+                  gender={gender}
+                />
+              );
+            }
           }
           
           // Add a small delay for visual feedback

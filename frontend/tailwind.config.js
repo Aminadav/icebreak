@@ -23,6 +23,13 @@ export default {
         'fade-in-bounce': 'fade-in-bounce 0.8s ease-out forwards',
         'flash': 'flash 0.3s ease-out forwards',
       },
+      animationDelay: {
+        '200': '200ms',
+        '400': '400ms',
+        '600': '600ms',
+        '800': '800ms',
+        '1000': '1000ms',
+      },
       keyframes: {
         fadeInUp: {
           '0%': {

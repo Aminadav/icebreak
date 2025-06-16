@@ -806,19 +806,12 @@ export default function CameraPage({
           {!faceDetected && !isUploading && !uploadError && (
             <div className="mt-3 text-center">
               <p className="text-sm text-white/80">
-                מקמו את הפנים במעגל כדי לצלם את התמונה הקטומה
+                מקמו את הפנים במעגל כדי לצלם את התמונה
               </p>
             </div>
           )}
           
-          {/* Success text when face is detected */}
-          {faceDetected && !isUploading && !uploadError && !isCapturing && (
-            <div className="mt-3 text-center">
-              <p className="text-sm text-green-300">
-                פנים זוהו - ניתן לצלם את התמונה הקטומה
-              </p>
-            </div>
-          )}
+          
         </div>
       )}
 

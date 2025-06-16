@@ -50,8 +50,6 @@ export default function ImageGalleryPage({
     })));
   };
   
-  const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
-  const [isConfirming, setIsConfirming] = useState(false);
   const [showProcessingModal, setShowProcessingModal] = useState(true);
   const [generationStarted, setGenerationStarted] = useState(false);
   const [showImagePreview, setShowImagePreview] = useState(false);
@@ -187,7 +185,6 @@ export default function ImageGalleryPage({
     // Listen for image selection confirmation
     const handleSelectionConfirmed = (data: { success: boolean; selectedImageHash: string }) => {
       console.log('🎉 Image selection confirmed:', data);
-      setIsConfirming(false);
       
       if (data.success) {
         // TODO: Navigate to game lobby or dashboard
@@ -202,7 +199,6 @@ export default function ImageGalleryPage({
     // Listen for selection errors
     const handleSelectionError = (data: { success: boolean; error: string }) => {
       console.error('❌ Image selection failed:', data.error);
-      setIsConfirming(false);
     };
 
     // Listen for existing images loaded
@@ -253,35 +249,6 @@ export default function ImageGalleryPage({
     }
   };
 
-  const handleConfirmSelection = async () => {
-    if (selectedImageId === null) return;
-    
-    const selectedImage = galleryImages[selectedImageId];
-    if (!selectedImage || !selectedImage.imageHash) return;
-
-    setIsConfirming(true);
-
-    try {
-      console.log('✅ Confirming image selection:', selectedImage.imageHash);
-      
-      // Emit final image selection to backend
-      socket?.emit('confirm_image_selection', {
-        selectedImageHash: selectedImage.imageHash,
-        originalImageHash,
-        userId,
-        phoneNumber,
-        email,
-        name
-      });
-
-      // Note: Response will be handled by the socket listener
-      
-    } catch (error) {
-      console.error('Error confirming selection:', error);
-      setIsConfirming(false);
-    }
-  };
-
   // Image preview modal handlers
   const handleClosePreview = () => {
     setShowImagePreview(false);
@@ -296,15 +263,12 @@ export default function ImageGalleryPage({
     // Find the image index for the selected hash
     const imageIndex = galleryImages.findIndex(img => img.imageHash === previewImageHash);
     if (imageIndex !== -1) {
-      setSelectedImageId(imageIndex);
       setShowImagePreview(false);
       setPreviewImageHash(null);
       
       // Automatically confirm the selection
       const selectedImage = galleryImages[imageIndex];
       if (selectedImage && selectedImage.imageHash) {
-        setIsConfirming(true);
-        
         socket?.emit('confirm_image_selection', {
           selectedImageHash: selectedImage.imageHash,
           originalImageHash,
@@ -425,30 +389,6 @@ export default function ImageGalleryPage({
           <div className="grid grid-cols-2 gap-4 mb-6">
             {galleryImages.map(renderImageSlot)}
           </div>
-        </div>
-
-        {/* Confirm Button */}
-        <div className="pb-6">
-          <button
-            onClick={handleConfirmSelection}
-            disabled={selectedImageId === null || isConfirming}
-            className={`w-full max-w-md mx-auto block px-8 py-4 rounded-2xl font-bold text-lg transition-all duration-300 ${
-              selectedImageId !== null && !isConfirming
-                ? 'bg-orange-500 text-white hover:bg-orange-600 shadow-lg hover:shadow-xl transform hover:scale-105'
-                : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-            }`}
-          >
-            {isConfirming ? (
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-5 h-5 border-2 border-white rounded-full border-t-transparent animate-spin" />
-                שומר בחירה...
-              </div>
-            ) : selectedImageId !== null ? (
-              'אישור בחירה'
-            ) : (
-              'לחץ על תמונה כדי לבחור'
-            )}
-          </button>
         </div>
 
       </main>

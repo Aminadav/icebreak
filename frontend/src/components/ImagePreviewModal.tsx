@@ -1,4 +1,5 @@
 import { useEffect, useCallback } from 'react';
+import Button from './Button';
 
 interface ImagePreviewModalProps {
   imageHash: string;
@@ -6,6 +7,31 @@ interface ImagePreviewModalProps {
   onClose: () => void;
   onChoose: () => void;
 }
+
+// SVG Icons
+const ChooseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+  </svg>
+);
+
+const DownloadIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+  </svg>
+);
+
+const WhatsAppIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893A11.821 11.821 0 0020.531 3.542"/>
+  </svg>
+);
+
+const CloseIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+  </svg>
+);
 
 export default function ImagePreviewModal({ 
   imageHash, 
@@ -98,14 +124,14 @@ export default function ImagePreviewModal({
     >
       {/* Animated background particles */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 left-10 w-4 h-4 bg-yellow-400 rounded-full animate-pulse opacity-70 animation-delay-0"></div>
-        <div className="absolute top-32 right-20 w-3 h-3 bg-blue-400 rounded-full animate-bounce opacity-60 animation-delay-100"></div>
-        <div className="absolute bottom-20 left-32 w-5 h-5 bg-pink-400 rounded-full animate-ping opacity-50 animation-delay-200"></div>
-        <div className="absolute bottom-40 right-16 w-2 h-2 bg-green-400 rounded-full animate-pulse opacity-80 animation-delay-300"></div>
-        <div className="absolute top-1/3 left-1/4 w-3 h-3 bg-purple-400 rounded-full animate-bounce opacity-60 animation-delay-400"></div>
-        <div className="absolute top-2/3 right-1/3 w-4 h-4 bg-orange-400 rounded-full animate-ping opacity-50 animation-delay-500"></div>
-        <div className="absolute top-1/2 left-1/2 w-3 h-3 bg-cyan-400 rounded-full animate-pulse opacity-70 animation-delay-600"></div>
-        <div className="absolute top-20 right-1/4 w-2 h-2 bg-red-400 rounded-full animate-bounce opacity-60 animation-delay-700"></div>
+        <div className="absolute w-4 h-4 bg-yellow-400 rounded-full top-10 left-10 animate-pulse opacity-70 animation-delay-0"></div>
+        <div className="absolute w-3 h-3 bg-blue-400 rounded-full top-32 right-20 animate-bounce opacity-60 animation-delay-100"></div>
+        <div className="absolute w-5 h-5 bg-pink-400 rounded-full opacity-50 bottom-20 left-32 animate-ping animation-delay-200"></div>
+        <div className="absolute w-2 h-2 bg-green-400 rounded-full bottom-40 right-16 animate-pulse opacity-80 animation-delay-300"></div>
+        <div className="absolute w-3 h-3 bg-purple-400 rounded-full top-1/3 left-1/4 animate-bounce opacity-60 animation-delay-400"></div>
+        <div className="absolute w-4 h-4 bg-orange-400 rounded-full opacity-50 top-2/3 right-1/3 animate-ping animation-delay-500"></div>
+        <div className="absolute w-3 h-3 rounded-full top-1/2 left-1/2 bg-cyan-400 animate-pulse opacity-70 animation-delay-600"></div>
+        <div className="absolute w-2 h-2 bg-red-400 rounded-full top-20 right-1/4 animate-bounce opacity-60 animation-delay-700"></div>
       </div>
 
       {/* Modal Content */}
@@ -117,12 +143,12 @@ export default function ImagePreviewModal({
         }}
       >
         {/* Header with fun title */}
-        <div className="relative bg-gradient-to-r from-yellow-400 to-purple-600 p-4">
+        <div className="relative p-4 bg-gradient-to-r from-yellow-400 to-purple-600">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-white drop-shadow-lg">
               🎨 ✨ תמונה מדהימה! ✨ 🎮
             </h2>
-            <p className="text-white/90 text-sm mt-1">
+            <p className="mt-1 text-sm text-white/90">
               איך התמונה הזאת נראית לך?
             </p>
           </div>
@@ -130,7 +156,7 @@ export default function ImagePreviewModal({
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-all duration-200 hover:scale-110"
+            className="absolute flex items-center justify-center w-8 h-8 text-white transition-all duration-200 rounded-full top-4 right-4 bg-white/20 hover:bg-white/30 hover:scale-110"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -139,13 +165,13 @@ export default function ImagePreviewModal({
         </div>
 
         {/* Image Container */}
-        <div className="relative p-6">
-          <div className="relative mx-auto max-w-2xl">
+        <div className="relative px-1">
+          <div className="relative max-w-2xl mx-auto">
             {/* Glowing border effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-purple-600 rounded-2xl blur opacity-75 animate-pulse"></div>
+            <div className="absolute opacity-75 -inset-1 bg-gradient-to-r from-yellow-400 to-purple-600 rounded-2xl blur animate-pulse"></div>
             
             {/* Image */}
-            <div className="relative bg-black rounded-2xl overflow-hidden animate-pulse">
+            <div className="relative overflow-hidden bg-black rounded-2xl">
               <img
                 src={watermarkedImageUrl}
                 alt="תמונה עם חותמת מים"
@@ -156,85 +182,56 @@ export default function ImagePreviewModal({
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse opacity-30"></div>
               
               {/* Corner sparkles */}
-              <div className="absolute top-4 right-4 text-yellow-300 text-xl animate-bounce">✨</div>
-              <div className="absolute bottom-4 left-4 text-pink-300 text-lg animate-ping">💫</div>
-              <div className="absolute top-4 left-4 text-blue-300 text-sm animate-pulse">⭐</div>
-              <div className="absolute bottom-4 right-4 text-purple-300 text-xl animate-bounce animation-delay-300">🌟</div>
+              <div className="absolute text-xl text-yellow-300 top-4 right-4 animate-bounce">✨</div>
+              <div className="absolute text-lg text-pink-300 bottom-4 left-4 animate-ping">💫</div>
+              <div className="absolute text-sm text-blue-300 top-4 left-4 animate-pulse">⭐</div>
+              <div className="absolute text-xl text-purple-300 bottom-4 right-4 animate-bounce animation-delay-300">🌟</div>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="p-6 bg-gradient-to-r from-purple-900 to-pink-900 bg-opacity-80">
-          <div className="grid grid-cols-2 gap-4">
+        <div className="px-6 bg-gradient-to-r from-purple-900 to-pink-900 bg-opacity-80">
+          <div className="">
             {/* Choose Button - Primary action */}
-            <button
+            <Button
+              variant="primary"
               onClick={onChoose}
-              className="group relative overflow-hidden bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg border-2 border-green-400 hover:animate-pulse"
+              icon={<ChooseIcon />}
+              className="px-6 py-4"
             >
-              <div className="relative flex items-center justify-center gap-3">
-                <span className="text-2xl animate-bounce">🎯</span>
-                <span className="text-lg">בחר תמונה זו!</span>
-              </div>
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </button>
+              בחר תמונה זו!
+            </Button>
 
-            {/* Download Button */}
-            <button
-              onClick={handleDownload}
-              className="group relative overflow-hidden bg-gradient-to-r from-blue-500 to-cyan-600 hover:from-blue-600 hover:to-cyan-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg border-2 border-blue-400"
-            >
-              <div className="relative flex items-center justify-center gap-3">
-                <span className="text-2xl group-hover:animate-bounce">⬇️</span>
-                <span className="text-lg">הורד</span>
-              </div>
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </button>
+              {/* Download Button */}
+              <Button
+                variant="secondary-small"
+                onClick={handleDownload}
+                icon={<DownloadIcon />}
+                className="px-6 py-4"
+              >
+                הורד
+              </Button>
 
-            {/* Share Button */}
-            <button
-              onClick={handleShare}
-              className="group relative overflow-hidden bg-gradient-to-r from-pink-500 to-rose-600 hover:from-pink-600 hover:to-rose-700 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg border-2 border-pink-400"
-            >
-              <div className="relative flex items-center justify-center gap-3">
-                <span className="text-2xl group-hover:animate-ping">📤</span>
-                <span className="text-lg">שתף</span>
-              </div>
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </button>
+              {/* Share Button */}
+              <Button
+                variant="secondary-small"
+                onClick={handleShare}
+                icon={<WhatsAppIcon />}
+                className="px-6 py-4"
+              >
+                שתף
+              </Button>
 
             {/* Close Button */}
-            <button
+            <Button
+              variant="ghost"
               onClick={onClose}
-              className="group relative overflow-hidden bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white font-bold py-4 px-6 rounded-2xl transition-all duration-300 transform hover:scale-105 hover:shadow-xl shadow-lg border-2 border-gray-500"
+              icon={<CloseIcon />}
+              className="px-4 py-2 !no-underline"
             >
-              <div className="relative flex items-center justify-center gap-3">
-                <span className="text-2xl group-hover:animate-spin">✖️</span>
-                <span className="text-lg">סגור</span>
-              </div>
-              
-              {/* Shine effect */}
-              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-            </button>
-          </div>
-
-          {/* Fun footer message */}
-          <div className="text-center mt-6">
-            <p className="text-white/80 text-sm flex items-center justify-center gap-2">
-              <span className="animate-bounce animation-delay-0">🌟</span>
-              <span>תמונה זו נוצרה בעזרת בינה מלאכותית</span>
-              <span className="animate-bounce animation-delay-200">🤖</span>
-              <span className="animate-bounce animation-delay-400">✨</span>
-            </p>
-            <p className="text-white/60 text-xs mt-2 animate-pulse">
-              לחץ על כפתור הפעולה הרצויה למעלה
-            </p>
+              סגור
+            </Button>
           </div>
         </div>
       </div>

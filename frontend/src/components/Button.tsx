@@ -65,7 +65,7 @@ const buttonVariants = {
     min-h-[60px]
   `,
   'secondary-small': `
-    bg-gradient-to-r from-orange-400 to-orange-500 
+    bg-transparent
     text-white font-semibold py-2 px-6 rounded-xl
     hover:from-orange-500 hover:to-orange-600 
     hover:scale-105
@@ -160,7 +160,7 @@ export default function Button({
           transition: 'clip-path 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.2s ease-in-out',
         }}
       >
-        {icon && <span className="flex-shrink-0">{icon}</span>}
+        {icon && <span className="inline-block mx-2 align-middle">{icon}</span>}
         {children}
       </button>
     </div>

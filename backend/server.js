@@ -28,6 +28,10 @@ app.use('/uploads', express.static('uploads'));
 const watermarkRouter = require('./routes/watermark');
 app.use('/api/watermark', watermarkRouter);
 
+// Testing route for E2E tests
+const testingRouter = require('./routes/testing');
+app.use('/api/testing', testingRouter);
+
 // הגדרת Socket.io עם CORS
 const io = socketIo(server, {
   cors: {

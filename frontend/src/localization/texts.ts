@@ -96,6 +96,12 @@ interface Texts {
     skipOption: string;
     cameraSmileText: string;
   };
+  skipConfirmationModal: {
+    title: string;
+    introText: string;
+    mainButton: string;
+    ghostButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -196,6 +202,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       whatsappButtonText: 'שימוש בתמונות וואצפ',
       skipOption: 'משחק בלי תמונות',
       cameraSmileText: 'תן חיוך'
+    },
+    skipConfirmationModal: {
+      title: 'אולי בכל זאת?',
+      introText: 'יש אנשים שקשה להם לזכור שמות ופנים. אנשים רוצים לזכור מי זה מי, להתחבר לפנים ולסיפור.\nהתמונה שלך עוזרת לאחרים לזהות אותך וליצור חיבור אמיתי.',
+      mainButton: 'צילום תמונה',
+      ghostButton: 'משחק ללא תמונות'
     }
   },
   en: {
@@ -295,6 +307,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       whatsappButtonText: 'Use WhatsApp Photos',
       skipOption: 'Game without photos',
       cameraSmileText: 'Give a smile'
+    },
+    skipConfirmationModal: {
+      title: 'Maybe after all?',
+      introText: 'Some people have trouble remembering names and faces. People want to remember who is who, connect to faces and stories.\nYour photo helps others identify you and create a real connection.',
+      mainButton: 'Take Photo',
+      ghostButton: 'Game without photos'
     }
   }
 };

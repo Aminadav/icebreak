@@ -55,6 +55,7 @@ export default function Modal({ children, onClose, closeOnOverlayClick = true }:
         isModalOpen ? 'opacity-100' : 'opacity-0'
       }`}
       data-testid="modal-overlay"
+      style={{ height: '100vh', width: '100vw' }}
     >
       {/* Background overlay - clickable to close */}
       <div 
@@ -68,8 +69,9 @@ export default function Modal({ children, onClose, closeOnOverlayClick = true }:
       
       {/* Modal container - centered */}
       <div 
-        className="relative z-10 h-full flex items-center justify-center p-4"
+        className="relative z-10 h-full w-full flex items-center justify-center p-4"
         onClick={handleOverlayClick}
+        style={{ minHeight: '100vh' }}
       >
         {/* Modal content */}
         <div 

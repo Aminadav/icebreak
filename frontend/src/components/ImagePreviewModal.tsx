@@ -175,7 +175,7 @@ export default function ImagePreviewModal({
               <img
                 src={watermarkedImageUrl}
                 alt="תמונה עם חותמת מים"
-                className="w-full h-auto max-h-[50vh] object-contain transition-all duration-300 hover:scale-105"
+                className="w-full h-auto max-h-[70vh] object-contain transition-all duration-300 hover:scale-105 aspect-square"
               />
               
               {/* Sparkle overlay effect */}

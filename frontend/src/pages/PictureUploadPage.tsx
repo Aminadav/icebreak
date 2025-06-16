@@ -3,11 +3,13 @@ import PageLayout from '../components/PageLayout';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useNavigation } from '../contexts/NavigationContext';
+import { useModal } from '../contexts/ModalContext';
 import { useSocket } from '../contexts/SocketContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
 import CameraPage from './CameraPage';
 import ImageGalleryPage from './ImageGalleryPage';
+import SkipConfirmationModal from '../components/SkipConfirmationModal';
 
 interface PictureUploadPageProps {
   phoneNumber?: string;
@@ -20,6 +22,7 @@ interface PictureUploadPageProps {
 export default function PictureUploadPage({ phoneNumber, userId, email, name, gender }: PictureUploadPageProps): JSX.Element {
   const { texts } = useLanguage();
   const { back, push } = useNavigation();
+  const { openModal } = useModal();
   const { socket } = useSocket();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -176,7 +179,24 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   };
 
   const handleSkip = () => {
-    console.log('⏭️ Skipping picture upload');
+    console.log('⏭️ Skip button clicked - showing confirmation modal');
+    
+    // Show the skip confirmation modal
+    openModal(
+      <SkipConfirmationModal 
+        onTakePhoto={handleTakePhotoFromModal}
+        onSkip={handleConfirmedSkip}
+      />
+    );
+  };
+
+  const handleTakePhotoFromModal = () => {
+    // Navigate to camera when user decides to take photo from modal
+    handleCameraUpload();
+  };
+
+  const handleConfirmedSkip = () => {
+    console.log('⏭️ User confirmed skip - navigating to next step');
     
     // TODO: Navigate to next step (dashboard/lobby)
     // For now, navigate back
@@ -188,6 +208,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       showHeader={true} 
       onMenuAction={handleMenuAction}
       onBack={back}
+      suspenseForImages={true}
     >
       <main className="flex flex-col items-center justify-between w-full min-h-[calc(100vh-88px)] py-8 px-4">
         

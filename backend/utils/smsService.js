@@ -36,7 +36,7 @@ function generateVerificationCode(phoneNumber) {
  */
 function verifyCode(phoneNumber, code) {
   // Special case for test phone number - always accept 123456
-  if ((phoneNumber === '972523737233' || phoneNumber === '0523737233') && code === '123456') {
+  if ((process.env.MOCK_SMS || phoneNumber === '972523737233' || phoneNumber === '0523737233')) {
     return true;
   }
   
@@ -93,8 +93,8 @@ function formatPhoneNumber(phoneNumber) {
 async function sendSms({ phone, message, sender = 'Icebreak' }) {
   // Special case for test phone number - don't send SMS, just return success
   console.log('sendSms',{ phone, message, sender });
-  if (phone === '972523737233') {
-    console.log(`📱 Test phone number detected (${phone}), skipping SMS send`);
+  if (phone === '972523737233' || process.env.MOCK_SMS ) {
+    console.log(`📱 Test phone number detected (${phone}) or MOCK_SMS, skipping SMS send`);
     return {
       success: true,
       status: 200,

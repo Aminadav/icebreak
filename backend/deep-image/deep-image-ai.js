@@ -84,7 +84,6 @@ async function generateSquareImage(options) {
       background: {
         generate: {
           description: prompt,
-          item_area_percentage: 0.7,
           "adapter_type": "face",
           "face_id": true
         }

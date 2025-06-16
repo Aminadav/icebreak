@@ -91,9 +91,8 @@ async function handleGenerateImageGallery(socket, data) {
       // Continue with generation if database check fails
     }
     
-    // Load prompts from prompts.json
-    const promptsPath = path.join(__dirname, '..', '..', 'deep-image', 'prompts.json');
-    const allPrompts = JSON.parse(fs.readFileSync(promptsPath, 'utf8'));
+    // Load prompts from prompts.js
+    const allPrompts = require('../../deep-image/prompts');
     
     console.log(`🎯 Filtering prompts for gender: ${userGender}`);
     

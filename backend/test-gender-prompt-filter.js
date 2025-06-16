@@ -6,8 +6,7 @@ function testGenderPromptFiltering() {
   console.log('🧪 Testing gender-based prompt filtering...\n');
 
   // Load prompts
-  const promptsPath = path.join(__dirname, 'deep-image', 'prompts.json');
-  const allPrompts = JSON.parse(fs.readFileSync(promptsPath, 'utf8'));
+  const { prompts: allPrompts } = require('./deep-image/prompts');
 
   console.log(`📊 Total prompts loaded: ${allPrompts.length}`);
   console.log(`📋 All prompts:`, allPrompts.map(p => `${p.gender}: ${p.description.substring(0, 40)}...`));

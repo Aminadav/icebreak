@@ -20,9 +20,8 @@ function testSocketPromptLogic() {
   const targetUserId = userId;
 
   try {
-    // Load prompts from prompts.json (same logic as socket.js)
-    const promptsPath = path.join(__dirname, 'deep-image', 'prompts.json');
-    const allPrompts = JSON.parse(fs.readFileSync(promptsPath, 'utf8'));
+    // Load prompts from prompts.js (same logic as socket.js)
+    const { prompts: allPrompts } = require('./deep-image/prompts');
     
     if (!gender || !['male', 'female'].includes(gender)) {
       throw new Error('Valid gender (male/female) is required for prompt selection');

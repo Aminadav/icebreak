@@ -24,6 +24,10 @@ app.use(express.static('public'));
 // Serve uploaded images statically
 app.use('/uploads', express.static('uploads'));
 
+// Watermark route
+const watermarkRouter = require('./routes/watermark');
+app.use('/api/watermark', watermarkRouter);
+
 // הגדרת Socket.io עם CORS
 const io = socketIo(server, {
   cors: {

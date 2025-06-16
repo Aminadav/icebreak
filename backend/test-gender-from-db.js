@@ -43,11 +43,7 @@ async function testGenderFromDatabase() {
     console.log(`✅ Successfully fetched gender from database: ${fetchedGender}`);
 
     // Test prompt filtering logic
-    const fs = require('fs');
-    const path = require('path');
-    
-    const promptsPath = path.join(__dirname, 'deep-image', 'prompts.json');
-    const allPrompts = JSON.parse(fs.readFileSync(promptsPath, 'utf8'));
+    const { prompts: allPrompts } = require('./deep-image/prompts');
     
     console.log(`📊 Total prompts loaded: ${allPrompts.length}`);
     

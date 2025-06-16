@@ -102,15 +102,8 @@ async function main() {
     srcPath = 'test-deep-face.jpg';
     size = 1024;
     
-    // Load prompts from prompts.json
-    const promptsPath = path.join(__dirname, 'prompts.json');
-    if (!fs.existsSync(promptsPath)) {
-      console.error('❌ prompts.json file not found!');
-      console.log('Create a prompts.json file with an array of prompt strings.');
-      process.exit(1);
-    }
-    
-    const prompts = JSON.parse(fs.readFileSync(promptsPath, 'utf8'));
+    // Load prompts from prompts.js
+    const { prompts } = require('./prompts');
     
     // Generate outputs array with automatic numbering
     outputs = prompts.map((prompt, index) => ({

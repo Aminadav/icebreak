@@ -54,7 +54,8 @@ function setupSocketHandlers(io) {
                 phoneNumber: user.phone_number,
                 email: user.email,
                 name: user.name,
-                gender: user.gender
+                gender: user.gender,
+                pendingImage: user.pending_image
               };
             }
           } catch (error) {

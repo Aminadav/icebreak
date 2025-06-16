@@ -107,7 +107,7 @@ export default function PictureEnhancementPage({
         if (response.success) {
           console.log('📤 Image uploaded successfully:', response.imageHash);
           
-          // Navigate to image gallery page
+          // Navigate immediately to gallery - generation starts right away
           push(
             <ImageGalleryPage 
               originalImageHash={response.imageHash}
@@ -116,6 +116,7 @@ export default function PictureEnhancementPage({
               email={email}
               name={name}
               gender={gender}
+              capturedImageUrl={imageUrl}
             />
           );
         } else {

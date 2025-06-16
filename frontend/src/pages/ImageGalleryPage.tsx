@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
+import ProcessingModal from '../components/ProcessingModal';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useLanguage } from '../contexts/LanguageContext';
@@ -11,6 +12,7 @@ interface ImageGalleryPageProps {
   email: string;
   name: string;
   gender: string;
+  capturedImageUrl?: string; // Optional for the modal
 }
 
 interface GalleryImage {
@@ -18,6 +20,8 @@ interface GalleryImage {
   imageHash?: string;
   isLoading: boolean;
   isReady: boolean;
+  progress: number; // Progress percentage 0-100
+  startTime?: number; // When generation started
 }
 
 export default function ImageGalleryPage({ 
@@ -26,7 +30,8 @@ export default function ImageGalleryPage({
   userId, 
   email, 
   name, 
-  gender 
+  gender,
+  capturedImageUrl 
 }: ImageGalleryPageProps): JSX.Element {
   const { back, push } = useNavigation();
   const { socket } = useSocket();
@@ -40,12 +45,39 @@ export default function ImageGalleryPage({
     Array.from({ length: 6 }, (_, index) => ({
       id: index,
       isLoading: true,
-      isReady: false
+      isReady: false,
+      progress: 0
     }))
   );
   
   const [selectedImageId, setSelectedImageId] = useState<number | null>(null);
   const [isConfirming, setIsConfirming] = useState(false);
+  const [showProcessingModal, setShowProcessingModal] = useState(true);
+  const [generationStarted, setGenerationStarted] = useState(false);
+
+  // Start image generation function
+  const startImageGeneration = () => {
+    if (socket && originalImageHash && !generationStarted) {
+      console.log('🎨 Starting image generation process...');
+      setGenerationStarted(true);
+      
+      // Mark all images as started and record start times
+      const now = Date.now();
+      setGalleryImages(prev => prev.map(img => ({
+        ...img,
+        startTime: now + (img.id * 1000) // Stagger start times by 1 second
+      })));
+
+      socket.emit('generate_image_gallery', {
+        originalImageHash,
+        phoneNumber,
+        userId,
+        email,
+        name,
+        gender
+      });
+    }
+  };
 
   useEffect(() => {
     // Update journey state when gallery page mounts
@@ -74,18 +106,40 @@ export default function ImageGalleryPage({
 
     updateJourneyState();
 
-    // Start image generation process
-    if (socket && originalImageHash) {
-      console.log('🎨 Starting image generation process...');
-      socket.emit('generate_image_gallery', {
-        originalImageHash,
-        phoneNumber,
-        userId,
-        email,
-        name,
-        gender
-      });
-    }
+    // Start image generation IMMEDIATELY when component mounts
+    startImageGeneration();
+  }, [socket, originalImageHash, phoneNumber, userId, email, name, gender]);
+
+  // Handle processing modal completion
+  const handleProcessingComplete = useCallback(() => {
+    console.log('🎬 Processing modal completed, hiding modal');
+    setShowProcessingModal(false);
+    // Generation already started, just hide modal
+  }, []);
+
+  // Progress bar animation for each image (15 seconds each)
+  useEffect(() => {
+    if (!generationStarted) return;
+
+    const interval = setInterval(() => {
+      setGalleryImages(prev => prev.map(img => {
+        if (!img.startTime || img.isReady) return img;
+        
+        const elapsed = Date.now() - img.startTime;
+        const progress = Math.min((elapsed / 15000) * 100, 99); // 15 seconds = 100%
+        
+        return {
+          ...img,
+          progress: Math.max(0, progress)
+        };
+      }));
+    }, 100); // Update every 100ms
+
+    return () => clearInterval(interval);
+  }, [generationStarted]);
+
+  useEffect(() => {
+    if (!socket) return;
 
     // Listen for individual image completion
     const handleImageReady = (data: { imageIndex: number; imageHash: string }) => {
@@ -93,7 +147,7 @@ export default function ImageGalleryPage({
       
       setGalleryImages(prev => prev.map(img => 
         img.id === data.imageIndex 
-          ? { ...img, imageHash: data.imageHash, isLoading: false, isReady: true }
+          ? { ...img, imageHash: data.imageHash, isLoading: false, isReady: true, progress: 100 }
           : img
       ));
     };
@@ -104,7 +158,7 @@ export default function ImageGalleryPage({
       
       setGalleryImages(prev => prev.map(img => 
         img.id === data.imageIndex 
-          ? { ...img, isLoading: false, isReady: false }
+          ? { ...img, isLoading: false, isReady: false, progress: 0 }
           : img
       ));
     };
@@ -223,14 +277,20 @@ export default function ImageGalleryPage({
               />
             </div>
             
-            {/* Loading indicator */}
+            {/* Loading indicator with real progress */}
             <div className="absolute bottom-2 left-2 right-2">
-              <div className="bg-black/60 rounded-lg px-2 py-1 text-center">
-                <div className="text-xs text-white/80 font-medium">
+              <div className="px-2 py-1 text-center rounded-lg bg-black/60">
+                <div className="text-xs font-medium text-white/80">
                   מכין תמונה...
                 </div>
-                <div className="mt-1 bg-gray-600 rounded-full h-1">
-                  <div className="bg-orange-500 h-1 rounded-full animate-pulse" style={{ width: '60%' }} />
+                <div className="h-1 mt-1 bg-gray-600 rounded-full">
+                  <div 
+                    className="h-1 transition-all duration-300 ease-out bg-orange-500 rounded-full" 
+                    style={{ width: `${Math.max(5, image.progress)}%` }}
+                  />
+                </div>
+                <div className="mt-1 text-xs text-white/60">
+                  {Math.round(image.progress)}%
                 </div>
               </div>
             </div>
@@ -241,13 +301,13 @@ export default function ImageGalleryPage({
             <img
               src={`${backendUrl}/uploads/${image.imageHash}.jpg`}
               alt={`Generated option ${image.id + 1}`}
-              className="w-full h-full object-cover"
+              className="object-cover w-full h-full"
             />
             
             {/* Selection indicator */}
             {isSelected && (
-              <div className="absolute inset-0 bg-orange-500/20 flex items-center justify-center">
-                <div className="bg-orange-500 rounded-full p-2">
+              <div className="absolute inset-0 flex items-center justify-center bg-orange-500/20">
+                <div className="p-2 bg-orange-500 rounded-full">
                   <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
@@ -257,9 +317,9 @@ export default function ImageGalleryPage({
           </div>
         ) : (
           // Error state
-          <div className="relative w-full h-full bg-gray-800 flex items-center justify-center">
+          <div className="relative flex items-center justify-center w-full h-full bg-gray-800">
             <div className="text-center">
-              <div className="text-red-400 text-2xl mb-2">⚠️</div>
+              <div className="mb-2 text-2xl text-red-400">⚠️</div>
               <div className="text-xs text-gray-400">שגיאה ביצירת תמונה</div>
             </div>
           </div>
@@ -274,15 +334,23 @@ export default function ImageGalleryPage({
   };
 
   return (
-    <PageLayout 
-      showHeader={true} 
-      onMenuAction={handleMenuAction}
-    >
+    <>
+      {/* Processing Modal */}
+      <ProcessingModal 
+        isVisible={showProcessingModal}
+        imageUrl={capturedImageUrl || `${backendUrl}/uploads/${originalImageHash}.jpg`}
+        onComplete={handleProcessingComplete}
+      />
+
+      <PageLayout 
+        showHeader={true} 
+        onMenuAction={handleMenuAction}
+      >
       <main className="flex flex-col min-h-[calc(100vh-88px)] px-4 py-6">
         
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-3xl font-bold text-white">
             בחרו תמונה
           </h1>
           <p className="text-lg text-white/80">
@@ -291,7 +359,7 @@ export default function ImageGalleryPage({
         </div>
 
         {/* Gallery Grid */}
-        <div className="flex-1 max-w-md mx-auto w-full">
+        <div className="flex-1 w-full max-w-md mx-auto">
           <div className="grid grid-cols-2 gap-4 mb-6">
             {galleryImages.map(renderImageSlot)}
           </div>
@@ -323,5 +391,6 @@ export default function ImageGalleryPage({
 
       </main>
     </PageLayout>
+    </>
   );
 }

@@ -9,6 +9,7 @@ import SelectGenderPage from '../pages/SelectGenderPage';
 import PictureUploadPage from '../pages/PictureUploadPage';
 import CameraPage from '../pages/CameraPage';
 import PictureEnhancementPage from '../pages/PictureEnhancementPage';
+import ImageGalleryPage from '../pages/ImageGalleryPage';
 
 // Journey states that match the backend
 export type JourneyState = 
@@ -33,6 +34,7 @@ export interface NavigationData {
   pendingGameName?: string;
   name?: string;
   gender?: string;
+  pendingImage?: string; // Added for IMAGE_GALLERY state
 }
 
 /**
@@ -139,9 +141,18 @@ export class NavigationController {
         return <EnterPhoneNumberPage />;
         
       case 'IMAGE_GALLERY':
-        // For image gallery, we need an original image hash, but since we can't store that in navigation data,
-        // this state should only be reached through upload flow, not auto-navigation
-        // Fallback to picture upload page
+        // If we have all required data including the pending image, show the gallery
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender && data.pendingImage) {
+          return <ImageGalleryPage 
+            originalImageHash={data.pendingImage}
+            phoneNumber={data.phoneNumber} 
+            userId={data.userId} 
+            email={data.email} 
+            name={data.name} 
+            gender={data.gender}
+          />;
+        }
+        // Fallback to picture upload page if missing data
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }

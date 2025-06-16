@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Image Gallery Flow</title>
+    <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .event {
+            padding: 8px;
+            margin: 4px 0;
+            border-radius: 4px;
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .info { background: #2d4a5a; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        #status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🖼️ Image Gallery Flow Test</h1>
+        <div id="status">Connecting...</div>
+        
+        <div>
+            <h2>Test Actions</h2>
+            <button onclick="createTestDevice()">1. Create Test Device</button>
+            <button onclick="setGalleryState()">2. Set IMAGE_GALLERY State</button>
+            <button onclick="uploadTestImage()">3. Upload Test Image</button>
+            <button onclick="startGeneration()">4. Start Generation</button>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div>
+            <h2>Test Image Upload</h2>
+            <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelect(event)">
+            <div id="imagePreview"></div>
+        </div>
+
+        <div>
+            <h2>Events Log</h2>
+            <div id="events"></div>
+        </div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:3001');
+        const statusDiv = document.getElementById('status');
+        const eventsDiv = document.getElementById('events');
+        let testDeviceId = null;
+        let testUserId = null;
+        let testImageHash = null;
+
+        function addEvent(message, className = '') {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `event ${className}`;
+            eventDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            eventsDiv.insertBefore(eventDiv, eventsDiv.firstChild);
+        }
+
+        function clearLog() {
+            eventsDiv.innerHTML = '';
+        }
+
+        // Socket event listeners
+        socket.on('connect', () => {
+            statusDiv.textContent = 'Connected! Socket ID: ' + socket.id;
+            statusDiv.style.color = 'green';
+            addEvent('Connected successfully', 'success');
+        });
+
+        socket.on('disconnect', (reason) => {
+            statusDiv.textContent = 'Disconnected: ' + reason;
+            statusDiv.style.color = 'red';
+            addEvent('Disconnected: ' + reason, 'error');
+        });
+
+        socket.on('device_registered', (data) => {
+            addEvent('Device registered: ' + JSON.stringify(data, null, 2), 'success');
+            testDeviceId = data.deviceId;
+            testUserId = data.userId;
+            
+            // Check if we have IMAGE_GALLERY state with pending image
+            if (data.journeyState === 'IMAGE_GALLERY' && data.pendingImage) {
+                addEvent(`IMAGE_GALLERY state detected with image: ${data.pendingImage}`, 'info');
+            }
+        });
+
+        socket.on('journey_state_updated', (data) => {
+            addEvent('Journey state updated: ' + JSON.stringify(data, null, 2), 'success');
+        });
+
+        socket.on('upload_pending_image_response', (data) => {
+            addEvent('Image upload response: ' + JSON.stringify(data, null, 2), data.success ? 'success' : 'error');
+            if (data.success) {
+                testImageHash = data.imageHash;
+            }
+        });
+
+        socket.on('gallery_image_ready', (data) => {
+            addEvent(`Gallery image ready [${data.imageIndex}]: ${data.imageHash}`, 'success');
+        });
+
+        socket.on('gallery_image_error', (data) => {
+            addEvent(`Gallery image error [${data.imageIndex}]: ${data.error}`, 'error');
+        });
+
+        socket.on('image_selection_confirmed', (data) => {
+            addEvent('Image selection confirmed: ' + JSON.stringify(data, null, 2), 'success');
+        });
+
+        socket.on('error', (data) => {
+            addEvent('Error: ' + JSON.stringify(data, null, 2), 'error');
+        });
+
+        // Log all events
+        socket.onAny((eventName, ...args) => {
+            console.log(`Event ${eventName}:`, args);
+        });
+
+        // Test functions
+        function createTestDevice() {
+            const deviceId = 'test-gallery-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            addEvent(`Creating test device: ${deviceId}`, 'info');
+            socket.emit('register_device', { deviceId });
+        }
+
+        function setGalleryState() {
+            if (!testDeviceId) {
+                addEvent('No device ID available. Create device first.', 'error');
+                return;
+            }
+            addEvent('Setting journey state to IMAGE_GALLERY', 'info');
+            socket.emit('update_journey_state', { 
+                journeyState: 'IMAGE_GALLERY',
+                additionalData: {
+                    phoneNumber: '972523737233',
+                    userId: testUserId,
+                    email: 'test@example.com',
+                    name: 'Test User',
+                    gender: 'male'
+                }
+            });
+        }
+
+        function uploadTestImage() {
+            const fileInput = document.getElementById('imageInput');
+            if (!fileInput.files[0]) {
+                addEvent('Please select an image first', 'error');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                const base64Data = e.target.result.split(',')[1];
+                addEvent('Uploading test image...', 'info');
+                
+                socket.emit('upload_pending_image', {
+                    imageData: base64Data,
+                    phoneNumber: '972523737233',
+                    userId: testUserId,
+                    email: 'test@example.com',
+                    name: 'Test User',
+                    gender: 'male'
+                });
+            };
+            
+            reader.readAsDataURL(file);
+        }
+
+        function startGeneration() {
+            if (!testImageHash) {
+                addEvent('No image hash available. Upload image first.', 'error');
+                return;
+            }
+            
+            addEvent('Starting image gallery generation...', 'info');
+            socket.emit('generate_image_gallery', {
+                originalImageHash: testImageHash,
+                phoneNumber: '972523737233',
+                userId: testUserId,
+                email: 'test@example.com',
+                name: 'Test User',
+                gender: 'male'
+            });
+        }
+
+        function handleImageSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.getElementById('imagePreview');
+                    preview.innerHTML = `<img src="${e.target.result}" class="image-preview" alt="Selected image">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+</body>
+</html>

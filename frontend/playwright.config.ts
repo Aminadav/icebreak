@@ -28,6 +28,12 @@ export default defineConfig({
     
     /* Capture video for all tests to see successful flows */
     video: 'on',
+    
+    /* Grant camera permissions for camera testing */
+    permissions: ['camera'],
+    
+    /* Run in headed mode for camera access */
+    headless: true,
   },
 
   /* Configure projects for mobile only */

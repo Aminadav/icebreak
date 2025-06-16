@@ -50,16 +50,23 @@ async function disableTestingMode() {
  * 6. EnterNamePage - Enter user name and test modal edge cases
  * 7. GenderSelectionPage - Select gender
  * 8. PictureUploadPage - Test picture upload interface
+ * 9. Skip confirmation modal - Click skip, then regret and take photo
+ * 10. CameraPage - Take photo after face detection
+ * 11. ImageGalleryPage - Wait for image generation, test image selection
+ * 12. ImagePreviewModal - Preview images, choose one
+ * 13. CreatorGameReadyPage - Verify final destination
  */
 
 const TEST_PHONE_NUMBER = '972523737233';
 
 test.describe('Icebreak App E2E Flow', () => {
-  test('Complete user registration flow with modal testing and gender selection', async ({ page }) => {
+  test('Complete user registration flow from homepage to creator game ready', async ({ page }) => {
+    // Set longer timeout for this comprehensive test
+    test.setTimeout(180000); // 3 minutes
+    
     console.log('🚀 Starting comprehensive E2E test - Complete user registration flow');
     
     // Enable testing mode before starting the test
-    console.log('🧪 Enabling testing mode (MOCK_SMS=true, MOCK_GENERATE=true)...');
     const testingEnabled = await enableTestingMode();
     if (!testingEnabled) {
       throw new Error('Failed to enable testing mode. Make sure backend is running.');
@@ -241,7 +248,116 @@ test.describe('Icebreak App E2E Flow', () => {
     await step(page,'Picture upload page');
     await expect(page.getByTestId('picture-upload-character-image')).toBeVisible();
     
-    await step(page,'Done!');
+    // Step 9: Click skip button
+    await step(page,'Before click skip button');
+    const skipButton = page.getByTestId('skip-picture-button');
+    await expect(skipButton).toBeVisible();
+    await expect(skipButton).toBeEnabled();
+    await skipButton.click();
+    await delay(DEFAULT_DELAY);
+    
+    // Step 10: Skip confirmation modal appears - click "Take Photo" to regret
+    await step(page,'Skip modal appeared, click take photo to regret');
+    const takePhotoButton = page.getByTestId('skip-confirmation-take-photo');
+    await expect(takePhotoButton).toBeVisible();
+    await expect(takePhotoButton).toBeEnabled();
+    
+    // Set up camera mock before navigation
+    await page.evaluate(() => {
+      // Create a mock video stream
+      const canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 480;
+      const ctx = canvas.getContext('2d');
+      
+      // Draw a simple face-like shape on the canvas
+      if (ctx) {
+        ctx.fillStyle = '#f4c2a1'; // Skin color
+        ctx.fillRect(0, 0, 640, 480);
+        
+        // Draw a simple face
+        ctx.fillStyle = '#000';
+        ctx.beginPath();
+        ctx.arc(200, 200, 20, 0, 2 * Math.PI); // Left eye
+        ctx.arc(440, 200, 20, 0, 2 * Math.PI); // Right eye
+        ctx.fill();
+        
+        ctx.beginPath();
+        ctx.arc(320, 300, 50, 0, Math.PI); // Mouth
+        ctx.stroke();
+      }
+      
+      // Get video stream from canvas
+      const stream = canvas.captureStream(30);
+      
+      // Mock getUserMedia
+      Object.defineProperty(navigator, 'mediaDevices', {
+        writable: true,
+        value: {
+          getUserMedia: () => Promise.resolve(stream)
+        }
+      });
+    });
+    
+    await takePhotoButton.click();
+    await delay(DEFAULT_DELAY);
+    
+    // Step 11: Camera page - wait for face detection and capture
+    await step(page,'Camera page loaded, wait for face detection and capture');
+    
+    // Wait for camera to initialize and face detection to be ready
+    const captureButton = page.getByTestId('camera-capture-button');
+    await expect(captureButton).toBeVisible();
+    
+    // Wait 5 seconds for camera to fully initialize and face detection
+    await page.waitForTimeout(2000);
+    
+    
+    // Click capture button to take photo
+    await captureButton.click();
+    await delay(1000); // Wait for capture processing
+    
+    // Step 12: Should navigate to Image Gallery page automatically
+    await step(page,'After capture, wait for navigation to gallery');
+    
+    // Wait for navigation to image gallery and processing modal
+    await page.waitForTimeout(1000);
+    await step(page,'Image gallery page with processing modal');
+    
+    // Wait 5 seconds for image generation
+    await page.waitForTimeout(1000);
+    
+    await step(page,'After waiting for image generation');
+    
+    // Step 13: Click on first image to preview it
+    await step(page,'Looking for gallery images');
+    
+    // Wait for gallery images to be ready and click on first one
+    await page.waitForTimeout(2000); // Additional wait for images to load
+    
+    // Find the first gallery image container (the clickable div that contains the img)
+    const firstImageContainer = page.locator('div[class*="cursor-pointer"][class*="aspect-square"]').first();
+    await firstImageContainer.waitFor({ state: 'visible' });
+    await firstImageContainer.click();
+    await delay(500);
+    
+    
+    
+    await step(page,'after click first image, pbefore click ok');
+    // Step 16: Choose this image to go to Creator Game Ready page
+    const chooseButton = page.getByTestId('choose-image-button')
+    await expect(chooseButton).toBeVisible();
+    await expect(chooseButton).toBeEnabled();
+    await chooseButton.click();
+    await delay(DEFAULT_DELAY);
+    
+    await step(page,'after click choose, before navigate to Creator Game Ready page');
+    
+    // Step 17: Verify we're on Creator Game Ready page
+    await step(page,'Creator Game Ready page');
+    await expect(page.locator('h1').filter({ hasText: 'המשחק מוכן!' })).toBeVisible();
+    
+    await step(page,'Test completed successfully!');
     
     } finally {
       // Always disable testing mode after the test, regardless of success or failure

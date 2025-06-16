@@ -73,8 +73,7 @@ export default function ImageGalleryPage({
         phoneNumber,
         userId,
         email,
-        name,
-        gender
+        name
       });
     }
   };
@@ -135,7 +134,7 @@ export default function ImageGalleryPage({
         if (!img.startTime || img.isReady) return img;
         
         const elapsed = Date.now() - img.startTime;
-        const progress = Math.min((elapsed / 15000) * 100, 99); // 15 seconds = 100%
+        const progress = Math.min((elapsed / 25000) * 100, 99); // 15 seconds = 100%
         
         return {
           ...img,
@@ -255,8 +254,7 @@ export default function ImageGalleryPage({
         userId,
         phoneNumber,
         email,
-        name,
-        gender
+        name
       });
 
       // Note: Response will be handled by the socket listener

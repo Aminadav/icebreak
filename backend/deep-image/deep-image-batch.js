@@ -115,7 +115,7 @@ async function main() {
     // Generate outputs array with automatic numbering
     outputs = prompts.map((prompt, index) => ({
       dstPath: `output-${index + 1}.png`,
-      prompt: prompt
+      prompt: prompt.description // Extract description from the new format
     }));
     
     console.log('🎯 Running with default parameters:');

@@ -9,7 +9,7 @@
  * @type {string[]} Array of prompt strings that can be used for any gender
  */
 module.exports = [
-  "The outfit should reflect a (relaxed) and (eclectic) vibe, incorporating (loose-fitting) and (comfortable) clothing. red, green, yellow colors. (dreadlocks) on the head. (spacey background) and (bright colors), capturing the essence of the (ocean beach) in (Reggae fashion).",
+  "The outfit should reflect a (relaxed) and (eclectic) vibe, incorporating (loose-fitting) and (comfortable) clothing. red, green, yellow colors. (dreadlocks) on the head. (spacey background) and (bright colors), capturing the essence of the (ocean beach) in (Reggae fashion). ",
 
   "a stylish model immersed in hip-hop culture. The outfit urban flair, with a mix of streetwear and athletic elements. Incorporate oversized, loose-fitting clothing, like baggy jeans or joggers paired with a graphic T-shirt and hoodie. branded apparel, hip-hop fashion trends. trendy sneakers, high-tops, baseball caps, thick golden chains, and statement watches. model's hairstyle, braids, urban street style.",
 
@@ -17,8 +17,9 @@ module.exports = [
 
   "Portrait of a simple medieval farmer striking a pose for a photo. the farmer in authentic attire against the backdrop of a medieval village, capturing the rustic charm of the era. details of the farmer's clothing, tools, and surroundings, ensuring a genuine portrayal of medieval life.",
 
-    "A painter at work in a colorful art studio, surrounded by canvases, brushes, and splashes of paint. The outfit is casual and creative, with paint stains and loose clothing. The background is full of abstract shapes and vivid color.",
+  "A painter at work in a colorful art studio, surrounded by canvases, brushes, and splashes of paint. The outfit is casual and creative, with paint stains and loose clothing. The background is full of abstract shapes and vivid color.",
 
-      "A pirate standing confidently on the deck of a ship at sea, wearing classic pirate attire — tricorn hat, vest, boots, and accessories like a compass or map. The ocean and cloudy sky form a dramatic and adventurous background.",
+  // Pirate
+  "A pirate standing confidently on the deck of a ship at sea, wearing classic pirate attire — tricorn hat, vest, boots, and accessories like a compass or map. The ocean and cloudy sky form a dramatic and adventurous background. ",
 
 ];

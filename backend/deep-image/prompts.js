@@ -16,7 +16,7 @@ var malePrompts = promptsMale.map(description => ({ gender: 'male', description 
 var femalePrompts = promptsFemale.map(description => ({ gender: 'female', description }));
 
 femalePrompts.forEach((prompt, index) => {
-  prompt.description = prompt.description + '. She should be wearing modest clothing, with sleeves and a top that fully covers the chest area, including the collarbone, without any visible cleavage.' 
+  prompt.description =  '. She should be wearing modest clothing, with sleeves and a top that fully covers the chest area, including the collarbone, without any visible cleavage.' + prompt.description
 })
 
 // Combine all prompts into a single array (like the original prompts.json)
@@ -28,7 +28,7 @@ var allPrompts = [
 ];
 
 allPrompts.forEach((prompt, index) => {
-  prompt.description= 'Make it Accurate. ' + prompt.description + ' The face should be centered so that if the image is later cropped into a circle, the face remains properly aligned. Position the eyes slightly above the horizontal center of the image.'
+  prompt.description= 'Accurate. a  portrait. The face should be large and dominate the frame, with minimal space above the head and below the chin. ' + prompt.description
 });
 
 /**

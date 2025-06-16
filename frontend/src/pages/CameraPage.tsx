@@ -4,6 +4,15 @@ import { useSocket } from '../contexts/SocketContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import PictureEnhancementPage from './PictureEnhancementPage';
 
+// Declare global FaceDetection type for MediaPipe
+declare global {
+  interface Window {
+    FaceDetection: any;
+  }
+  
+  var FaceDetection: any;
+}
+
 interface CameraPageProps {
   onPictureCapture?: (imageBlob: Blob) => void;
   phoneNumber?: string;
@@ -33,8 +42,163 @@ export default function CameraPage({
   const [error, setError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
   const [showSmileText, setShowSmileText] = useState(false);
+  const [faceDetected, setFaceDetected] = useState(false);
+  const [faceDetectionReady, setFaceDetectionReady] = useState(false);
+  const [facePosition, setFacePosition] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    confidence: number;
+  } | null>(null);
+  
+  const faceDetectionRef = useRef<any | null>(null);
+  const detectionCanvasRef = useRef<HTMLCanvasElement>(null);
+  const detectionIntervalRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Initialize face detection with fallback approach
+    const initFaceDetection = async () => {
+      try {
+        console.log('👁️ Attempting to initialize face detection...');
+        
+        // Try using the browser's built-in face detection API first
+        if ('FaceDetector' in window) {
+          console.log('👁️ Using browser native FaceDetector API');
+          try {
+            const faceDetector = new (window as any).FaceDetector({
+              maxDetectedFaces: 1,
+              fastMode: true
+            });
+            
+            // Create a simple face detection wrapper
+            const detectFaces = async () => {
+              if (videoRef.current && !videoRef.current.paused && !videoRef.current.ended) {
+                try {
+                  const faces = await faceDetector.detect(videoRef.current);
+                  const hasFace = faces && faces.length > 0;
+                  setFaceDetected(hasFace);
+                  
+                  if (hasFace) {
+                    const face = faces[0];
+                    const bbox = face.boundingBox;
+                    
+                    setFacePosition({
+                      x: Math.round(bbox.x + bbox.width / 2),
+                      y: Math.round(bbox.y + bbox.height / 2),
+                      width: Math.round(bbox.width),
+                      height: Math.round(bbox.height),
+                      confidence: 0.8 // Native API doesn't provide confidence
+                    });
+                    
+                    console.log('👁️ Face detected with native API!', {
+                      center: { x: Math.round(bbox.x + bbox.width / 2), y: Math.round(bbox.y + bbox.height / 2) },
+                      size: { width: Math.round(bbox.width), height: Math.round(bbox.height) }
+                    });
+                  } else {
+                    setFacePosition(null);
+                  }
+                } catch (detectError) {
+                  console.warn('Native face detection error:', detectError);
+                }
+              }
+            };
+            
+            faceDetectionRef.current = { detect: detectFaces };
+            setFaceDetectionReady(true);
+            console.log('👁️ Native face detection initialized successfully');
+            return;
+          } catch (nativeError) {
+            console.log('👁️ Native FaceDetector failed, trying MediaPipe...', nativeError);
+          }
+        }
+        
+        // Fallback to MediaPipe with better error handling
+        console.log('👁️ Loading MediaPipe Face Detection...');
+        
+        // Load MediaPipe with specific working version
+        if (!window.FaceDetection) {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/face_detection.js';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+          
+          // Wait a bit for the module to fully load
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+
+        console.log('👁️ MediaPipe script loaded, creating FaceDetection instance...');
+        
+        const faceDetection = new window.FaceDetection({
+          locateFile: (file: string) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/face_detection@0.4/${file}`;
+          }
+        });
+
+        console.log('👁️ Setting MediaPipe options...');
+        faceDetection.setOptions({
+          model: 'short',
+          minDetectionConfidence: 0.2,
+          selfieMode: true,
+        });
+
+        faceDetection.onResults((results: any) => {
+          const hasFace = results.detections && results.detections.length > 0;
+          setFaceDetected(hasFace);
+          
+          if (hasFace) {
+            const detection = results.detections[0];
+            const boundingBox = detection.boundingBox;
+            
+            const videoWidth = videoRef.current?.videoWidth || 640;
+            const videoHeight = videoRef.current?.videoHeight || 480;
+            
+            const faceX = boundingBox.xCenter * videoWidth;
+            const faceY = boundingBox.yCenter * videoHeight;
+            const faceWidth = boundingBox.width * videoWidth;
+            const faceHeight = boundingBox.height * videoHeight;
+            
+            setFacePosition({
+              x: Math.round(faceX),
+              y: Math.round(faceY),
+              width: Math.round(faceWidth),
+              height: Math.round(faceHeight),
+              confidence: detection.score?.[0] || 0.5
+            });
+            
+            console.log('👁️ MediaPipe face detected!', {
+              confidence: detection.score?.[0],
+              center: { x: Math.round(faceX), y: Math.round(faceY) },
+              size: { width: Math.round(faceWidth), height: Math.round(faceHeight) }
+            });
+          } else {
+            setFacePosition(null);
+          }
+        });
+
+        console.log('👁️ Initializing MediaPipe...');
+        await faceDetection.initialize();
+        
+        faceDetectionRef.current = faceDetection;
+        setFaceDetectionReady(true);
+        console.log('👁️ MediaPipe face detection initialized successfully');
+        
+      } catch (error) {
+        console.error('Face detection initialization failed:', error);
+        console.log('👁️ Using fallback mode - allowing all captures');
+        
+        // Complete fallback - no face detection, allow all captures
+        setFaceDetectionReady(false);
+        setFaceDetected(true); // Allow capture without face detection
+        setFacePosition(null);
+      }
+    };
+
+    initFaceDetection();
+
     // Update journey state when camera page mounts
     const updateJourneyState = async () => {
       if (socket) {
@@ -73,8 +237,33 @@ export default function CameraPage({
     return () => {
       clearTimeout(timer);
       stopCamera();
+      if (faceDetectionRef.current) {
+        faceDetectionRef.current.close();
+      }
+      if (detectionIntervalRef.current) {
+        window.clearInterval(detectionIntervalRef.current);
+      }
     };
   }, [socket, phoneNumber, userId, email, name, gender]);
+
+  // Start face detection when both are ready
+  useEffect(() => {
+    if (faceDetectionReady && hasPermission && videoRef.current && !videoRef.current.paused) {
+      startFaceDetection();
+    }
+  }, [faceDetectionReady, hasPermission]);
+
+  // Fallback: If face detection fails to initialize after 5 seconds, allow capture anyway
+  useEffect(() => {
+    if (hasPermission && !faceDetectionReady) {
+      const fallbackTimer = setTimeout(() => {
+        console.log('👁️ Face detection fallback: allowing capture without face detection');
+        setFaceDetected(true); // Allow capture
+      }, 5000); // 5 second timeout
+
+      return () => clearTimeout(fallbackTimer);
+    }
+  }, [hasPermission, faceDetectionReady]);
 
   const startCamera = async () => {
     try {
@@ -115,6 +304,11 @@ export default function CameraPage({
           console.log('📸 Video state after play - paused:', video.paused, 'ended:', video.ended);
           setHasPermission(true);
           setIsLoading(false);
+          
+          // Start face detection when video is ready
+          if (faceDetectionReady && faceDetectionRef.current) {
+            startFaceDetection();
+          }
         } catch (playError) {
           console.error('📸 Play error:', playError);
           // Still set permission and stop loading, video might work anyway
@@ -134,6 +328,45 @@ export default function CameraPage({
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
+    
+    // Stop face detection
+    if (detectionIntervalRef.current) {
+      window.clearInterval(detectionIntervalRef.current);
+      detectionIntervalRef.current = null;
+    }
+  };
+
+  const startFaceDetection = () => {
+    if (!faceDetectionRef.current || !videoRef.current) return;
+
+    // Clear any existing interval
+    if (detectionIntervalRef.current) {
+      window.clearInterval(detectionIntervalRef.current);
+    }
+
+    // Run face detection every 100ms instead of every frame for better performance
+    detectionIntervalRef.current = window.setInterval(() => {
+      if (videoRef.current && !videoRef.current.paused && !videoRef.current.ended && faceDetectionRef.current) {
+        try {
+          // Check if this is native browser API or MediaPipe
+          if (faceDetectionRef.current.detect) {
+            // Native browser API
+            faceDetectionRef.current.detect();
+          } else if (faceDetectionRef.current.send) {
+            // MediaPipe API
+            faceDetectionRef.current.send({ image: videoRef.current });
+          }
+        } catch (error) {
+          console.error('Face detection error:', error);
+          // Stop detection on error
+          if (detectionIntervalRef.current) {
+            window.clearInterval(detectionIntervalRef.current);
+          }
+        }
+      }
+    }, 100); // 100ms = 10 FPS for face detection
+
+    console.log('👁️ Face detection started (100ms interval)');
   };
 
   const capturePhoto = async () => {
@@ -221,6 +454,79 @@ export default function CameraPage({
         onError={(e) => console.error('📸 Video error:', e)}
       />
 
+      {/* Face Detection Canvas (invisible overlay) */}
+      <canvas
+        ref={detectionCanvasRef}
+        className="absolute inset-0 pointer-events-none"
+        style={{ 
+          transform: 'scaleX(-1)', // Mirror to match video
+          display: hasPermission ? 'block' : 'none',
+          opacity: 0 // Make invisible, we only want the detection logic
+        }}
+      />
+
+      {/* Face Positioning Guide Circle */}
+      {hasPermission && !error && (
+        <div className="absolute inset-0 pointer-events-none z-5">
+          <div className="flex items-center justify-center w-full h-full">
+            <div 
+              className={`w-72 h-72 rounded-full border-4 border-dashed transition-colors duration-300 ${
+                faceDetected 
+                  ? 'border-green-400 animate-pulse' 
+                  : 'border-white/60'
+              }`}
+              style={{
+                borderSpacing: '10px',
+              }}
+            >
+              {/* Inner guide for better positioning */}
+              <div className="flex items-center justify-center w-full h-full">
+                <div 
+                  className={`w-48 h-64 rounded-full border-2 border-dashed transition-colors duration-300 ${
+                    faceDetected 
+                      ? 'border-green-400/50' 
+                      : 'border-white/30'
+                  }`}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Face Detection Debug Overlay */}
+      {hasPermission && !error && facePosition && (
+        <div className="absolute inset-0 z-10 pointer-events-none">
+          <div 
+            className="absolute border-2 border-red-500 bg-red-500/20"
+            style={{
+              left: `${facePosition.x - facePosition.width/2}px`,
+              top: `${facePosition.y - facePosition.height/2}px`,
+              width: `${facePosition.width}px`,
+              height: `${facePosition.height}px`,
+              transform: 'scaleX(-1)', // Mirror to match video
+            }}
+          >
+            {/* Face center dot */}
+            <div 
+              className="absolute w-2 h-2 bg-red-500 rounded-full"
+              style={{
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}
+            />
+          </div>
+          
+          {/* Face position info */}
+          <div className="absolute p-2 text-sm text-white rounded top-4 left-4 bg-black/70">
+            <div>Face: {facePosition.x}, {facePosition.y}</div>
+            <div>Size: {facePosition.width} × {facePosition.height}</div>
+            <div>Confidence: {(facePosition.confidence * 100).toFixed(1)}%</div>
+          </div>
+        </div>
+      )}
+
       {/* Hidden canvas for capturing */}
       <canvas ref={canvasRef} className="hidden" />
 
@@ -280,12 +586,14 @@ export default function CameraPage({
         <div className="absolute z-10 transform -translate-x-1/2 bottom-8 left-1/2">
           <button
             onClick={capturePhoto}
-            disabled={isCapturing}
+            disabled={isCapturing || !faceDetected}
             data-testid="camera-capture-button"
             className={`w-20 h-20 rounded-full transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${
               isCapturing 
                 ? 'bg-orange-500 animate-pulse' 
-                : 'bg-red-500 hover:bg-red-600 shadow-lg hover:shadow-xl'
+                : faceDetected
+                ? 'bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl'
+                : 'bg-gray-500 cursor-not-allowed'
             }`}
           >
             {isCapturing ? (
@@ -298,6 +606,15 @@ export default function CameraPage({
               </div>
             )}
           </button>
+          
+          {/* Instruction text below button */}
+          {!faceDetected && (
+            <div className="mt-3 text-center">
+              <p className="text-sm text-white/80">
+                מקמו את הפנים במעגל כדי לצלם
+              </p>
+            </div>
+          )}
         </div>
       )}
 

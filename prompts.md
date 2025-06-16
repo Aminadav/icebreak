@@ -15,3 +15,9 @@ Keep this page in joureny so if click refresh come back to the same page.
 Use PageLayout, and input component, and animatedImage, and save the user journey. Update the test to ensiture it goes to that page.
 if there is text in multi color and multi size ensure to keep those colors and sizes.
 תעשה את זה בצורה משחקית וכייפית
+
+
+# In the future
+add to the topmenu a button to replace my image. When clicked it navigate to the gallery page (As a modal or stack so when closed returning back to the same place where the user did).
+Ask me questions before implement.
+

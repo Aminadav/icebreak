@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
 import ProcessingModal from '../components/ProcessingModal';
+import ImagePreviewModal from '../components/ImagePreviewModal';
 import { useSocket } from '../contexts/SocketContext';
 
 interface ImageGalleryPageProps {
@@ -53,6 +54,8 @@ export default function ImageGalleryPage({
   const [isConfirming, setIsConfirming] = useState(false);
   const [showProcessingModal, setShowProcessingModal] = useState(true);
   const [generationStarted, setGenerationStarted] = useState(false);
+  const [showImagePreview, setShowImagePreview] = useState(false);
+  const [previewImageHash, setPreviewImageHash] = useState<string | null>(null);
 
   // Start image generation function
   const startImageGeneration = () => {
@@ -243,8 +246,10 @@ export default function ImageGalleryPage({
 
   const handleImageSelect = (imageId: number) => {
     const image = galleryImages[imageId];
-    if (image && image.isReady) {
-      setSelectedImageId(imageId);
+    if (image && image.isReady && image.imageHash) {
+      console.log('🖼️ Opening image preview for:', image.imageHash);
+      setPreviewImageHash(image.imageHash);
+      setShowImagePreview(true);
     }
   };
 
@@ -277,17 +282,46 @@ export default function ImageGalleryPage({
     }
   };
 
-  const renderImageSlot = (image: GalleryImage) => {
-    const isSelected = selectedImageId === image.id;
+  // Image preview modal handlers
+  const handleClosePreview = () => {
+    setShowImagePreview(false);
+    setPreviewImageHash(null);
+  };
+
+  const handleChooseImage = () => {
+    if (!previewImageHash) return;
     
+    console.log('✅ User chose image from preview:', previewImageHash);
+    
+    // Find the image index for the selected hash
+    const imageIndex = galleryImages.findIndex(img => img.imageHash === previewImageHash);
+    if (imageIndex !== -1) {
+      setSelectedImageId(imageIndex);
+      setShowImagePreview(false);
+      setPreviewImageHash(null);
+      
+      // Automatically confirm the selection
+      const selectedImage = galleryImages[imageIndex];
+      if (selectedImage && selectedImage.imageHash) {
+        setIsConfirming(true);
+        
+        socket?.emit('confirm_image_selection', {
+          selectedImageHash: selectedImage.imageHash,
+          originalImageHash,
+          userId,
+          phoneNumber,
+          email,
+          name
+        });
+      }
+    }
+  };
+
+  const renderImageSlot = (image: GalleryImage) => {
     return (
       <div
         key={image.id}
-        className={`relative aspect-square rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 ${
-          isSelected 
-            ? 'ring-4 ring-orange-500 ring-offset-2 ring-offset-purple-900 scale-95 shadow-xl' 
-            : 'hover:scale-105 shadow-lg'
-        } ${
+        className={`relative aspect-square rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 shadow-lg ${
           image.isReady ? 'cursor-pointer' : 'cursor-default'
         }`}
         onClick={() => handleImageSelect(image.id)}
@@ -342,17 +376,6 @@ export default function ImageGalleryPage({
               alt={`Generated option ${image.id + 1}`}
               className="object-cover w-full h-full"
             />
-            
-            {/* Selection indicator */}
-            {isSelected && (
-              <div className="absolute inset-0 flex items-center justify-center bg-orange-500/20">
-                <div className="p-2 bg-orange-500 rounded-full">
-                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              </div>
-            )}
           </div>
         ) : (
           // Error state
@@ -423,13 +446,23 @@ export default function ImageGalleryPage({
             ) : selectedImageId !== null ? (
               'אישור בחירה'
             ) : (
-              'בחרו תמונה'
+              'לחץ על תמונה כדי לבחור'
             )}
           </button>
         </div>
 
       </main>
     </PageLayout>
+
+    {/* Image Preview Modal */}
+    {showImagePreview && previewImageHash && (
+      <ImagePreviewModal
+        imageHash={previewImageHash}
+        isVisible={showImagePreview}
+        onClose={handleClosePreview}
+        onChoose={handleChooseImage}
+      />
+    )}
     </>
   );
 }

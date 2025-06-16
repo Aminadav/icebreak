@@ -2,6 +2,8 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { useModal } from '../contexts/ModalContext';
 import type { NavigationEntry } from '../contexts/NavigationContext';
 import NavigationDebugger from './NavigationDebugger';
+import { useState, useEffect } from 'react';
+import { getText } from '../localization/texts';
 
 // Animation control - set to false to disable animations
 const ENABLE_ANIMATIONS = false;
@@ -11,6 +13,13 @@ const ANIMATION_EASING = 'ease-in-out';
 export default function AppRouter(): JSX.Element {
   const { navigationStack } = useNavigation();
   const { modalContent } = useModal();
+  const [backgroundReady, setBackgroundReady] = useState(false);
+
+  useEffect(() => {
+    const img = new Image();
+    img.onload = () => setBackgroundReady(true);
+    img.src = '/images/backgrounds/background.png';
+  }, []);
 
   const renderPage = (entry: NavigationEntry, index: number) => {
     const isCurrentPage = index === navigationStack.length - 1;
@@ -46,6 +55,14 @@ export default function AppRouter(): JSX.Element {
       </div>
     );
   };
+
+  if (!backgroundReady) {
+    return (
+      <div className="relative flex items-center justify-center w-full h-screen overflow-hidden bg-gray-900">
+        <div className="text-white">{getText().common.loading}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-full h-screen overflow-hidden">

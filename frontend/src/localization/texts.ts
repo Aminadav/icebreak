@@ -18,6 +18,7 @@ interface Texts {
   common: {
     switchToEnglish: string;
     switchToHebrew: string;
+    loading: string;
   };
   about: {
     title: string;
@@ -117,7 +118,8 @@ export const texts: Record<'he' | 'en', Texts> = {
     },
     common: {
       switchToEnglish: 'English',
-      switchToHebrew: 'עברית'
+      switchToHebrew: 'עברית',
+      loading: 'כבר עולים ...'
     },
     about: {
       title: 'אודות IceBreak',
@@ -215,7 +217,8 @@ export const texts: Record<'he' | 'en', Texts> = {
     },
     common: {
       switchToEnglish: 'English',
-      switchToHebrew: 'עברית'
+      switchToHebrew: 'עברית',
+      loading: 'Loading...'
     },
     about: {
       title: 'About IceBreak',

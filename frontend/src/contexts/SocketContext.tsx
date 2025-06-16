@@ -80,8 +80,11 @@ export function SocketProvider({ children }: SocketProviderProps) {
         // Save device ID to localStorage for future use
         setDeviceId(data.deviceId);
         
-        // Handle auto-navigation based on journey state (only if we haven't already auto-navigated)
-        if (data.journeyState && NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) && !hasAutoNavigated) {
+        // Check if we're on the admin page - don't auto-navigate in that case
+        const isOnAdminPage = window.location.pathname === '/admin';
+        
+        // Handle auto-navigation based on journey state (only if we haven't already auto-navigated and not on admin page)
+        if (data.journeyState && NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) && !hasAutoNavigated && !isOnAdminPage) {
           console.log(`🎯 Auto-navigating to journey state: ${data.journeyState}`);
           console.log('📊 Navigation data:', data);
           
@@ -118,6 +121,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
           console.log('  - Has journey state?', !!data.journeyState);
           console.log('  - Should auto-navigate?', data.journeyState ? NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) : false);
           console.log('  - Already auto-navigated?', hasAutoNavigated);
+          console.log('  - Is on admin page?', window.location.pathname === '/admin');
         }
       } else {
         console.error('❌ Device registration failed:', data);

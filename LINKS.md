@@ -1,0 +1,5 @@
+- https://pixabay.com/sound-effects/search/drum%20impact/
+- lottiefiles.com/free-animation/scanner-fP0d9e8oI9?trigger_action=download
+- https://app.lottiefiles.com/animation/080a3031-870e-4959-9b19-62c701122bc2?channel=web&source=public-animation&panel=download&from=download
+- https://app.lottiefiles.com/animation/080a3031-870e-4959-9b19-62c701122bc2?channel=web&source=public-animation&panel=download&from=download
+- https://app.lottiefiles.com/animation/7e50fcdf-e01a-4bc4-9729-2516785bab6b?channel=web&source=public-animation&panel=download&from=download

@@ -10,6 +10,7 @@ import PictureUploadPage from '../pages/PictureUploadPage';
 import CameraPage from '../pages/CameraPage';
 import ImageGalleryPage from '../pages/ImageGalleryPage';
 import CreatorGameReadyPage from '../pages/CreatorGameReadyPage';
+import AdminPageSimple from '../pages/AdminPageSimple';
 
 // Journey states that match the backend
 export type JourneyState = 

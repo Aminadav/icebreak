@@ -32,6 +32,10 @@ app.use('/api/watermark', watermarkRouter);
 const testingRouter = require('./routes/testing');
 app.use('/api/testing', testingRouter);
 
+// Admin route for journey state management
+const adminRouter = require('./routes/admin');
+app.use('/admin', adminRouter);
+
 // הגדרת Socket.io עם CORS
 const io = socketIo(server, {
   cors: {

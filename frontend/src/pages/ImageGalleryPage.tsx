@@ -2,7 +2,9 @@ import { useState, useEffect, useCallback } from 'react';
 import PageLayout from '../components/PageLayout';
 import ProcessingModal from '../components/ProcessingModal';
 import ImagePreviewModal from '../components/ImagePreviewModal';
+import CreatorGameReadyPage from './CreatorGameReadyPage';
 import { useSocket } from '../contexts/SocketContext';
+import { useNavigation } from '../contexts/NavigationContext';
 
 interface ImageGalleryPageProps {
   originalImageHash: string;
@@ -33,6 +35,7 @@ export default function ImageGalleryPage({
   capturedImageUrl 
 }: ImageGalleryPageProps): JSX.Element {
   const { socket } = useSocket();
+  const { push } = useNavigation();
   
   // Get backend URL from environment
   const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:3001';
@@ -266,9 +269,10 @@ export default function ImageGalleryPage({
       setShowImagePreview(false);
       setPreviewImageHash(null);
       
-      // Automatically confirm the selection
+      // Navigate directly to the Creator Game Ready page
       const selectedImage = galleryImages[imageIndex];
       if (selectedImage && selectedImage.imageHash) {
+        // Emit confirmation in background
         socket?.emit('confirm_image_selection', {
           selectedImageHash: selectedImage.imageHash,
           originalImageHash,
@@ -277,6 +281,16 @@ export default function ImageGalleryPage({
           email,
           name
         });
+        
+        // Navigate to game ready page immediately
+        push(<CreatorGameReadyPage 
+          phoneNumber={phoneNumber}
+          userId={userId}
+          email={email}
+          name={name}
+          gender={gender}
+          selectedImageHash={selectedImage.imageHash}
+        />);
       }
     }
   };

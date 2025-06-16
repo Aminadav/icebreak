@@ -30,8 +30,8 @@ async function handleConfirmImageSelection(socket, data) {
       throw new Error('User not found');
     }
     
-    // Update journey state to COMPLETED
-    await Device.updateJourneyState(socket.deviceId, 'COMPLETED');
+    // Update journey state to CREATOR_GAME_READY
+    await Device.updateJourneyState(socket.deviceId, 'CREATOR_GAME_READY');
     
     socket.emit('image_selection_confirmed', {
       success: true,

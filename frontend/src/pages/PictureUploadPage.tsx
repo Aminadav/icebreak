@@ -163,11 +163,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
             <span className="font-bold text-[#f3a257] text-[28px]">הכי</span>
             <span className="text-[22px]">{texts.pictureUpload.instructions.split('הכי')[1] || ' פוטוגנית שלכם.'}</span>
           </p>
-          
-          {/* Funny Smile Instruction */}
-          <p className="text-[20px] leading-snug mt-4 text-orange-300 animate-pulse" dir="auto" data-testid="smile-instruction">
-            {texts.pictureUpload.smileInstruction}
-          </p>
+
         </div>
 
         {/* Camera Button Section */}
@@ -215,7 +211,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
         </div>
 
         {/* WhatsApp Button */}
-        <div className="flex justify-center w-full mb-10">
+        <div className="flex justify-center w-full mb-5">
           <button
             onClick={handleGalleryUpload}
             disabled={isLoading}

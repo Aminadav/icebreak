@@ -8,8 +8,8 @@ import EnterNamePage from '../pages/EnterNamePage';
 import SelectGenderPage from '../pages/SelectGenderPage';
 import PictureUploadPage from '../pages/PictureUploadPage';
 import CameraPage from '../pages/CameraPage';
-import PictureEnhancementPage from '../pages/PictureEnhancementPage';
 import ImageGalleryPage from '../pages/ImageGalleryPage';
+import CreatorGameReadyPage from '../pages/CreatorGameReadyPage';
 
 // Journey states that match the backend
 export type JourneyState = 
@@ -25,7 +25,7 @@ export type JourneyState =
   | 'CAMERA_ACTIVE'
   | 'PICTURE_ENHANCEMENT'
   | 'IMAGE_GALLERY'
-  | 'COMPLETED';
+  | 'CREATOR_GAME_READY';
 
 export interface NavigationData {
   phoneNumber?: string;
@@ -35,6 +35,7 @@ export interface NavigationData {
   name?: string;
   gender?: string;
   pendingImage?: string; // Added for IMAGE_GALLERY state
+  selectedImageHash?: string; // Added for CREATOR_GAME_READY state
 }
 
 /**
@@ -158,9 +159,16 @@ export class NavigationController {
         }
         return <EnterPhoneNumberPage />;
         
-      case 'COMPLETED':
-        // Could navigate to game lobby or dashboard
-        return <HomePage />;
+      case 'CREATOR_GAME_READY':
+          return <CreatorGameReadyPage 
+            phoneNumber={data.phoneNumber!} 
+            userId={data.userId!} 
+            email={data.email!} 
+            name={data.name!} 
+            gender={data.gender!}
+            selectedImageHash={data.selectedImageHash!}
+          />;
+
         
       default:
         console.warn(`⚠️ NavigationController: Unknown journey state: ${journeyState}, defaulting to INITIAL`);
@@ -193,7 +201,7 @@ export class NavigationController {
       'CAMERA_ACTIVE': 'Camera active for photo capture',
       'PICTURE_ENHANCEMENT': 'Picture enhancement in progress',
       'IMAGE_GALLERY': 'Image gallery selection in progress',
-      'COMPLETED': 'Registration completed'
+      'CREATOR_GAME_READY': 'Game is ready to play by creator'
     };
     
     return descriptions[journeyState] || 'Unknown state';

@@ -88,8 +88,8 @@ export default function ImagePreviewModal({
         const file = new File([blob], `icebreak-image-${imageHash}.jpg`, { type: 'image/jpeg' });
         
         await navigator.share({
-          title: 'IceBreak AI Image',
-          text: 'Check out my AI-generated image from IceBreak!',
+          title: 'IceBreak - משחק לגיבוש קבוצות WhatsApp',
+          text: 'היי! מוזמנים לשחק במשחק IceBreak בוואטסאפ!',
           files: [file]
         });
         

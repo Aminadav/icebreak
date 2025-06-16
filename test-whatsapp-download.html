@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp Image Download Test</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #1a1a1a;
+            color: white;
+        }
+        .event { 
+            margin: 10px 0; 
+            padding: 10px; 
+            background: #2a2a2a; 
+            border-radius: 5px; 
+        }
+        .success { background: #2d5a2d; }
+        .error { background: #5a2d2d; }
+        .info { background: #2d4a5a; }
+        button { 
+            margin: 5px; 
+            padding: 10px 15px; 
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover { background: #0056b3; }
+        input { 
+            padding: 5px; 
+            margin: 5px; 
+            width: 200px;
+        }
+        #status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>📱 WhatsApp Image Download Test</h1>
+    
+    <div id="status">Connecting...</div>
+    
+    <div>
+        <h2>Test WhatsApp Image Download</h2>
+        <input type="text" id="phoneInput" placeholder="Phone number (e.g., 972523737233)" value="972523737233">
+        <button onclick="testWhatsappDownload()">Download WhatsApp Image</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div>
+        <h2>Events Log</h2>
+        <div id="events"></div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:3001');
+        const statusDiv = document.getElementById('status');
+        const eventsDiv = document.getElementById('events');
+        let testDeviceId = null;
+        let testUserId = null;
+
+        function addEvent(message, className = '') {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `event ${className}`;
+            eventDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            eventsDiv.insertBefore(eventDiv, eventsDiv.firstChild);
+        }
+
+        function clearLog() {
+            eventsDiv.innerHTML = '';
+        }
+
+        // Socket event listeners
+        socket.on('connect', () => {
+            statusDiv.textContent = 'Connected! Socket ID: ' + socket.id;
+            statusDiv.style.color = 'green';
+            addEvent('Connected successfully', 'success');
+            
+            // Auto-create test device
+            createTestDevice();
+        });
+
+        socket.on('disconnect', (reason) => {
+            statusDiv.textContent = 'Disconnected: ' + reason;
+            statusDiv.style.color = 'red';
+            addEvent('Disconnected: ' + reason, 'error');
+        });
+
+        socket.on('device_registered', (data) => {
+            addEvent('Device registered: ' + JSON.stringify(data, null, 2), 'success');
+            testDeviceId = data.deviceId;
+            testUserId = data.userId;
+        });
+
+        socket.on('whatsapp_image_downloaded', (data) => {
+            addEvent('✅ WhatsApp image downloaded: ' + JSON.stringify(data, null, 2), 'success');
+        });
+
+        socket.on('whatsapp_image_download_error', (data) => {
+            addEvent('❌ WhatsApp download error: ' + JSON.stringify(data, null, 2), 'error');
+        });
+
+        socket.on('error', (data) => {
+            addEvent('General error: ' + JSON.stringify(data, null, 2), 'error');
+        });
+
+        // Log all events
+        socket.onAny((eventName, ...args) => {
+            console.log(`Event ${eventName}:`, args);
+        });
+
+        function createTestDevice() {
+            const deviceId = 'test-whatsapp-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            addEvent(`Creating test device: ${deviceId}`, 'info');
+            
+            // Register the device
+            socket.emit('register_device', { deviceId });
+            
+            // Create a complete user profile
+            setTimeout(() => {
+                addEvent('Setting up test user...', 'info');
+                socket.emit('submit_phone_number', { phoneNumber: '+972523737233' });
+                
+                setTimeout(() => {
+                    socket.emit('verify_2fa_code', { code: '123456' });
+                    
+                    setTimeout(() => {
+                        socket.emit('save_email', { email: 'test@example.com' });
+                        
+                        setTimeout(() => {
+                            socket.emit('save_user_name', { name: 'Test User' });
+                            
+                            setTimeout(() => {
+                                socket.emit('save_user_gender', { 
+                                    gender: 'male', 
+                                    userId: testUserId,
+                                    name: 'Test User'
+                                });
+                                addEvent('Test user setup complete', 'success');
+                            }, 500);
+                        }, 500);
+                    }, 500);
+                }, 500);
+            }, 1000);
+        }
+
+        function testWhatsappDownload() {
+            if (!testDeviceId) {
+                addEvent('Please wait for device creation to complete', 'error');
+                return;
+            }
+            
+            const phoneNumber = document.getElementById('phoneInput').value;
+            if (!phoneNumber) {
+                addEvent('Please enter a phone number', 'error');
+                return;
+            }
+            
+            addEvent(`Testing WhatsApp download for phone: ${phoneNumber}`, 'info');
+            
+            socket.emit('download_whatsapp_image', {
+                phoneNumber: phoneNumber,
+                userId: testUserId,
+                email: 'test@example.com',
+                name: 'Test User',
+                gender: 'male'
+            });
+        }
+    </script>
+</body>
+</html>

@@ -7,6 +7,7 @@ import { useSocket } from '../contexts/SocketContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
 import CameraPage from './CameraPage';
+import ImageGalleryPage from './ImageGalleryPage';
 
 interface PictureUploadPageProps {
   phoneNumber?: string;
@@ -23,6 +24,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   
   const [isLoading, setIsLoading] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<'camera' | 'gallery' | null>(null);
+  const [whatsappError, setWhatsappError] = useState<string | null>(null);
 
   // Update journey state when component mounts
   useEffect(() => {
@@ -58,6 +60,52 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       });
     }
   }, [socket, phoneNumber, userId, email, name, gender]);
+
+  // Handle WhatsApp image download events
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleWhatsappImageDownloaded = (response: any) => {
+      console.log('📱 WhatsApp image downloaded:', response);
+      setIsLoading(false);
+      setUploadMethod(null);
+      setWhatsappError(null);
+      
+      if (response.success) {
+        console.log('✅ WhatsApp image downloaded successfully:', response.imageHash);
+        
+        // Navigate to gallery page immediately
+        push(
+          <ImageGalleryPage 
+            originalImageHash={response.imageHash}
+            phoneNumber={phoneNumber || ''}
+            userId={userId || ''}
+            email={email || ''}
+            name={name || ''}
+            gender={gender || ''}
+          />
+        );
+      } else {
+        console.error('❌ WhatsApp image download failed:', response.error);
+        setWhatsappError(response.message || 'Failed to download WhatsApp image');
+      }
+    };
+
+    const handleWhatsappImageDownloadError = (error: any) => {
+      console.error('❌ WhatsApp image download error:', error);
+      setIsLoading(false);
+      setUploadMethod(null);
+      setWhatsappError(error.message || 'Failed to download WhatsApp image');
+    };
+
+    socket.on('whatsapp_image_downloaded', handleWhatsappImageDownloaded);
+    socket.on('whatsapp_image_download_error', handleWhatsappImageDownloadError);
+
+    return () => {
+      socket.off('whatsapp_image_downloaded', handleWhatsappImageDownloaded);
+      socket.off('whatsapp_image_download_error', handleWhatsappImageDownloadError);
+    };
+  }, [socket, push, phoneNumber, userId, email, name, gender]);
 
   const handleMenuAction = (page: string) => {
     if (page === 'about') {
@@ -109,17 +157,22 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   };
 
   const handleGalleryUpload = () => {
-  setUploadMethod('gallery');
+    setUploadMethod('gallery');
     setIsLoading(true);
+    setWhatsappError(null);
     
-    // TODO: Implement gallery functionality
-    console.log('🖼️ Gallery upload selected');
+    console.log('📱 WhatsApp image download selected');
     
-    setTimeout(() => {
+    if (!socket) {
+      console.error('❌ Socket not available');
       setIsLoading(false);
       setUploadMethod(null);
-      console.log('🖼️ Gallery functionality coming soon!');
-    }, 1000);
+      setWhatsappError('Connection error. Please try again.');
+      return;
+    }
+    
+    // Emit WhatsApp image download request - no user data needed, backend gets it from database
+    socket.emit('download_whatsapp_image', {});
   };
 
   const handleSkip = () => {
@@ -277,8 +330,25 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
             <div className="flex flex-col items-center gap-4">
               <div className="w-12 h-12 border-4 border-white rounded-full border-t-transparent animate-spin"></div>
               <p className="text-lg text-white animate-pulse">
-                {uploadMethod === 'camera' ? '📸 מכין מצלמה...' : '🖼️ פותח גלריה...'}
+                {uploadMethod === 'camera' ? '📸 מכין מצלמה...' : '📱 מוריד תמונה מווצאפ...'}
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* WhatsApp Error Display */}
+        {whatsappError && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="bg-red-600 text-white p-6 rounded-lg max-w-sm mx-4 text-center">
+              <div className="mb-4 text-4xl">⚠️</div>
+              <h3 className="text-lg font-bold mb-2">שגיאה בהורדת תמונה</h3>
+              <p className="text-sm mb-4">{whatsappError}</p>
+              <button
+                onClick={() => setWhatsappError(null)}
+                className="bg-white text-red-600 px-4 py-2 rounded font-medium hover:bg-gray-100 transition-colors"
+              >
+                סגור
+              </button>
             </div>
           </div>
         )}

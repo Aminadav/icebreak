@@ -19,6 +19,7 @@ interface EnterNamePageProps {
 }
 
 export default function EnterNamePage({ phoneNumber, userId, email }: EnterNamePageProps): JSX.Element {
+  const DEBUG = false;
   const { texts } = useLanguage();
   const { back, push } = useNavigation();
   const { openModal } = useModal();
@@ -190,7 +191,7 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
         </div>
 
         {/* Debug info - only show in development */}
-        {(phoneNumber || email) && (
+        {DEBUG && (phoneNumber || email) && (
           <div className="mt-4 text-sm text-white opacity-70">
             {phoneNumber && `טלפון: ${phoneNumber}`} 
             {phoneNumber && email && ' | '}

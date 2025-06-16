@@ -16,6 +16,7 @@ interface EnterEmailPageProps {
 }
 
 export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPageProps): JSX.Element {
+  const DEBUG=false
   const { texts } = useLanguage();
   const { back, push } = useNavigation();
   const { socket } = useSocket();
@@ -190,7 +191,7 @@ export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPagePr
         </div>
 
         {/* Debug info - only show in development */}
-        {phoneNumber && (
+        {DEBUG && phoneNumber && (
           <div className="mt-4 text-sm text-white opacity-70">
             טלפון: {phoneNumber} | משתמש: {userId}
           </div>

@@ -13,6 +13,7 @@ const handleUpdateJourneyState = require('./updateJourneyState');
 const handleSaveUserName = require('./saveUserName');
 const handleSaveUserGender = require('./saveUserGender');
 const handleUploadPendingImage = require('./uploadPendingImage');
+const handleDownloadWhatsappImage = require('./downloadWhatsappImage');
 const handleLoadExistingGalleryImages = require('./loadExistingGalleryImages');
 const handleGenerateImageGallery = require('./generateImageGallery');
 const handleConfirmImageSelection = require('./confirmImageSelection');
@@ -32,6 +33,7 @@ module.exports = {
   handleSaveUserName,
   handleSaveUserGender,
   handleUploadPendingImage,
+  handleDownloadWhatsappImage,
   handleLoadExistingGalleryImages,
   handleGenerateImageGallery,
   handleConfirmImageSelection

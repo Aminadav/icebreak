@@ -6,6 +6,7 @@ import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
 import AboutPage from '../components/AboutPage';
 import ComponentsShowcase from './ComponentsShowcase';
+import CameraPage from './CameraPage';
 
 interface PictureUploadPageProps {
   phoneNumber?: string;
@@ -70,14 +71,41 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
     setUploadMethod('camera');
     setIsLoading(true);
     
-    // TODO: Implement camera functionality
-    console.log('📸 Camera upload selected');
+    console.log('📸 Camera upload selected - navigating to camera page');
     
-    setTimeout(() => {
-      setIsLoading(false);
-      setUploadMethod(null);
-      console.log('📸 Camera functionality coming soon!');
-    }, 1000);
+    // Navigate to camera page
+    push(<CameraPage 
+      phoneNumber={phoneNumber}
+      userId={userId}
+      email={email}
+      name={name}
+      gender={gender}
+      onPictureCapture={(imageBlob: Blob) => {
+        console.log('📸 Picture captured:', imageBlob);
+        // TODO: Handle the captured image (upload to server, etc.)
+        
+        // Update journey state back to picture upload
+        if (socket) {
+          socket.emit('update_journey_state', { 
+            journeyState: 'PICTURE_UPLOAD',
+            additionalData: {
+              phoneNumber,
+              userId,
+              email,
+              name,
+              gender
+            }
+          });
+        }
+        
+        // For now, just go back to picture upload page
+        back();
+      }}
+    />);
+    
+    // Reset loading state
+    setIsLoading(false);
+    setUploadMethod(null);
   };
 
   const handleGalleryUpload = () => {

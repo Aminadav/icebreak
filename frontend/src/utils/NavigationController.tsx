@@ -7,6 +7,7 @@ import EnterEmailPage from '../pages/EnterEmailPage';
 import EnterNamePage from '../pages/EnterNamePage';
 import SelectGenderPage from '../pages/SelectGenderPage';
 import PictureUploadPage from '../pages/PictureUploadPage';
+import CameraPage from '../pages/CameraPage';
 
 // Journey states that match the backend
 export type JourneyState = 
@@ -19,6 +20,7 @@ export type JourneyState =
   | 'NAME_SAVED'
   | 'GENDER_SELECTION'
   | 'PICTURE_UPLOAD'
+  | 'CAMERA_ACTIVE'
   | 'COMPLETED';
 
 export interface NavigationData {
@@ -105,14 +107,22 @@ export class NavigationController {
         return <EnterPhoneNumberPage />;
         
       case 'PICTURE_UPLOAD':
-        console.log(data)
-        debugger
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }
         // Fallback to gender selection if missing data
         if (data.phoneNumber && data.userId && data.email && data.name) {
           return <SelectGenderPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} />;
+        }
+        return <EnterPhoneNumberPage />;
+        
+      case 'CAMERA_ACTIVE':
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <CameraPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
+        }
+        // Fallback to picture upload if missing data
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }
         return <EnterPhoneNumberPage />;
         
@@ -148,6 +158,7 @@ export class NavigationController {
       'NAME_SAVED': 'Name saved, ready for gender selection',
       'GENDER_SELECTION': 'Gender selection in progress',
       'PICTURE_UPLOAD': 'Picture upload in progress',
+      'CAMERA_ACTIVE': 'Camera active for photo capture',
       'COMPLETED': 'Registration completed'
     };
     

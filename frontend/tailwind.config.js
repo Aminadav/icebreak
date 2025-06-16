@@ -20,6 +20,8 @@ export default {
         'gentle-float': 'gentle-float 3s ease-in-out infinite',
         'entrance': 'entrance 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards',
         'zoom-in': 'zoom-in 0.5s ease-out forwards',
+        'fade-in-bounce': 'fade-in-bounce 0.8s ease-out forwards',
+        'flash': 'flash 0.3s ease-out forwards',
       },
       keyframes: {
         fadeInUp: {
@@ -101,6 +103,31 @@ export default {
           '50%': {
             transform: 'translateY(0)',
             animationTimingFunction: 'cubic-bezier(0, 0, 0.2, 1)',
+          },
+        },
+        'fade-in-bounce': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(-20px) scale(0.8)',
+          },
+          '60%': {
+            opacity: '1',
+            transform: 'translateY(5px) scale(1.05)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0) scale(1)',
+          },
+        },
+        'flash': {
+          '0%': {
+            opacity: '0',
+          },
+          '50%': {
+            opacity: '0.8',
+          },
+          '100%': {
+            opacity: '0',
           },
         },
       },

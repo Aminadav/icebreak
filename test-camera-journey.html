@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Camera Page Test</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .event { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; }
+        .success { background: #d4edda; }
+        .error { background: #f8d7da; }
+        button { margin: 5px; padding: 10px 15px; cursor: pointer; }
+        input { padding: 5px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Camera Page Journey State Test</h1>
+    
+    <div>
+        <h2>Test Scenario: Camera Page Navigation</h2>
+        <p>This test will:</p>
+        <ol>
+            <li>Create a device with PICTURE_UPLOAD state and full user data</li>
+            <li>Test camera page navigation and journey state updates</li>
+            <li>Verify that the camera page properly tracks CAMERA_ACTIVE state</li>
+            <li>Test returning to PICTURE_UPLOAD after camera interaction</li>
+        </ol>
+    </div>
+
+    <div>
+        <h2>Connection Status</h2>
+        <div id="status">Disconnected</div>
+    </div>
+
+    <div>
+        <h2>Test Actions</h2>
+        <button onclick="createTestDevice()">1. Create Test Device with Picture Upload State</button>
+        <button onclick="simulateCameraPageEntry()">2. Simulate Camera Page Entry (CAMERA_ACTIVE)</button>
+        <button onclick="simulateCameraReturn()">3. Simulate Return to Picture Upload</button>
+        <button onclick="simulatePageRefresh()">4. Test Page Refresh Navigation</button>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+
+    <div>
+        <h2>Events Log</h2>
+        <div id="events"></div>
+    </div>
+
+    <script>
+        const socket = io('http://localhost:3001');
+        const statusDiv = document.getElementById('status');
+        const eventsDiv = document.getElementById('events');
+        let testDeviceId = null;
+        let testUserId = null;
+
+        function addEvent(message, className = '') {
+            const eventDiv = document.createElement('div');
+            eventDiv.className = `event ${className}`;
+            eventDiv.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            eventsDiv.insertBefore(eventDiv, eventsDiv.firstChild);
+        }
+
+        function clearLog() {
+            eventsDiv.innerHTML = '';
+        }
+
+        // Socket event listeners
+        socket.on('connect', () => {
+            statusDiv.textContent = 'Connected! Socket ID: ' + socket.id;
+            statusDiv.style.color = 'green';
+            addEvent('Connected successfully', 'success');
+        });
+
+        socket.on('disconnect', (reason) => {
+            statusDiv.textContent = 'Disconnected: ' + reason;
+            statusDiv.style.color = 'red';
+            addEvent('Disconnected: ' + reason, 'error');
+        });
+
+        socket.on('device_registered', (data) => {
+            addEvent('Device registered: ' + JSON.stringify(data, null, 2), 'success');
+            testDeviceId = data.deviceId;
+            testUserId = data.userId;
+        });
+
+        socket.on('journey_state_updated', (data) => {
+            addEvent('Journey state updated: ' + JSON.stringify(data, null, 2), 'success');
+        });
+
+        socket.on('error', (data) => {
+            addEvent('Error: ' + JSON.stringify(data, null, 2), 'error');
+        });
+
+        // Log all events
+        socket.onAny((eventName, ...args) => {
+            console.log(`Event ${eventName}:`, args);
+        });
+
+        // Test functions
+        function createTestDevice() {
+            // Generate a random device ID for testing
+            const deviceId = 'test-camera-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            addEvent(`Creating test device: ${deviceId}`, 'success');
+            
+            // Register the device
+            socket.emit('register_device', { deviceId });
+            
+            // Wait a bit then create a full user profile leading to picture upload
+            setTimeout(() => {
+                addEvent('Submitting test phone number...', 'success');
+                socket.emit('submit_phone_number', { phoneNumber: '+972501234567' });
+                
+                setTimeout(() => {
+                    addEvent('Verifying 2FA with test code...', 'success');
+                    socket.emit('verify_2fa_code', { code: '123456' });
+                    
+                    setTimeout(() => {
+                        addEvent('Saving test email...', 'success');
+                        socket.emit('save_email', { email: 'test@example.com' });
+                        
+                        setTimeout(() => {
+                            addEvent('Saving test name...', 'success');
+                            socket.emit('save_user_name', { name: 'Test User' });
+                            
+                            setTimeout(() => {
+                                addEvent('Saving test gender to reach picture upload...', 'success');
+                                socket.emit('save_user_gender', { 
+                                    gender: 'female', 
+                                    userId: testUserId,
+                                    name: 'Test User'
+                                });
+                            }, 500);
+                        }, 500);
+                    }, 500);
+                }, 500);
+            }, 1000);
+        }
+
+        function simulateCameraPageEntry() {
+            if (!testDeviceId) {
+                addEvent('Please create a test device first', 'error');
+                return;
+            }
+            
+            addEvent('Simulating entry to camera page (CAMERA_ACTIVE)...', 'success');
+            // This simulates what happens when CameraPage component mounts
+            socket.emit('update_journey_state', { 
+                journeyState: 'CAMERA_ACTIVE',
+                additionalData: {
+                    phoneNumber: '+972501234567',
+                    userId: testUserId,
+                    email: 'test@example.com',
+                    name: 'Test User',
+                    gender: 'female'
+                }
+            });
+        }
+
+        function simulateCameraReturn() {
+            if (!testDeviceId) {
+                addEvent('Please create a test device first', 'error');
+                return;
+            }
+            
+            addEvent('Simulating return to picture upload after camera use...', 'success');
+            // This simulates what happens when user returns from camera
+            socket.emit('update_journey_state', { 
+                journeyState: 'PICTURE_UPLOAD',
+                additionalData: {
+                    phoneNumber: '+972501234567',
+                    userId: testUserId,
+                    email: 'test@example.com',
+                    name: 'Test User',
+                    gender: 'female'
+                }
+            });
+        }
+
+        function simulatePageRefresh() {
+            if (!testDeviceId) {
+                addEvent('Please create a test device first', 'error');
+                return;
+            }
+            
+            addEvent('Simulating page refresh - re-registering device to check journey state...', 'success');
+            // This simulates a page refresh where the app re-registers the device
+            // The NavigationController should handle this automatically
+            socket.emit('register_device', { deviceId: testDeviceId });
+        }
+
+        // Auto-start connection
+        setTimeout(() => {
+            addEvent('Ready to test camera page journey state management', 'success');
+        }, 1000);
+    </script>
+</body>
+</html>

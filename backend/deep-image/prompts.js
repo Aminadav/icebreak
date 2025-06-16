@@ -21,7 +21,6 @@ femalePrompts.forEach((prompt, index) => {
 
 // Combine all prompts into a single array (like the original prompts.json)
 var allPrompts = [
-  {gender:'both',description:''}, // the original one.
   ...bothPrompts,
   ...malePrompts,
   ...femalePrompts

@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import PictureEnhancementPage from './PictureEnhancementPage';
+import ImageGalleryPage from './ImageGalleryPage';
 
 // Declare global FaceDetection type for MediaPipe
 declare global {
@@ -42,6 +42,8 @@ export default function CameraPage({
   const [hasPermission, setHasPermission] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [showSmileText, setShowSmileText] = useState(false);
   const [faceDetected, setFaceDetected] = useState(false);
   const [faceDetectionReady, setFaceDetectionReady] = useState(false);
@@ -445,60 +447,148 @@ export default function CameraPage({
     setCroppedFaceImage(croppedImageData);
   };
 
-  const downloadCroppedFace = () => {
-    if (!croppedFaceImage) return;
+  const uploadImage = async (imageBlob: Blob) => {
+    if (!socket) return null;
 
-    const link = document.createElement('a');
-    link.href = croppedFaceImage;
-    link.download = `face-crop-${Date.now()}.jpg`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      setIsUploading(true);
+      setUploadError(null);
+
+      console.log('📤 Starting cropped face image upload...');
+
+      // Convert blob to base64 for socket transmission
+      const reader = new FileReader();
+      
+      return new Promise<string | null>((resolve) => {
+        reader.onload = () => {
+          const base64Data = reader.result as string;
+          const base64WithoutPrefix = base64Data.split(',')[1]; // Remove data:image/jpeg;base64, prefix
+          
+          console.log('📤 Emitting image upload...');
+          socket.emit('upload_pending_image', {
+            imageData: base64WithoutPrefix,
+            phoneNumber,
+            userId,
+            email,
+            name,
+            gender
+          });
+
+          // Listen for upload response
+          const handleUploadResponse = (response: any) => {
+            console.log('📤 Upload response:', response);
+            setIsUploading(false);
+            
+            if (response.success) {
+              console.log('📤 Image uploaded successfully:', response.imageHash);
+              socket.off('upload_pending_image_response', handleUploadResponse);
+              socket.off('error', handleUploadError);
+              resolve(response.imageHash);
+            } else {
+              console.error('📤 Upload failed:', response.error);
+              setUploadError('שגיאה בהעלאת התמונה');
+              socket.off('upload_pending_image_response', handleUploadResponse);
+              socket.off('error', handleUploadError);
+              resolve(null);
+            }
+          };
+
+          const handleUploadError = (error: any) => {
+            console.error('📤 Upload error:', error);
+            setUploadError('שגיאה בהעלאת התמונה');
+            setIsUploading(false);
+            socket.off('upload_pending_image_response', handleUploadResponse);
+            socket.off('error', handleUploadError);
+            resolve(null);
+          };
+
+          socket.once('upload_pending_image_response', handleUploadResponse);
+          socket.once('error', handleUploadError);
+        };
+
+        reader.onerror = (error) => {
+          console.error('📤 Error reading image file:', error);
+          setUploadError('שגיאה בקריאת התמונה');
+          setIsUploading(false);
+          resolve(null);
+        };
+
+        reader.readAsDataURL(imageBlob);
+      });
+
+    } catch (error) {
+      console.error('📤 Error in uploadImage:', error);
+      setUploadError('שגיאה בהעלאת התמונה');
+      setIsUploading(false);
+      return null;
+    }
   };
 
   const capturePhoto = async () => {
-    if (!videoRef.current || !canvasRef.current || isCapturing) return;
+    if (!videoRef.current || !cropCanvasRef.current || isCapturing) return;
 
     try {
       setIsCapturing(true);
 
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
-
-      if (!context) {
-        throw new Error('Cannot get canvas context');
+      // Check if we have face position for cropping
+      if (!facePosition) {
+        console.error('No face detected for cropping');
+        setIsCapturing(false);
+        return;
       }
 
-      // Set canvas dimensions to match video
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+      const video = videoRef.current;
+      
+      // Use the crop canvas that already has the cropped face
+      // First, update the crop canvas with the current face position
+      const { x, y, width, height } = facePosition;
+      
+      // Mirror X coordinate to match display (since video is mirrored)
+      const videoWidth = video.videoWidth || 640;
+      const mirroredCropX = videoWidth - x;
+      
+      // Update the cropped face one more time to ensure we have the latest frame
+      cropFaceFromVideo(
+        mirroredCropX - width/2, 
+        y - height/2, 
+        width, 
+        height
+      );
 
-      // Draw the video frame to canvas (mirror it back to normal)
-      context.scale(-1, 1);
-      context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
-
-      // Convert canvas to blob
+      // Convert the cropped canvas to blob
       return new Promise<void>((resolve) => {
-        canvas.toBlob((blob) => {
+        cropCanvasRef.current!.toBlob(async (blob) => {
           if (blob) {
             // Call the onPictureCapture callback if provided
             if (onPictureCapture) {
               onPictureCapture(blob);
             }
             
-            // Navigate to picture enhancement page
+            // Upload image and navigate directly to gallery
             if (phoneNumber && userId && email && name && gender) {
-              push(
-                <PictureEnhancementPage 
-                  capturedImage={blob}
-                  phoneNumber={phoneNumber}
-                  userId={userId}
-                  email={email}
-                  name={name}
-                  gender={gender}
-                />
-              );
+              console.log('📤 Uploading cropped face image and navigating to gallery...');
+              
+              const imageHash = await uploadImage(blob);
+              
+              if (imageHash) {
+                // Create object URL for the captured image to pass to gallery
+                const capturedImageUrl = URL.createObjectURL(blob);
+                
+                push(
+                  <ImageGalleryPage 
+                    originalImageHash={imageHash}
+                    phoneNumber={phoneNumber}
+                    userId={userId}
+                    email={email}
+                    name={name}
+                    gender={gender}
+                    capturedImageUrl={capturedImageUrl}
+                  />
+                );
+              } else {
+                console.error('Failed to upload image');
+                setUploadError('שגיאה בהעלאת התמונה');
+              }
             }
           }
           
@@ -674,17 +764,17 @@ export default function CameraPage({
         <div className="absolute z-10 text-center transform -translate-x-1/2 bottom-8 left-1/2">
           <button
             onClick={capturePhoto}
-            disabled={isCapturing || !faceDetected}
+            disabled={isCapturing || isUploading || !faceDetected}
             data-testid="camera-capture-button"
             className={`w-20 h-20 rounded-full transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${
-              isCapturing 
+              isCapturing || isUploading
                 ? 'bg-orange-500 animate-pulse' 
                 : faceDetected
                 ? 'bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl'
                 : 'bg-gray-500 cursor-not-allowed'
             }`}
           >
-            {isCapturing ? (
+            {isCapturing || isUploading ? (
               <div className="flex items-center justify-center">
                 <div className="w-8 h-8 border-2 border-white rounded-full border-t-transparent animate-spin"></div>
               </div>
@@ -695,11 +785,37 @@ export default function CameraPage({
             )}
           </button>
           
+          {/* Status text below button */}
+          {isUploading && (
+            <div className="mt-3 text-center">
+              <p className="text-sm text-orange-300 animate-pulse">
+                מעלה תמונה...
+              </p>
+            </div>
+          )}
+          
+          {uploadError && (
+            <div className="mt-3 text-center">
+              <p className="text-sm text-red-400">
+                {uploadError}
+              </p>
+            </div>
+          )}
+          
           {/* Instruction text below button */}
-          {!faceDetected && (
+          {!faceDetected && !isUploading && !uploadError && (
             <div className="mt-3 text-center">
               <p className="text-sm text-white/80">
-                מקמו את הפנים במעגל כדי לצלם
+                מקמו את הפנים במעגל כדי לצלם את התמונה הקטומה
+              </p>
+            </div>
+          )}
+          
+          {/* Success text when face is detected */}
+          {faceDetected && !isUploading && !uploadError && !isCapturing && (
+            <div className="mt-3 text-center">
+              <p className="text-sm text-green-300">
+                פנים זוהו - ניתן לצלם את התמונה הקטומה
               </p>
             </div>
           )}

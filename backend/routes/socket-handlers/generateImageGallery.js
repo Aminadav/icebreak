@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { getUserIdFromDevice } = require('./utils');
+const { improveFace } = require('../../deep-image/deep-image-improve-face');
 
 // Load environment variables
 require('dotenv').config();
@@ -101,20 +102,15 @@ async function handleGenerateImageGallery(socket, data) {
       prompt.gender === 'both' || prompt.gender === userGender
     );
     
-    if (availablePrompts.length < GENERATED_IMAGES) {
-      throw new Error(`Not enough prompts available for gender "${userGender}". Found ${availablePrompts.length}, need at least ${GENERATED_IMAGES}.`);
+    if (availablePrompts.length < GENERATED_IMAGES - 1) {
+      throw new Error(`Not enough prompts available for gender "${userGender}". Found ${availablePrompts.length}, need at least ${GENERATED_IMAGES - 1} (one slot reserved for face improvement).`);
     }
     
-    // Prepare generations: first prompt + random others
-    const firstPrompt = availablePrompts[0]; // First gender-appropriate prompt
-    const otherPrompts = availablePrompts.slice(1); // All others
+    // Prepare generations: face improvement + random prompts
+    // First image will always be face improvement, rest will be random prompts
+    const selectedPrompts = availablePrompts.sort(() => Math.random() - 0.5).slice(0, GENERATED_IMAGES - 1);
     
-    // Select random prompts from the remaining ones (GENERATED_IMAGES - 1 for the first prompt)
-    const selectedPrompts = [firstPrompt];
-    const shuffledOthers = [...otherPrompts].sort(() => Math.random() - 0.5);
-    selectedPrompts.push(...shuffledOthers.slice(0, GENERATED_IMAGES - 1));
-    
-    console.log(`🎯 Selected ${selectedPrompts.length} prompts for ${userGender}:`, selectedPrompts.map((p, i) => `[${i}] ${p.description.substring(0, 50)}...`));
+    console.log(`🎯 Selected ${selectedPrompts.length} prompts for ${userGender} (plus 1 face improvement):`, selectedPrompts.map((p, i) => `[${i+1}] ${p.description.substring(0, 50)}...`));
     
     // Inform frontend about the number of images to be generated
     socket.emit('gallery_generation_started', {
@@ -133,18 +129,36 @@ async function handleGenerateImageGallery(socket, data) {
     await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
     
     // Prepare output configurations
-    const outputs = selectedPrompts.map((prompt, index) => {
+    const outputs = [];
+    
+    // First output: Face improvement (index 0)
+    const faceImproveHash = crypto
+      .createHash('md5')
+      .update(`${targetUserId}-${originalImageHash}-face-improve-${Date.now()}`)
+      .digest('hex');
+    
+    outputs.push({
+      dstPath: path.join(__dirname, '..', '..', 'uploads', `${faceImproveHash}.jpg`),
+      prompt: 'Face Enhancement (AI-improved original)',
+      imageIndex: 0,
+      imageHash: faceImproveHash,
+      isFaceImprovement: true
+    });
+    
+    // Rest of outputs: Regular prompt-based generations
+    selectedPrompts.forEach((prompt, index) => {
       const generatedHash = crypto
         .createHash('md5')
-        .update(`${targetUserId}-${originalImageHash}-${index}-${Date.now()}`)
+        .update(`${targetUserId}-${originalImageHash}-${index + 1}-${Date.now()}`)
         .digest('hex');
       
-      return {
+      outputs.push({
         dstPath: path.join(__dirname, '..', '..', 'uploads', `${generatedHash}.jpg`),
         prompt: prompt.description,
-        imageIndex: index,
-        imageHash: generatedHash
-      };
+        imageIndex: index + 1,
+        imageHash: generatedHash,
+        isFaceImprovement: false
+      });
     });
     
     console.log(`🚀 Starting parallel generation of ${outputs.length} images...`);
@@ -154,15 +168,26 @@ async function handleGenerateImageGallery(socket, data) {
       try {
         console.log(`📸 [${index + 1}/${GENERATED_IMAGES}] Starting generation: ${output.prompt.substring(0, 60)}...`);
         
-        // Use the generateSquareImage function directly for real-time updates
-        const { generateSquareImage } = require('../../deep-image/deep-image-ai');
+        let result;
         
-        const result = await generateSquareImage({
-          srcPath: originalImagePath,
-          dstPath: output.dstPath,
-          prompt: output.prompt,
-          size: 1024
-        });
+        if (output.isFaceImprovement) {
+          // Use face improvement for the first image
+          console.log(`🎭 [${index + 1}/${GENERATED_IMAGES}] Running face improvement...`);
+          result = await improveFace({
+            srcPath: originalImagePath,
+            dstPath: output.dstPath,
+            size: 1024
+          });
+        } else {
+          // Use regular prompt-based generation for other images
+          const { generateSquareImage } = require('../../deep-image/deep-image-ai');
+          result = await generateSquareImage({
+            srcPath: originalImagePath,
+            dstPath: output.dstPath,
+            prompt: output.prompt,
+            size: 1024
+          });
+        }
         
         console.log(`✅ [${index + 1}/${GENERATED_IMAGES}] Generation completed: ${output.imageHash}`);
         

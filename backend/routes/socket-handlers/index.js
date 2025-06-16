@@ -14,6 +14,8 @@ const handleSaveUserName = require('./saveUserName');
 const handleSaveUserGender = require('./saveUserGender');
 const handleUploadPendingImage = require('./uploadPendingImage');
 const handleDownloadWhatsappImage = require('./downloadWhatsappImage');
+const handleBackgroundWhatsappDownload = require('./backgroundWhatsappDownload');
+const handleUseWhatsappImage = require('./useWhatsappImage');
 const handleLoadExistingGalleryImages = require('./loadExistingGalleryImages');
 const handleGenerateImageGallery = require('./generateImageGallery');
 const handleConfirmImageSelection = require('./confirmImageSelection');
@@ -34,6 +36,8 @@ module.exports = {
   handleSaveUserGender,
   handleUploadPendingImage,
   handleDownloadWhatsappImage,
+  handleBackgroundWhatsappDownload,
+  handleUseWhatsappImage,
   handleLoadExistingGalleryImages,
   handleGenerateImageGallery,
   handleConfirmImageSelection

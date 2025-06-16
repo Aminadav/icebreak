@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
+import { useLanguage } from '../contexts/LanguageContext';
 import PictureEnhancementPage from './PictureEnhancementPage';
 
 interface CameraPageProps {
@@ -22,6 +23,7 @@ export default function CameraPage({
 }: CameraPageProps): JSX.Element {
   const { back, push } = useNavigation();
   const { socket } = useSocket();
+  const { texts } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -268,7 +270,7 @@ export default function CameraPage({
       {showSmileText && hasPermission && !error && (
         <div className="absolute z-10 transform -translate-x-1/2 top-20 left-1/2">
           <p className="text-2xl font-medium text-center text-white animate-fade-in-bounce">
-            תן חיוך...
+            {texts.pictureUpload.cameraSmileText}
           </p>
         </div>
       )}

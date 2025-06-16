@@ -89,9 +89,11 @@ interface Texts {
     title: string;
     subtitle: string;
     instructions: string;
+    smileInstruction: string;
     cameraButtonText: string;
     whatsappButtonText: string;
     skipOption: string;
+    cameraSmileText: string;
   };
 }
 
@@ -187,9 +189,11 @@ export const texts: Record<'he' | 'en', Texts> = {
       title: 'צלמו רגע תמונה שלכם',
       subtitle: 'גם אם אתה שונאים להצטלם',
       instructions: 'הבינה מלאכותית שלנו תהפוך אתכם לגרסה הכי פוטוגנית שלכם.',
+      smileInstruction: '😄 תנו חיוך גדול - המצלמה רואה הכל!',
       cameraButtonText: 'לחצו לצילום',
       whatsappButtonText: 'שימוש בתמונות וואצפ',
-      skipOption: 'משחק בלי תמונות'
+      skipOption: 'משחק בלי תמונות',
+      cameraSmileText: 'תן חיוך...'
     }
   },
   en: {
@@ -283,9 +287,11 @@ export const texts: Record<'he' | 'en', Texts> = {
       title: 'Take a moment to capture yourselves',
       subtitle: 'Even if you hate being photographed',
       instructions: 'Our artificial intelligence will turn you into the most photogenic version of yourselves.',
+      smileInstruction: '😄 Give a big smile - the camera sees everything!',
       cameraButtonText: 'Click to Shoot',
       whatsappButtonText: 'Use WhatsApp Photos',
-      skipOption: 'Game without photos'
+      skipOption: 'Game without photos',
+      cameraSmileText: 'Give a smile...'
     }
   }
 };

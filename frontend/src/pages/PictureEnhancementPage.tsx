@@ -98,7 +98,7 @@ export default function PictureEnhancementPage({
 
       reader.readAsDataURL(capturedImage);
 
-      // Listen for upload response
+    // Listen for upload response
       const handleUploadResponse = (response: any) => {
         console.log('📤 Upload response:', response);
         setIsUploading(false);

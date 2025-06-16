@@ -62,7 +62,13 @@ class MigrationManager {
       await pool.query('BEGIN');
       
       // Execute the migration SQL
-      await pool.query(sql);
+      var res=await pool.query(sql);
+      console.log(`Executed ${res.rowCount} statements in migration ${version}`);
+      if (res.rowCount === 0) {
+        console.warn(`⚠️  No changes made by migration ${version}`);
+      }
+      // show output (the res) output of the migration
+      console.log(res);
       
       // Record the migration as executed
       await pool.query(

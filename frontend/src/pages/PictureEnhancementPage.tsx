@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
+import ImageGalleryPage from './ImageGalleryPage';
 
 interface PictureEnhancementPageProps {
   capturedImage: Blob;
@@ -19,7 +20,7 @@ export default function PictureEnhancementPage({
   name, 
   gender 
 }: PictureEnhancementPageProps): JSX.Element {
-  const { back } = useNavigation();
+  const { back, push } = useNavigation();
   const { socket } = useSocket();
   const [imageUrl, setImageUrl] = useState<string>('');
   const [isUploading, setIsUploading] = useState(false);
@@ -105,8 +106,18 @@ export default function PictureEnhancementPage({
         
         if (response.success) {
           console.log('📤 Image uploaded successfully:', response.imageHash);
-          // Image uploaded successfully, stay on this page for now
-          // Later we'll implement navigation to next step
+          
+          // Navigate to image gallery page
+          push(
+            <ImageGalleryPage 
+              originalImageHash={response.imageHash}
+              phoneNumber={phoneNumber}
+              userId={userId}
+              email={email}
+              name={name}
+              gender={gender}
+            />
+          );
         } else {
           console.error('📤 Upload failed:', response.error);
           setUploadError('שגיאה בהעלאת התמונה');

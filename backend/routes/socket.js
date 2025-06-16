@@ -716,8 +716,8 @@ function setupSocketHandlers(io) {
         
         const filename = `${imageHash}.jpg`;
         
-        // Ensure upload directory exists
-        const uploadDir = path.join(__dirname, '..', 'uploads', 'users', 'pending_images');
+        // Ensure upload directory exists - save directly to uploads root
+        const uploadDir = path.join(__dirname, '..', 'uploads');
         if (!fs.existsSync(uploadDir)) {
           fs.mkdirSync(uploadDir, { recursive: true });
         }
@@ -729,7 +729,7 @@ function setupSocketHandlers(io) {
         
         console.log(`📸 Image saved to: ${filePath}`);
         
-        // Update user's pending_image field in database
+        // Update user's image_original field in database
         const result = await pool.query(
           'UPDATE users SET pending_image = $1 WHERE user_id = $2 RETURNING *',
           [imageHash, targetUserId]
@@ -741,8 +741,8 @@ function setupSocketHandlers(io) {
           throw new Error('User not found');
         }
         
-        // Update journey state to PICTURE_ENHANCEMENT
-        await Device.updateJourneyState(socket.deviceId, 'PICTURE_ENHANCEMENT');
+        // Update journey state to IMAGE_GALLERY (instead of PICTURE_ENHANCEMENT)
+        await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
         
         socket.emit('upload_pending_image_response', {
           success: true,
@@ -759,6 +759,182 @@ function setupSocketHandlers(io) {
         socket.emit('upload_pending_image_response', {
           success: false,
           message: error.message || 'Failed to upload image',
+          error: error.message
+        });
+      }
+    });
+
+    // Image gallery generation
+    socket.on('generate_image_gallery', async (data) => {
+      try {
+        const { originalImageHash, phoneNumber, userId, email, name, gender } = data;
+        
+        if (!originalImageHash) {
+          throw new Error('Original image hash is required');
+        }
+        
+        // Use userId from data if provided, otherwise use socket's userId
+        const targetUserId = userId || socket.userId;
+        
+        if (!targetUserId) {
+          throw new Error('User not authenticated. Please complete phone verification first.');
+        }
+        
+        console.log(`🎨 Starting image gallery generation for user ${targetUserId} with original image: ${originalImageHash}`);
+        
+        // Load prompts from prompts.json
+        const promptsPath = path.join(__dirname, '..', 'deep-image', 'prompts.json');
+        const prompts = JSON.parse(fs.readFileSync(promptsPath, 'utf8'));
+        
+        if (prompts.length < 6) {
+          throw new Error('Not enough prompts available for image generation');
+        }
+        
+        // Prepare 6 generations: first prompt + 5 random others
+        const firstPrompt = prompts[0]; // "Make it Accurate."
+        const otherPrompts = prompts.slice(1); // All others
+        
+        // Select 5 random prompts from the remaining ones
+        const selectedPrompts = [firstPrompt];
+        const shuffledOthers = [...otherPrompts].sort(() => Math.random() - 0.5);
+        selectedPrompts.push(...shuffledOthers.slice(0, 5));
+        
+        console.log('🎯 Selected prompts for generation:', selectedPrompts.map((p, i) => `[${i}] ${p.substring(0, 50)}...`));
+        
+        // Original image path
+        const originalImagePath = path.join(__dirname, '..', 'uploads', `${originalImageHash}.jpg`);
+        
+        if (!fs.existsSync(originalImagePath)) {
+          throw new Error(`Original image not found: ${originalImagePath}`);
+        }
+        
+        // Update journey state to IMAGE_GALLERY
+        await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
+        
+        // Start generating images in parallel
+        const { deepImageGenerateBatch } = require('../deep-image/deep-image-batch');
+        
+        // Prepare output configurations
+        const outputs = selectedPrompts.map((prompt, index) => {
+          const generatedHash = crypto
+            .createHash('md5')
+            .update(`${targetUserId}-${originalImageHash}-${index}-${Date.now()}`)
+            .digest('hex');
+          
+          return {
+            dstPath: path.join(__dirname, '..', 'uploads', `${generatedHash}.jpg`),
+            prompt: prompt,
+            imageIndex: index,
+            imageHash: generatedHash
+          };
+        });
+        
+        console.log(`🚀 Starting parallel generation of ${outputs.length} images...`);
+        
+        // Function to process images with real-time updates
+        const processImageWithUpdates = async (output, index) => {
+          try {
+            console.log(`📸 [${index + 1}/6] Starting generation: ${output.prompt.substring(0, 60)}...`);
+            
+            // Use the generateSquareImage function directly for real-time updates
+            const { generateSquareImage } = require('../deep-image/deep-image-ai');
+            
+            const result = await generateSquareImage({
+              srcPath: originalImagePath,
+              dstPath: output.dstPath,
+              prompt: output.prompt,
+              size: 1024
+            });
+            
+            console.log(`✅ [${index + 1}/6] Generation completed: ${output.imageHash}`);
+            
+            // Emit immediate update to client
+            socket.emit('gallery_image_ready', {
+              imageIndex: index,
+              imageHash: output.imageHash
+            });
+            
+            return { success: true, imageIndex: index, imageHash: output.imageHash };
+            
+          } catch (error) {
+            console.error(`❌ [${index + 1}/6] Generation failed:`, error.message);
+            
+            // Emit error to client
+            socket.emit('gallery_image_error', {
+              imageIndex: index,
+              error: error.message
+            });
+            
+            return { success: false, imageIndex: index, error: error.message };
+          }
+        };
+        
+        // Start all generations in parallel
+        outputs.forEach((output, index) => {
+          // Don't await - let them run in parallel
+          processImageWithUpdates(output, index);
+        });
+        
+        console.log('🎨 All image generations started in parallel');
+        
+      } catch (error) {
+        console.error('Error starting image gallery generation:', error);
+        
+        socket.emit('gallery_generation_error', {
+          success: false,
+          message: error.message || 'Failed to start image generation',
+          error: error.message
+        });
+      }
+    });
+
+    // Image selection confirmation
+    socket.on('confirm_image_selection', async (data) => {
+      try {
+        const { selectedImageHash, originalImageHash, userId, phoneNumber, email, name, gender } = data;
+        
+        if (!selectedImageHash) {
+          throw new Error('Selected image hash is required');
+        }
+        
+        // Use userId from data if provided, otherwise use socket's userId
+        const targetUserId = userId || socket.userId;
+        
+        if (!targetUserId) {
+          throw new Error('User not authenticated. Please complete phone verification first.');
+        }
+        
+        console.log(`✅ User ${targetUserId} confirmed image selection: ${selectedImageHash}`);
+        
+        // Update user's profile with the selected image
+        // For now, we'll update the pending_image field with the selected image
+        const result = await pool.query(
+          'UPDATE users SET pending_image = $1 WHERE user_id = $2 RETURNING *',
+          [selectedImageHash, targetUserId]
+        );
+        
+        if (result.rows.length === 0) {
+          throw new Error('User not found');
+        }
+        
+        // Update journey state to COMPLETED
+        await Device.updateJourneyState(socket.deviceId, 'COMPLETED');
+        
+        socket.emit('image_selection_confirmed', {
+          success: true,
+          message: 'Image selection confirmed successfully',
+          selectedImageHash: selectedImageHash,
+          userId: targetUserId
+        });
+        
+        console.log(`🎉 Image selection confirmed for user ${targetUserId}: ${selectedImageHash}`);
+        
+      } catch (error) {
+        console.error('Error confirming image selection:', error);
+        
+        socket.emit('image_selection_error', {
+          success: false,
+          message: error.message || 'Failed to confirm image selection',
           error: error.message
         });
       }

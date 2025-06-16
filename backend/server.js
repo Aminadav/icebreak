@@ -21,6 +21,9 @@ app.use(express.json());
 // הוספת תמיכה בקבצים סטטיים
 app.use(express.static('public'));
 
+// Serve uploaded images statically
+app.use('/uploads', express.static('uploads'));
+
 // הגדרת Socket.io עם CORS
 const io = socketIo(server, {
   cors: {

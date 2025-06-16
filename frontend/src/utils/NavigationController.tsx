@@ -23,6 +23,7 @@ export type JourneyState =
   | 'PICTURE_UPLOAD'
   | 'CAMERA_ACTIVE'
   | 'PICTURE_ENHANCEMENT'
+  | 'IMAGE_GALLERY'
   | 'COMPLETED';
 
 export interface NavigationData {
@@ -137,6 +138,15 @@ export class NavigationController {
         }
         return <EnterPhoneNumberPage />;
         
+      case 'IMAGE_GALLERY':
+        // For image gallery, we need an original image hash, but since we can't store that in navigation data,
+        // this state should only be reached through upload flow, not auto-navigation
+        // Fallback to picture upload page
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
+        }
+        return <EnterPhoneNumberPage />;
+        
       case 'COMPLETED':
         // Could navigate to game lobby or dashboard
         return <HomePage />;
@@ -171,6 +181,7 @@ export class NavigationController {
       'PICTURE_UPLOAD': 'Picture upload in progress',
       'CAMERA_ACTIVE': 'Camera active for photo capture',
       'PICTURE_ENHANCEMENT': 'Picture enhancement in progress',
+      'IMAGE_GALLERY': 'Image gallery selection in progress',
       'COMPLETED': 'Registration completed'
     };
     

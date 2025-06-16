@@ -65,7 +65,7 @@ async function generateSquareImage(options) {
           "face_id": true
         }
       },
-      output_format: "png",
+      output_format: "jpg",
       quality: 90
     };
 

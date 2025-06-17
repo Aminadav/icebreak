@@ -11,10 +11,9 @@ If needed access to the databse schema. Use Docker. the container name is icebre
 
 # When adding new journey state or modify it's name be sure to update it in this file for admin debugging: frontend/src/pages/AdminPageSimple.tsx and to frontend/src/utils/NavigationController.tsx
 
-# No Frontend testing
-When you have new task to implement something on the frontend, do not test it.
-Just let the user know that you have implemented it and I will test it.
-Dont run tsx to check compilation errors. Or create test files on the frontend
+# No  testing
+When you have new task to implement something, do not create test files.
+Dont run tsx to check compilation errors. Or create test files.
 
 # Backend testing
 If you have implemented something on the backend, you can create a test file and execute it. (If needed)

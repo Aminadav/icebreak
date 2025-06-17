@@ -21,3 +21,17 @@ if there is text in multi color and multi size ensure to keep those colors and s
 add to the topmenu a button to replace my image. When clicked it navigate to the gallery page (As a modal or stack so when closed returning back to the same place where the user did).
 Ask me questions before implement.
 
+
+
+### Points
+The MyPoints compoments should show real data.
+The points of this specific user for this specific game.
+Create MyPointsContexts.
+It should serve two things:
+
+Get the current points of the user. When context ready. It's ask for current points, and update the value. Maybe the GameContext should provide the current game_id.
+If game_id change, should receive again the points for that game.
+The server can push update for points. Not just from this connection. The user "join" a room under his user_id and game_id, so any connection can update any user points.
+In the admin panel Add an input box: "set my user points" and "update". It will update the database, and trigger the update points event (to who in the room).
+Should be utilitil library to get user points per game, per user_id, and update user points per game per_id
+Please summarise what you want to do, do not start just plan

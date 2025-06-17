@@ -15,7 +15,8 @@ const JOURNEY_STATES = [
   'CAMERA_ACTIVE',
   'PICTURE_ENHANCEMENT',
   'IMAGE_GALLERY',
-  'CREATOR_GAME_READY'
+  'CREATOR_GAME_READY',
+  'BEFORE_START_ASK_ABOUT_YOU'
 ];
 
 // Human-readable descriptions for journey states
@@ -32,7 +33,8 @@ const STATE_DESCRIPTIONS: Record<string, string> = {
   'CAMERA_ACTIVE': 'Camera active for photo capture',
   'PICTURE_ENHANCEMENT': 'Picture enhancement in progress',
   'IMAGE_GALLERY': 'Image gallery selection in progress',
-  'CREATOR_GAME_READY': 'Game is ready to play by creator'
+  'CREATOR_GAME_READY': 'Game is ready to play by creator',
+  'BEFORE_START_ASK_ABOUT_YOU': 'Pre-game questions introduction page'
 };
 
 export default function AdminPageSimple(): JSX.Element {
@@ -110,33 +112,6 @@ export default function AdminPageSimple(): JSX.Element {
     setSelectedState(newState);
     // Automatically update the state when dropdown changes
     handleUpdateState(newState);
-  };
-
-  const handleRefresh = () => {
-    if (!socket || !deviceId) {
-      setMessage('❌ Error: No socket connection or device ID');
-      return;
-    }
-
-    setIsLoading(true);
-    setMessage('');
-    
-    console.log('🔄 Admin: Refreshing device state');
-    socket.emit('register_device', { deviceId });
-  };
-
-  const handleResetToInitial = () => {
-    if (!socket) {
-      setMessage('❌ Error: No socket connection');
-      return;
-    }
-
-    setIsLoading(true);
-    setMessage('');
-    setSelectedState('INITIAL');
-    
-    console.log('🔄 Admin: Resetting journey state to INITIAL');
-    socket.emit('reset_journey_state');
   };
 
   return (

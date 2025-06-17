@@ -10,7 +10,7 @@ import PictureUploadPage from '../pages/PictureUploadPage';
 import CameraPage from '../pages/CameraPage';
 import ImageGalleryPage from '../pages/ImageGalleryPage';
 import CreatorGameReadyPage from '../pages/CreatorGameReadyPage';
-import AdminPageSimple from '../pages/AdminPageSimple';
+import BeforeStartAskAboutYou from '../pages/BeforeStartAskAboutYou';
 
 // Journey states that match the backend
 export type JourneyState = 
@@ -26,7 +26,8 @@ export type JourneyState =
   | 'CAMERA_ACTIVE'
   | 'PICTURE_ENHANCEMENT'
   | 'IMAGE_GALLERY'
-  | 'CREATOR_GAME_READY';
+  | 'CREATOR_GAME_READY'
+  | 'BEFORE_START_ASK_ABOUT_YOU';
 
 export interface NavigationData {
   phoneNumber?: string;
@@ -177,6 +178,30 @@ export class NavigationController {
         }
         return <EnterPhoneNumberPage />;
 
+      case 'BEFORE_START_ASK_ABOUT_YOU':
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <BeforeStartAskAboutYou 
+            phoneNumber={data.phoneNumber} 
+            userId={data.userId} 
+            email={data.email} 
+            name={data.name} 
+            gender={data.gender}
+            selectedImageHash={data.selectedImageHash || 'no-image'}
+          />;
+        }
+        // Fallback to creator game ready if missing data
+        if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
+          return <CreatorGameReadyPage 
+            phoneNumber={data.phoneNumber} 
+            userId={data.userId} 
+            email={data.email} 
+            name={data.name} 
+            gender={data.gender}
+            selectedImageHash={data.selectedImageHash || 'no-image'}
+          />;
+        }
+        return <EnterPhoneNumberPage />;
+
         
       default:
         console.warn(`⚠️ NavigationController: Unknown journey state: ${journeyState}, defaulting to INITIAL`);
@@ -209,7 +234,8 @@ export class NavigationController {
       'CAMERA_ACTIVE': 'Camera active for photo capture',
       'PICTURE_ENHANCEMENT': 'Picture enhancement in progress',
       'IMAGE_GALLERY': 'Image gallery selection in progress',
-      'CREATOR_GAME_READY': 'Game is ready to play by creator'
+      'CREATOR_GAME_READY': 'Game is ready to play by creator',
+      'BEFORE_START_ASK_ABOUT_YOU': 'Pre-game questions introduction page'
     };
     
     return descriptions[journeyState] || 'Unknown state';

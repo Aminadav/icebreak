@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Gender Selection Journey State</title>
-    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script src="http://localhost:4001/socket.io/socket.io.js"></script>
     <style>
         body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
         .event { margin: 10px 0; padding: 10px; background: #f0f0f0; border-radius: 5px; }
@@ -47,7 +47,7 @@
     </div>
 
     <script>
-        const socket = io('http://localhost:3001');
+        const socket = io('http://localhost:4001');
         const statusDiv = document.getElementById('status');
         const eventsDiv = document.getElementById('events');
         let testDeviceId = null;

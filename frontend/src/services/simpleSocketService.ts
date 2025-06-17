@@ -12,7 +12,7 @@ class SimpleSocketService {
     return new Promise((resolve, reject) => {
       console.log('📡 Creating socket connection...');
       
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
       this.socket = io(backendUrl, {
         transports: ['polling', 'websocket'],
         timeout: 10000

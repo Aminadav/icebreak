@@ -3,7 +3,7 @@ import { io } from 'socket.io-client';
 
 console.log('🧪 Testing direct socket connection...');
 
-const socket = io('http://localhost:3001', {
+const socket = io('http://localhost:4001', {
   transports: ['polling', 'websocket'],
   reconnectionAttempts: 5,
   reconnectionDelay: 1000,

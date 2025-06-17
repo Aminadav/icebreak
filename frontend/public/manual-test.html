@@ -19,7 +19,7 @@
 
         log('Starting manual socket test...');
         
-        const socket = io('http://localhost:3001', {
+        const socket = io('http://localhost:4001', {
             transports: ['polling', 'websocket'],
             reconnectionAttempts: 5,
             reconnectionDelay: 1000,

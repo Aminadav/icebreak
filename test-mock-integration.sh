@@ -6,7 +6,7 @@ echo "================================================"
 # Test 1: Start testing mode via API
 echo ""
 echo "1. Starting testing mode via API..."
-curl -s -X POST http://localhost:3001/api/testing/start | jq '.'
+curl -s -X POST http://localhost:4001/api/testing/start | jq '.'
 
 # Test 2: Check that environment variables are set
 echo ""
@@ -25,11 +25,11 @@ sendVerificationCode('972523737233').then(result => {
 # Test 3: End testing mode via API
 echo ""
 echo "3. Ending testing mode via API..."
-curl -s -X POST http://localhost:3001/api/testing/end | jq '.'
+curl -s -X POST http://localhost:4001/api/testing/end | jq '.'
 
 echo ""
 echo "4. Final status check..."
-curl -s http://localhost:3001/api/testing/status | jq '.'
+curl -s http://localhost:4001/api/testing/status | jq '.'
 
 echo ""
 echo "✅ Integration test completed!"

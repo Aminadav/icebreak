@@ -1,6 +1,6 @@
 const axios = require('axios');
 
-const BASE_URL = 'http://localhost:3001';
+const BASE_URL = 'http://localhost:4001';
 
 /**
  * Test the testing mode endpoints
@@ -48,7 +48,7 @@ async function testTestingEndpoints() {
     console.error('❌ Error testing endpoints:', error.response?.data || error.message);
     
     if (error.code === 'ECONNREFUSED') {
-      console.log('\n💡 Make sure the backend server is running on port 3001');
+      console.log('\n💡 Make sure the backend server is running on port 4001');
       console.log('   Run: cd backend && npm start');
     }
   }

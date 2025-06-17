@@ -81,7 +81,7 @@ When `MOCK_GENERATE=true`:
 ```typescript
 // At the beginning of your test
 async function enableTestingMode() {
-  const response = await fetch('http://localhost:3001/api/testing/start', {
+  const response = await fetch('http://localhost:4001/api/testing/start', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -90,7 +90,7 @@ async function enableTestingMode() {
 
 // At the end of your test (in finally block)
 async function disableTestingMode() {
-  const response = await fetch('http://localhost:3001/api/testing/end', {
+  const response = await fetch('http://localhost:4001/api/testing/end', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   });
@@ -113,12 +113,12 @@ test('My E2E test', async ({ page }) => {
 const axios = require('axios');
 
 // Enable testing mode
-await axios.post('http://localhost:3001/api/testing/start');
+await axios.post('http://localhost:4001/api/testing/start');
 
 // Your backend test code here
 
 // Disable testing mode
-await axios.post('http://localhost:3001/api/testing/end');
+await axios.post('http://localhost:4001/api/testing/end');
 ```
 
 ## Files Modified

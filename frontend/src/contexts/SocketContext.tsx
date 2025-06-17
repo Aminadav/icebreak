@@ -36,7 +36,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     console.log('🚀 SocketProvider: Initializing socket connection...');
     
     // Create socket connection
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001';
+    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
     const newSocket = io(backendUrl, {
       transports: ['polling', 'websocket'],
       timeout: 10000

@@ -43,7 +43,7 @@ async function generateSquareImage(options) {
       
       // Wait 5 seconds to simulate processing time
       // a random number between 3 seconds and 10 seconds
-      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 7000) + 3000));
+      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 7000) + 4000));
       
       // Copy mock output file to destination
       const mockOutputPath = path.join(__dirname, 'mock-output.png');

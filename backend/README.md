@@ -61,11 +61,11 @@ npm run db:setup
 ```
 
 ## בדיקת התקנה
-1. השרת אמור לרוץ על http://localhost:3001
-2. בדיקת בריאות: http://localhost:3001/health
+1. השרת אמור לרוץ על http://localhost:4001
+2. בדיקת בריאות: http://localhost:4001/health
 3. בלוג השרת אמור להציג:
    ```
-   🚀 Server running on port 3001
+   🚀 Server running on port 4001
    📡 Socket.io ready for connections
    ✅ Connected to PostgreSQL database
    ```

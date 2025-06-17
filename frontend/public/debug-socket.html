@@ -18,7 +18,7 @@
         function testConnection() {
             log('🧪 Starting connection test...');
             
-            const socket = io('http://localhost:3001', {
+            const socket = io('http://localhost:4001', {
                 transports: ['polling', 'websocket'],
                 timeout: 5000
             });

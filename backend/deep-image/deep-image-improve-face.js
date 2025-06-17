@@ -39,7 +39,7 @@ async function improveFace(options) {
       console.log('🎭 Mock mode enabled - simulating face enhancement...');
       
       // Wait 3-8 seconds to simulate processing time
-      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 5000) + 3000));
+      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 5000) + 4000));
       
       // Copy mock output file to destination
       const mockOutputPath = path.join(__dirname, 'mock-output.png');
@@ -194,7 +194,7 @@ async function pollForResult(jobHash, dstPath, maxAttempts = 60, startTime = Dat
       }
 
       // Wait before next poll
-      await new Promise(resolve => setTimeout(resolve, 3000)); // 3 second intervals
+      await new Promise(resolve => setTimeout(resolve, 4000)); // 3 second intervals
 
     } catch (error) {
       if (attempt === maxAttempts) {

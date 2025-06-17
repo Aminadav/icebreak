@@ -22,9 +22,9 @@ The E2E tests cover the complete user registration and game creation flow:
 
 ### Prerequisites
 
-1. **Backend must be running** on `http://localhost:3001`
+1. **Backend must be running** on `http://localhost:4001`
 2. **Database must be running** (PostgreSQL via Docker)
-3. **Frontend must be running** on `http://localhost:3000`
+3. **Frontend must be running** on `http://localhost:4000`
 
 ### Quick Start
 
@@ -107,7 +107,7 @@ The `test-utils.ts` file contains the `get2FACode()` function that generates the
 
 The test configuration is in `playwright.config.ts`:
 
-- **Base URL**: `http://localhost:3000`
+- **Base URL**: `http://localhost:4000`
 - **Browsers**: Chromium, Firefox, WebKit, Mobile Chrome, Mobile Safari
 - **Screenshots**: Captured on failure
 - **Videos**: Recorded on failure
@@ -148,8 +148,8 @@ The tests use the following test data:
 ### Common Issues
 
 1. **"Connection refused" errors**
-   - Ensure backend is running on port 3001
-   - Ensure frontend is running on port 3000
+   - Ensure backend is running on port 4001
+   - Ensure frontend is running on port 4000
    - Check that database is running
 
 2. **2FA code validation fails**
@@ -174,10 +174,10 @@ cd backend && node test-2fa.js
 
 ```bash
 # Check if backend is running
-curl http://localhost:3001/health
+curl http://localhost:4001/health
 
 # Check if frontend is running
-curl http://localhost:3000
+curl http://localhost:4000
 
 # Check database
 cd backend && pnpm run db:logs

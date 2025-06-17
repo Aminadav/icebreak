@@ -64,7 +64,7 @@ export default function AdminPageSimple(): JSX.Element {
         setSelectedState(data.journeyState);
         setMessage(`✅ Success: ${data.message}`);
         // Clear success message after 3 seconds
-        setTimeout(() => setMessage(''), 3000);
+        setTimeout(() => setMessage(''), 4000);
       }
     };
 

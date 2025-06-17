@@ -41,8 +41,8 @@ fi
 # Check if backend is running
 check_backend() {
     print_status "Checking if backend is running..."
-    if curl -s http://localhost:3001/health >/dev/null 2>&1; then
-        print_success "Backend is running on port 3001"
+    if curl -s http://localhost:4001/health >/dev/null 2>&1; then
+        print_success "Backend is running on port 4001"
         return 0
     else
         return 1
@@ -87,8 +87,8 @@ start_backend() {
 # Check if frontend is running
 check_frontend() {
     print_status "Checking if frontend is running..."
-    if curl -s http://localhost:3000 >/dev/null 2>&1; then
-        print_success "Frontend is running on port 3000"
+    if curl -s http://localhost:4000 >/dev/null 2>&1; then
+        print_success "Frontend is running on port 4000"
         return 0
     else
         return 1
@@ -173,8 +173,8 @@ main() {
     fi
     
     print_success "Both backend and frontend are running!"
-    print_status "Backend: http://localhost:3001"
-    print_status "Frontend: http://localhost:3000"
+    print_status "Backend: http://localhost:4001"
+    print_status "Frontend: http://localhost:4000"
     
     # Wait a moment for everything to stabilize
     sleep 3

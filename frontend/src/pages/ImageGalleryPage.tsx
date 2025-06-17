@@ -38,7 +38,7 @@ export default function ImageGalleryPage({
   const { push } = useNavigation();
   
   // Get backend URL from environment
-  const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:3001';
+  const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:4001';
   
   // State for gallery images (dynamic count based on backend)
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);

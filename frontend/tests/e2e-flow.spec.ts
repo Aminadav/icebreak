@@ -8,7 +8,7 @@ var DEFAULT_DELAY=200
  */
 async function enableTestingMode() {
   try {
-    const response = await fetch('http://localhost:3001/api/testing/start', {
+    const response = await fetch('http://localhost:4001/api/testing/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -26,7 +26,7 @@ async function enableTestingMode() {
  */
 async function disableTestingMode() {
   try {
-    const response = await fetch('http://localhost:3001/api/testing/end', {
+    const response = await fetch('http://localhost:4001/api/testing/end', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' }
     });

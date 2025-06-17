@@ -12,7 +12,7 @@ const server = http.createServer(app);
 
 // הגדרת CORS
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:5173"], // כתובת ה-frontend
+  origin: ["http://localhost:4000", "http://localhost:5173"], // כתובת ה-frontend
   credentials: true
 }));
 
@@ -39,7 +39,7 @@ app.use('/admin', adminRouter);
 // הגדרת Socket.io עם CORS
 const io = socketIo(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:5173"],
+    origin: ["http://localhost:4000", "http://localhost:5173"],
     methods: ["GET", "POST"],
     credentials: true
   },
@@ -126,7 +126,7 @@ app.get('/test', (req, res) => {
   res.redirect('/socket-test.html');
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 4001;
 
 // התחלת השרת
 async function startServer() {

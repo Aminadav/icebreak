@@ -41,7 +41,7 @@ export default function ImagePreviewModal({
 }: ImagePreviewModalProps): JSX.Element {
   
   // Get backend URL from environment
-  const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:3001';
+  const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:4001';
   
   // URL for watermarked image
   const watermarkedImageUrl = `${backendUrl}/api/watermark/${imageHash}`;

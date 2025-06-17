@@ -1,28 +1,24 @@
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import PageTracking from '../components/PageTracking';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useTracking } from '../contexts/TrackingContext';
-import GiveGameNamePage from './GiveGameNamePage';
-import AboutPage from '../components/AboutPage';
-import ComponentsShowcase from './ComponentsShowcase';
 
 export default function HomePage(): JSX.Element {
   const { texts } = useLanguage();
-  const { isConnected, deviceId, userId, error, socket } = useSocket();
-  const { push } = useNavigation();
+  const { isConnected, error, socket } = useSocket();
+  const navigate = useNavigate();
   const { trackEvent } = useTracking();
 
   // Silence unused warnings - keeping for future use
-  void isConnected; void deviceId; void userId; void error;
+  void error;
 
   const handleCreateGame = () => {
     console.log('Creating new game...');
     trackEvent('create_game_flow_started', {
-      source_page: 'homepage',
-      user_authenticated: !!userId
+      source_page: 'homepage'
     });
     
     // Emit socket event to set journey state to GAME_NAME_ENTRY
@@ -32,29 +28,37 @@ export default function HomePage(): JSX.Element {
         console.log('🎯 Game creation flow started successfully:', data);
         socket.off('game_creation_started', successHandler);
         socket.off('error', errorHandler);
+        
+        // Navigate to game creation with React Router
+        if (data.gameId) {
+          navigate(`/game/${data.gameId}/name`);
+        }
       };
 
       const errorHandler = (data: any) => {
         console.error('❌ Failed to start game creation flow:', data);
         socket.off('game_creation_started', successHandler);
         socket.off('error', errorHandler);
-        // Continue with navigation anyway
+        // Continue with navigation anyway - create a local gameId if needed
+        navigate('/game/new/name');
       };
 
       socket.once('game_creation_started', successHandler);
       socket.once('error', errorHandler);
       
+      console.log('📤 Emitting start_game_creation');
       socket.emit('start_game_creation');
+    } else {
+      console.log('⚠️ Socket not available, navigating anyway');
+      navigate('/game/new/name');
     }
-    
-    push(<GiveGameNamePage />);
   };
 
   const handleMenuNavigation = (page: string) => {
     if (page === 'about') {
-      push(<AboutPage />);
+      navigate('/about');
     } else if (page === 'components') {
-      push(<ComponentsShowcase />);
+      navigate('/components');
     }
   };
 
@@ -66,8 +70,7 @@ export default function HomePage(): JSX.Element {
       <PageTracking 
         pageName="homepage"
         pageData={{ 
-          user_authenticated: !!userId,
-          device_id: deviceId 
+          has_connection: isConnected
         }}
       />
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
@@ -92,11 +95,23 @@ export default function HomePage(): JSX.Element {
           <Button
             variant="primary-large"
             onClick={handleCreateGame}
-            className="text-xl px-12 py-5 min-w-[300px] border-6 border-white bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 rounded-3xl shadow-xl"
+            disabled={!isConnected}
+            className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
+              isConnected
+                ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 
+                : 'bg-gray-400 cursor-not-allowed opacity-50'
+            }`}
             trackingId="homepage_create_game_clicked"
             data-testid="create-game-button"
           >
-            {texts.homepage.createGameButton}
+            {!isConnected ? (
+              <div className="flex items-center justify-center">
+                <div className="w-6 h-6 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
+                מתחבר...
+              </div>
+            ) : (
+              texts.homepage.createGameButton
+            )}
           </Button>
         </div>
       </main>

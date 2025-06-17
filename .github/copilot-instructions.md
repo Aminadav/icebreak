@@ -9,8 +9,6 @@ If need to capture output of backend, just ask the user to copy and paste.
 # Schema
 If needed access to the databse schema. Use Docker. the container name is icebreak_postgres, the databasename icebreak_db.  The username is: icebreak_user.
 
-# When adding new journey state or modify it's name be sure to update it in this file for admin debugging: frontend/src/pages/AdminPageSimple.tsx and to frontend/src/utils/NavigationController.tsx
-
 # No  testing
 When you have new task to implement something, do not create test files.
 Dont run tsx to check compilation errors. Or create test files.

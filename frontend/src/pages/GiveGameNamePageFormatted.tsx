@@ -10,15 +10,15 @@ import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
 
 interface GiveGameNamePageProps {
-  gameId?: string; // Optional for legacy navigation, required for React Router
+  gameId: string;
   initialGameName?: string;
 }
 
 export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveGameNamePageProps): JSX.Element {
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
+  const { push } = useNavigation(); // For menu navigation
   const navigate = useNavigate(); // For game flow navigation
-  const { handleMenuAction } = useMenuNavigation(); // For menu navigation
   
   const [gameName, setGameName] = useState(initialGameName);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +30,14 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
       setGameName(initialGameName);
     }
   }, [initialGameName, gameName]);
+
+  const handleMenuAction = (page: string) => {
+    if (page === 'about') {
+      push(<AboutPage />);
+    } else if (page === 'components') {
+      push(<ComponentsShowcase />);
+    }
+  };
 
   const handleContinue = async () => {
     if (!gameName.trim()) {
@@ -46,75 +54,40 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
     setError(null);
     
     try {
-      if (gameId) {
-        // React Router flow - update existing game name
-        // Set up listener for game_name_updated response
-        const gameNameUpdatedHandler = (data: any) => {
-          setIsLoading(false);
-          if (data.success && data.gameId === gameId) {
-            console.log('📝 Game name updated successfully:', data);
-            // Navigate to phone number page
-            navigate(`/game/${gameId}/phone`);
-          } else {
-            setError('שגיאה בעדכון שם המשחק');
-          }
-          // Remove the listener after use
-          socket.off('game_name_updated', gameNameUpdatedHandler);
-        };
+      // Set up listener for game_name_updated response
+      const gameNameUpdatedHandler = (data: any) => {
+        setIsLoading(false);
+        if (data.success && data.gameId === gameId) {
+          console.log('📝 Game name updated successfully:', data);
+          // Navigate to phone number page
+          navigate(`/game/${gameId}/phone`);
+        } else {
+          setError('שגיאה בעדכון שם המשחק');
+        }
+        // Remove the listener after use
+        socket.off('game_name_updated', gameNameUpdatedHandler);
+      };
 
-        // Set up error handler
-        const errorHandler = (data: any) => {
-          setIsLoading(false);
-          setError(data.message || 'שגיאה בעדכון שם המשחק');
-          console.error('❌ Game name update error:', data);
-          // Remove the listener after use
-          socket.off('error', errorHandler);
-        };
+      // Set up error handler
+      const errorHandler = (data: any) => {
+        setIsLoading(false);
+        setError(data.message || 'שגיאה בעדכון שם המשחק');
+        console.error('❌ Game name update error:', data);
+        // Remove the listener after use
+        socket.off('error', errorHandler);
+      };
 
-        // Add event listeners
-        socket.on('game_name_updated', gameNameUpdatedHandler);
-        socket.on('error', errorHandler);
-        
-        // Emit the update_game_name event
-        console.log('📤 Emitting update_game_name event with name:', gameName.trim());
-        socket.emit('update_game_name', { gameId, gameName: gameName.trim() });
-      } else {
-        // Legacy navigation flow - set game name in memory
-        // Set up listener for game_name_saved response
-        const gameNameSavedHandler = (data: any) => {
-          setIsLoading(false);
-          if (data.success) {
-            console.log('📝 Game name saved successfully:', data);
-            // Navigate to phone number page using React Router
-            navigate('/game/new/phone');
-          } else {
-            setError('שגיאה בשמירת שם המשחק');
-          }
-          // Remove the listener after use
-          socket.off('game_name_saved', gameNameSavedHandler);
-        };
-
-        // Set up error handler
-        const errorHandler = (data: any) => {
-          setIsLoading(false);
-          setError(data.message || 'שגיאה בשמירת שם המשחק');
-          console.error('❌ Game name save error:', data);
-          // Remove the listener after use
-          socket.off('error', errorHandler);
-        };
-
-        // Add event listeners
-        socket.on('game_name_saved', gameNameSavedHandler);
-        socket.on('error', errorHandler);
-        
-        // Emit the set_game_name event
-        console.log('📤 Emitting set_game_name event with name:', gameName.trim());
-        socket.emit('set_game_name', { gameName: gameName.trim() });
-      }
+      // Add event listeners
+      socket.on('game_name_updated', gameNameUpdatedHandler);
+      socket.on('error', errorHandler);
+      
+      // Emit the update_game_name event
+      console.log('📤 Emitting update_game_name event with name:', gameName.trim());
+      socket.emit('update_game_name', { gameId, gameName: gameName.trim() });
       
     } catch (error) {
-      console.error('Failed to process game name:', error);
-      setError('שגיאה בעיבוד שם המשחק');
+      console.error('Failed to update game name:', error);
+      setError('שגיאה בעדכון שם המשחק');
       setIsLoading(false);
     }
   };
@@ -128,7 +101,7 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
   // Show connection status
   if (!isConnected) {
     return (
-      <PageLayout showHeader={true} onMenuAction={handleMenuAction}>
+      <PageLayout showHeader={true} onMenuAction={handleMenuAction} suspenseForImages={true}>
         <PageTracking 
           pageName="give_game_name"
           pageData={{ 
@@ -150,6 +123,7 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
     <PageLayout 
       showHeader={true} 
       onMenuAction={handleMenuAction}
+      suspenseForImages={true}
     >
       <PageTracking 
         pageName="give_game_name"
@@ -165,6 +139,7 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
           src="/images/game-assets/give-game-name.png"
           alt="Friends sitting together"
           size="large"
+          suspense={true}
         />
         
         {/* Title */}
@@ -178,7 +153,8 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
         {error && (
           <div className="max-w-md mb-4 text-center">
             <p className="px-4 py-2 text-lg text-red-400 bg-red-100 rounded-lg bg-opacity-20">
-              {error}            </p>
+              {error}
+            </p>
           </div>
         )}
         

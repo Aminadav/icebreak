@@ -1,41 +1,45 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { SocketProvider } from './contexts/SocketContext';
-import { NavigationProvider } from './contexts/NavigationContext';
 import { TrackingProvider } from './contexts/TrackingContext';
 import { ModalProvider } from './contexts/ModalContext';
-import AppRouter from './components/AppRouter';
-import HomePage from './pages/HomePage';
+import StartPage from './pages/StartPage';
+import GameRouter from './components/GameRouter';
 import AdminPageSimple from './pages/AdminPageSimple';
+import AboutPage from './components/AboutPage';
+import ComponentsShowcase from './pages/ComponentsShowcase';
+import ModalRenderer from './components/ModalRenderer';
 import './App.css';
 
 function App(): JSX.Element {
-  // Determine initial component based on URL path
-  const getInitialComponent = () => {
-    const path = window.location.pathname;
-    console.log('🛣️ Current URL path:', path);
-    
-    switch (path) {
-      case '/admin':
-        console.log('🔧 Loading admin page from URL');
-        return <AdminPageSimple />;
-      default:
-        console.log('🏠 Loading home page as default');
-        return <HomePage />;
-    }
-  };
-
   return (
-    <LanguageProvider>
-      <ModalProvider>
-        <NavigationProvider initialComponent={getInitialComponent()}>
+    <BrowserRouter>
+      <LanguageProvider>
+        <ModalProvider>
           <SocketProvider>
             <TrackingProvider>
-              <AppRouter />
+              <Routes>
+                {/* Start page */}
+                <Route path="/" element={<StartPage />} />
+                
+                {/* Game routes - all under /game/:gameId/* */}
+                <Route path="/game/:gameId/*" element={<GameRouter />} />
+                
+                {/* Admin page */}
+                <Route path="/admin" element={<AdminPageSimple />} />
+                
+                {/* Menu pages - now as proper routes */}
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/components" element={<ComponentsShowcase />} />
+              </Routes>
+              
+              {/* Global modal renderer - enables modals across all routes */}
+              <ModalRenderer />
             </TrackingProvider>
           </SocketProvider>
-        </NavigationProvider>
-      </ModalProvider>
-    </LanguageProvider>
+        </ModalProvider>
+      </LanguageProvider>
+    </BrowserRouter>
   );
 }
 

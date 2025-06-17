@@ -12,16 +12,20 @@ require('dotenv').config();
 // Get number of images to generate from environment variable, default to 6 if not set
 const GENERATED_IMAGES = parseInt(process.env.GENERATED_IMAGES) || 6;
 
-async function handleGenerateImageGallery(socket, data) {
+async function handleGenerateImageGallery(socket) {
   try {
-    const { originalImageHash, phoneNumber, email, name } = data;
+    const targetUserId = await getUserIdFromDevice(socket.deviceId);
+    // get pendin_image for user
+    var res=await pool.query('SELECT pending_image FROM users WHERE user_id = $1', [targetUserId])
+
+    var originalImageHash = res.rows[0].pending_image;
+    console.log(`🔍 Original image hash for user ${targetUserId}: ${originalImageHash}`);
     
     if (!originalImageHash) {
       throw new Error('Original image hash is required');
     }
     
     // Security: Always derive userId from deviceId
-    const targetUserId = await getUserIdFromDevice(socket.deviceId);
     
     if (!targetUserId) {
       throw new Error('User not authenticated. Please complete phone verification first.');

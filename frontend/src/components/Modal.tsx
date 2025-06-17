@@ -55,11 +55,10 @@ export default function Modal({ children, onClose, closeOnOverlayClick = true }:
         isModalOpen ? 'opacity-100' : 'opacity-0'
       }`}
       data-testid="modal-overlay"
-      style={{ height: '100vh', width: '100vw' }}
     >
       {/* Background overlay - clickable to close */}
       <div 
-        className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-300 cursor-pointer"
+        className="absolute inset-0 transition-opacity duration-300 bg-black bg-opacity-50 cursor-pointer"
         onClick={handleOverlayClick}
         onMouseDown={(e) => {
           console.log('Mouse down on overlay');
@@ -69,15 +68,19 @@ export default function Modal({ children, onClose, closeOnOverlayClick = true }:
       
       {/* Modal container - centered */}
       <div 
-        className="relative z-10 h-full w-full flex items-center justify-center p-4"
-        onClick={handleOverlayClick}
-        style={{ minHeight: '100vh' }}
+        className="fixed inset-0 flex items-center justify-center p-4"
+        style={{ 
+          pointerEvents: 'none' // Allow clicks to pass through to overlay
+        }}
       >
         {/* Modal content */}
         <div 
-          className={`transform transition-all duration-300 w-full max-w-md ${
+          className={`relative transform transition-all duration-300 w-full max-w-md ${
             isModalOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
           }`}
+          style={{ 
+            pointerEvents: 'auto' // Re-enable pointer events for modal content
+          }}
           onClick={(e) => {
             console.log('Click on modal content, stopping propagation');
             e.stopPropagation();

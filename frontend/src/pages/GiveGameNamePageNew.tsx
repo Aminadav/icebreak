@@ -7,18 +7,20 @@ import AnimatedImage from '../components/AnimatedImage';
 import PageTracking from '../components/PageTracking';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useNavigation } from '../contexts/NavigationContext';
+import AboutPage from '../components/AboutPage';
+import ComponentsShowcase from './ComponentsShowcase';
 
 interface GiveGameNamePageProps {
-  gameId?: string; // Optional for legacy navigation, required for React Router
+  gameId: string;
   initialGameName?: string;
 }
 
 export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveGameNamePageProps): JSX.Element {
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
+  const { push } = useNavigation(); // For menu navigation
   const navigate = useNavigate(); // For game flow navigation
-  const { handleMenuAction } = useMenuNavigation(); // For menu navigation
   
   const [gameName, setGameName] = useState(initialGameName);
   const [isLoading, setIsLoading] = useState(false);
@@ -30,6 +32,14 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
       setGameName(initialGameName);
     }
   }, [initialGameName, gameName]);
+
+  const handleMenuAction = (page: string) => {
+    if (page === 'about') {
+      push(<AboutPage />);
+    } else if (page === 'components') {
+      push(<ComponentsShowcase />);
+    }
+  };
 
   const handleContinue = async () => {
     if (!gameName.trim()) {
@@ -46,75 +56,40 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
     setError(null);
     
     try {
-      if (gameId) {
-        // React Router flow - update existing game name
-        // Set up listener for game_name_updated response
-        const gameNameUpdatedHandler = (data: any) => {
-          setIsLoading(false);
-          if (data.success && data.gameId === gameId) {
-            console.log('📝 Game name updated successfully:', data);
-            // Navigate to phone number page
-            navigate(`/game/${gameId}/phone`);
-          } else {
-            setError('שגיאה בעדכון שם המשחק');
-          }
-          // Remove the listener after use
-          socket.off('game_name_updated', gameNameUpdatedHandler);
-        };
+      // Set up listener for game_name_updated response
+      const gameNameUpdatedHandler = (data: any) => {
+        setIsLoading(false);
+        if (data.success && data.gameId === gameId) {
+          console.log('📝 Game name updated successfully:', data);
+          // Navigate to phone number page
+          navigate(`/game/${gameId}/phone`);
+        } else {
+          setError('שגיאה בעדכון שם המשחק');
+        }
+        // Remove the listener after use
+        socket.off('game_name_updated', gameNameUpdatedHandler);
+      };
 
-        // Set up error handler
-        const errorHandler = (data: any) => {
-          setIsLoading(false);
-          setError(data.message || 'שגיאה בעדכון שם המשחק');
-          console.error('❌ Game name update error:', data);
-          // Remove the listener after use
-          socket.off('error', errorHandler);
-        };
+      // Set up error handler
+      const errorHandler = (data: any) => {
+        setIsLoading(false);
+        setError(data.message || 'שגיאה בעדכון שם המשחק');
+        console.error('❌ Game name update error:', data);
+        // Remove the listener after use
+        socket.off('error', errorHandler);
+      };
 
-        // Add event listeners
-        socket.on('game_name_updated', gameNameUpdatedHandler);
-        socket.on('error', errorHandler);
-        
-        // Emit the update_game_name event
-        console.log('📤 Emitting update_game_name event with name:', gameName.trim());
-        socket.emit('update_game_name', { gameId, gameName: gameName.trim() });
-      } else {
-        // Legacy navigation flow - set game name in memory
-        // Set up listener for game_name_saved response
-        const gameNameSavedHandler = (data: any) => {
-          setIsLoading(false);
-          if (data.success) {
-            console.log('📝 Game name saved successfully:', data);
-            // Navigate to phone number page using React Router
-            navigate('/game/new/phone');
-          } else {
-            setError('שגיאה בשמירת שם המשחק');
-          }
-          // Remove the listener after use
-          socket.off('game_name_saved', gameNameSavedHandler);
-        };
-
-        // Set up error handler
-        const errorHandler = (data: any) => {
-          setIsLoading(false);
-          setError(data.message || 'שגיאה בשמירת שם המשחק');
-          console.error('❌ Game name save error:', data);
-          // Remove the listener after use
-          socket.off('error', errorHandler);
-        };
-
-        // Add event listeners
-        socket.on('game_name_saved', gameNameSavedHandler);
-        socket.on('error', errorHandler);
-        
-        // Emit the set_game_name event
-        console.log('📤 Emitting set_game_name event with name:', gameName.trim());
-        socket.emit('set_game_name', { gameName: gameName.trim() });
-      }
+      // Add event listeners
+      socket.on('game_name_updated', gameNameUpdatedHandler);
+      socket.on('error', errorHandler);
+      
+      // Emit the update_game_name event
+      console.log('📤 Emitting update_game_name event with name:', gameName.trim());
+      socket.emit('update_game_name', { gameId, gameName: gameName.trim() });
       
     } catch (error) {
-      console.error('Failed to process game name:', error);
-      setError('שגיאה בעיבוד שם המשחק');
+      console.error('Failed to update game name:', error);
+      setError('שגיאה בעדכון שם המשחק');
       setIsLoading(false);
     }
   };
@@ -155,43 +130,34 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
         pageName="give_game_name"
         pageData={{ 
           has_connection: isConnected,
-          game_id: gameId,
-          game_name_length: gameName.length
+          game_id: gameId
         }}
       />
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Friends illustration */}
         <AnimatedImage
           src="/images/game-assets/give-game-name.png"
-          alt="Friends sitting together"
+          alt="Give Game Name"
           size="large"
+          className="drop-shadow-2xl"
         />
         
         {/* Title */}
-        <div className="max-w-md mb-4 text-center">
+        <div className="mb-6 text-center">
           <h1 className="text-3xl font-bold leading-tight text-white">
             {texts.giveGameName.title}
           </h1>
         </div>
-        
+
         {/* Error Message */}
         {error && (
-          <div className="max-w-md mb-4 text-center">
-            <p className="px-4 py-2 text-lg text-red-400 bg-red-100 rounded-lg bg-opacity-20">
-              {error}            </p>
+          <div className="w-full max-w-md mb-4 p-4 text-center bg-red-600 text-white rounded-lg">
+            {error}
           </div>
         )}
         
-        {/* Subtitle */}
-        <div className="max-w-md mb-8 text-center">
-          <p className="text-lg text-white opacity-90">
-            {texts.giveGameName.subtitle}
-          </p>
-        </div>
-        
-        {/* Game name input */}
+        {/* Game Name Input */}
         <Input
-          type="text"
           value={gameName}
           onChange={setGameName}
           onKeyPress={handleKeyPress}
@@ -218,8 +184,8 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
           >
             {isLoading ? (
               <div className="flex items-center justify-center">
-                <div className="w-6 h-6 mr-2 border-b-2 border-white rounded-full animate-spin"></div>
-                עדכן שם משחק...
+                <div className="w-5 h-5 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                שומר...
               </div>
             ) : (
               texts.giveGameName.continueButton

@@ -3,6 +3,9 @@ const handleRegisterDevice = require('./registerDevice');
 const handleSetGameName = require('./setGameName');
 const handleStartGameCreation = require('./startGameCreation');
 const handleCreateGameNow = require('./createGameNow');
+const handleCreateGameImmediately = require('./createGameImmediately');
+const handleGetGameData = require('./getGameData');
+const handleUpdateGameName = require('./updateGameName');
 const handleSubmitPhoneNumber = require('./submitPhoneNumber');
 const handleVerify2FACode = require('./verify2FACode');
 const handlePing = require('./ping');
@@ -25,6 +28,9 @@ module.exports = {
   handleSetGameName,
   handleStartGameCreation,
   handleCreateGameNow,
+  handleCreateGameImmediately,
+  handleGetGameData,
+  handleUpdateGameName,
   handleSubmitPhoneNumber,
   handleVerify2FACode,
   handlePing,

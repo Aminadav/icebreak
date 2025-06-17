@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import ProcessingModal from '../components/ProcessingModal';
 import ImagePreviewModal from '../components/ImagePreviewModal';
-import CreatorGameReadyPage from './CreatorGameReadyPage';
 import { useSocket } from '../contexts/SocketContext';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGameId } from '../utils/useGameId';
 
 interface ImageGalleryPageProps {
   originalImageHash: string;
@@ -14,6 +15,7 @@ interface ImageGalleryPageProps {
   name: string;
   gender: string;
   capturedImageUrl?: string; // Optional for the modal
+  gameId?: string; // Add gameId for React Router support
 }
 
 interface GalleryImage {
@@ -25,18 +27,11 @@ interface GalleryImage {
   startTime?: number; // When generation started
 }
 
-export default function ImageGalleryPage({ 
-  originalImageHash,
-  phoneNumber, 
-  userId, 
-  email, 
-  name, 
-  gender,
-  capturedImageUrl 
-}: ImageGalleryPageProps): JSX.Element {
+export default function ImageGalleryPage(): JSX.Element {
   const { socket } = useSocket();
-  const { push } = useNavigation();
-  
+  const { handleMenuAction } = useMenuNavigation();
+  const navigate = useNavigate();
+
   // Get backend URL from environment
   const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:4001';
   
@@ -60,46 +55,23 @@ export default function ImageGalleryPage({
 
   // Start image generation function
   const startImageGeneration = () => {
-    if (socket && originalImageHash && !generationStarted) {
       console.log('🎨 Starting image generation process...');
       setGenerationStarted(true);
 
-      socket.emit('generate_image_gallery', {
-        originalImageHash,
-        phoneNumber,
-        userId,
-        email,
-        name
-      });
-    }
+      socket!.emit('generate_image_gallery');
   };
 
-  useEffect(() => {
-    // Update journey state when gallery page mounts
-    const updateJourneyState = async () => {
-      if (socket) {
-        try {
-          socket.emit('update_journey_state', { 
-            journeyState: 'IMAGE_GALLERY',
-            additionalData: {
-              phoneNumber,
-              userId,
-              email,
-              name,
-              gender,
-              originalImageHash
-            }
-          });
-          console.log('🖼️ Updated journey state to IMAGE_GALLERY', {
-            phoneNumber, userId, email, name, gender, originalImageHash
-          });
-        } catch (error) {
-          console.error('Failed to update journey state:', error);
-        }
-      }
-    };
+  var [originalImageHash,set_originalImageHash] = useState(''); 
 
-    updateJourneyState();
+  useEffect(()=>{
+    socket!.emit('get_original_image_hash', (data: { originalImageHash: string }) => {
+      console.log('📥 Received original image hash:', data.originalImageHash);
+      set_originalImageHash(data.originalImageHash);
+    })
+  },[])
+
+  useEffect(() => {
+
 
     // Initialize with default number of images (will be updated by backend)
     if (galleryImages.length === 0) {
@@ -107,17 +79,11 @@ export default function ImageGalleryPage({
     }
 
     // Load existing images first
-    if (socket && originalImageHash && userId) {
-      console.log('🔍 Loading existing gallery images...');
-      socket.emit('load_existing_gallery_images', {
-        originalImageHash,
-        userId
-      });
-    }
+      socket!.emit('load_existing_gallery_images');
 
     // Start image generation IMMEDIATELY when component mounts
     startImageGeneration();
-  }, [socket, originalImageHash, phoneNumber, userId, email, name, gender]);
+  }, [socket]);
 
   // Handle processing modal completion
   const handleProcessingComplete = useCallback(() => {
@@ -241,7 +207,7 @@ export default function ImageGalleryPage({
         socket.off('existing_images_error', handleExistingImagesError);
       }
     };
-  }, [socket, originalImageHash, phoneNumber, userId, email, name, gender]);
+  }, [socket]);
 
   const handleImageSelect = (imageId: number) => {
     const image = galleryImages[imageId];
@@ -257,6 +223,8 @@ export default function ImageGalleryPage({
     setShowImagePreview(false);
     setPreviewImageHash(null);
   };
+
+  var gameId=useGameId()
 
   const handleChooseImage = () => {
     if (!previewImageHash) return;
@@ -275,22 +243,10 @@ export default function ImageGalleryPage({
         // Emit confirmation in background
         socket?.emit('confirm_image_selection', {
           selectedImageHash: selectedImage.imageHash,
-          originalImageHash,
-          userId,
-          phoneNumber,
-          email,
-          name
         });
         
         // Navigate to game ready page immediately
-        push(<CreatorGameReadyPage 
-          phoneNumber={phoneNumber}
-          userId={userId}
-          email={email}
-          name={name}
-          gender={gender}
-          selectedImageHash={selectedImage.imageHash}
-        />);
+        navigate(`/game/${gameId}/ready`);
       }
     }
   };
@@ -368,17 +324,12 @@ export default function ImageGalleryPage({
     );
   };
 
-  const handleMenuAction = (action: string) => {
-    // Handle menu actions if needed
-    console.log('Menu action:', action);
-  };
-
   return (
     <>
       {/* Processing Modal */}
       <ProcessingModal 
         isVisible={showProcessingModal}
-        imageUrl={capturedImageUrl || `${backendUrl}/uploads/${originalImageHash}.jpg`}
+        imageUrl={ `${backendUrl}/uploads/${originalImageHash}.jpg`}
         onComplete={handleProcessingComplete}
       />
 

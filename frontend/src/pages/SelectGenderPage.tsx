@@ -1,26 +1,26 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
-import AboutPage from '../components/AboutPage';
-import ComponentsShowcase from './ComponentsShowcase';
-import PictureUploadPage from './PictureUploadPage';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
 
 interface SelectGenderPageProps {
   phoneNumber?: string;
   userId?: string;
   email?: string;
   name?: string;
+  gameId?: string;
 }
 
 type Gender = 'male' | 'female';
 
-export default function SelectGenderPage({ phoneNumber, userId, email, name }: SelectGenderPageProps): JSX.Element {
+export default function SelectGenderPage({ phoneNumber, userId, email, name, gameId }: SelectGenderPageProps): JSX.Element {
   const { texts } = useLanguage();
-  const { back, push } = useNavigation();
+  const { handleMenuAction } = useMenuNavigation();
   const { socket } = useSocket();
+  const navigate = useNavigate();
   
   const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -28,30 +28,10 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name }: S
   // Silence unused warnings - keeping for future use and navigation data
   void phoneNumber; void email;
 
-  // Update journey state when component mounts
+  // Journey state is now managed by URL routing
   useEffect(() => {
-    const updateJourneyState = async () => {
-      if (socket) {
-        try {
-          // Emit a request to update journey state to GENDER_SELECTION
-          socket.emit('update_journey_state', { journeyState: 'GENDER_SELECTION' });
-          console.log('🎯 Updated journey state to GENDER_SELECTION');
-        } catch (error) {
-          console.error('Failed to update journey state:', error);
-        }
-      }
-    };
-
-    updateJourneyState();
-  }, [socket]);
-
-  const handleMenuAction = (page: string) => {
-    if (page === 'about') {
-      push(<AboutPage />);
-    } else if (page === 'components') {
-      push(<ComponentsShowcase />);
-    }
-  };
+    console.log('🎭 SelectGenderPage mounted - state managed by React Router');
+  }, []);
 
   const handleGenderSelect = async (gender: Gender) => {
     if (isLoading) return;
@@ -62,10 +42,9 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name }: S
     try {
       console.log('📤 Saving gender:', gender);
       
-      if (socket && userId) {
-        // Save gender to backend
+      if (socket) {
+        // Save gender to backend - backend auto-derives userId from deviceId
         socket.emit('save_user_gender', {
-          userId,
           gender,
           name: name || 'Unknown'
         });
@@ -77,13 +56,20 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name }: S
           
           // Navigate to picture upload page
           console.log('🎯 Moving to picture upload page');
-          push(<PictureUploadPage 
-            phoneNumber={phoneNumber}
-            userId={userId}
-            email={email}
-            name={name}
-            gender={gender}
-          />);
+          if (gameId) {
+            navigate(`/game/${gameId}/avatar`);
+          } else {
+            // Legacy navigation for non-game flows
+            navigate('/avatar', { 
+              state: { 
+                phoneNumber, 
+                userId, 
+                email, 
+                name, 
+                gender 
+              }
+            });
+          }
           
           // Clean up listeners
           socket.off('gender_saved', handleGenderSaved);
@@ -104,20 +90,22 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name }: S
         socket.on('gender_save_error', handleGenderError);
         
       } else {
-        console.warn('⚠️ No socket connection or userId available');
+        console.warn('⚠️ No socket connection available');
         setTimeout(() => {
           console.log('✅ Gender saved successfully (fallback)');
           setIsLoading(false);
           
           // Navigate to picture upload page
           console.log('🎯 Moving to picture upload page');
-          push(<PictureUploadPage 
-            phoneNumber={phoneNumber}
-            userId={userId}
-            email={email}
-            name={name}
-            gender={gender}
-          />);
+          navigate('/avatar', { 
+            state: { 
+              phoneNumber, 
+              userId, 
+              email, 
+              name, 
+              gender 
+            }
+          });
           
         }, 1000);
       }
@@ -133,7 +121,7 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name }: S
     <PageLayout 
       showHeader={true} 
       onMenuAction={handleMenuAction}
-      onBack={back}
+      onBack={() => navigate(-1)}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         

@@ -1,31 +1,26 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useNavigation } from '../contexts/NavigationContext';
-import Enter2faCodePage from './Enter2faCodePage';
-import AboutPage from '../components/AboutPage';
-import ComponentsShowcase from './ComponentsShowcase';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
 
-export default function EnterPhoneNumberPage(): JSX.Element {
+interface EnterPhoneNumberPageProps {
+  gameId?: string;
+}
+
+export default function EnterPhoneNumberPage({ gameId }: EnterPhoneNumberPageProps = {}): JSX.Element {
   const { texts } = useLanguage();
   const { socket } = useSocket();
-  const { push } = useNavigation();
+  const { handleMenuAction } = useMenuNavigation(); // For menu navigation
+  const navigate = useNavigate(); // For game flow navigation
   
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleMenuAction = (page: string) => {
-    if (page === 'about') {
-      push(<AboutPage />);
-    } else if (page === 'components') {
-      push(<ComponentsShowcase />);
-    }
-  };
 
   // Set up socket event listeners once when component mounts
   useEffect(() => {
@@ -35,8 +30,12 @@ export default function EnterPhoneNumberPage(): JSX.Element {
       setIsLoading(false);
       if (data.success) {
         console.log('📱 SMS sent successfully:', data);
-        // Navigate to 2FA page
-        push(<Enter2faCodePage phoneNumber={phoneNumber} />);
+        // Navigate to 2FA page with React Router
+        if (gameId) {
+          navigate(`/game/${gameId}/verify`);
+        } else {
+          navigate('/game/new/verify');
+        }
       } else {
         setError(data.message || 'שגיאה בשליחת SMS');
       }

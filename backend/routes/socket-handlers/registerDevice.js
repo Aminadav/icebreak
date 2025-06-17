@@ -3,7 +3,12 @@ const { getUserDetails } = require('./utils');
 
 async function handleRegisterDevice(socket, data) {
   try {
-    const { deviceId } = data || {};
+    // Use device ID from socket (attached during connection) or fallback to data
+    const deviceId = socket.deviceId || data?.deviceId;
+    
+    if (!deviceId) {
+      throw new Error('No device ID available for registration');
+    }
     
     const result = await Device.registerDevice(deviceId);
     

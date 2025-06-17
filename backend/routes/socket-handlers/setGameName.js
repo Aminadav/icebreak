@@ -5,7 +5,9 @@ async function handleSetGameName(socket, data) {
   try {
     const { gameName } = data;
     
-    validateDeviceRegistration(socket);
+    if (!socket.deviceId) {
+      throw new Error('Device not registered');
+    }
     
     if (!gameName || gameName.trim().length === 0) {
       throw new Error('Game name is required');

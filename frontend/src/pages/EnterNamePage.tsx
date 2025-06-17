@@ -1,40 +1,32 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
 import NameConfirmationModal from '../components/NameConfirmationModal';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useModal } from '../contexts/ModalContext';
 import { useSocket } from '../contexts/SocketContext';
-import AboutPage from '../components/AboutPage';
-import ComponentsShowcase from './ComponentsShowcase';
-import SelectGenderPage from './SelectGenderPage';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
 
 interface EnterNamePageProps {
   phoneNumber?: string;
   userId?: string;
   email?: string;
+  gameId?: string;
 }
 
-export default function EnterNamePage({ phoneNumber, userId, email }: EnterNamePageProps): JSX.Element {
+export default function EnterNamePage({ phoneNumber, userId, email, gameId }: EnterNamePageProps): JSX.Element {
   const DEBUG = false;
   const { texts } = useLanguage();
-  const { back, push } = useNavigation();
+  const { handleMenuAction } = useMenuNavigation();
   const { openModal } = useModal();
   const { socket } = useSocket();
+  const navigate = useNavigate();
   
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-
-  const handleMenuAction = (page: string) => {
-    if (page === 'about') {
-      push(<AboutPage />);
-    } else if (page === 'components') {
-      push(<ComponentsShowcase />);
-    }
-  };
 
   const handleContinue = async () => {
     if (!name.trim()) {
@@ -57,25 +49,34 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
     try {
       console.log('📤 Saving name:', name);
       
-      if (socket && userId) {
-        // Save name to backend via socket
+      if (socket) {
+        // Save name to backend via socket (userId is auto-derived from device ID)
         socket.emit('save_user_name', {
-          name: name.trim(),
-          userId
+          name: name.trim()
         });
         
         // Listen for response
         const handleNameSaved = (data: any) => {
           console.log('✅ Name saved successfully:', data);
+          console.log('🎮 gameId:', gameId, 'type:', typeof gameId);
           setIsLoading(false);
           
           // Navigate to gender selection page
-          push(<SelectGenderPage 
-            phoneNumber={phoneNumber}
-            userId={userId}
-            email={email}
-            name={name}
-          />);
+          if (gameId) {
+            console.log('🚀 Navigating to gender page with gameId:', gameId);
+            navigate(`/game/${gameId}/gender`);
+          } else {
+            // Legacy navigation for non-game flows
+            console.log('🚀 Using navigate to gender page');
+            navigate('/gender', { 
+              state: { 
+                phoneNumber, 
+                userId, 
+                email, 
+                name 
+              }
+            });
+          }
           
           // Clean up listener
           socket.off('name_saved', handleNameSaved);
@@ -94,19 +95,21 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
         socket.on('name_save_error', handleNameError);
         
       } else {
-        console.warn('⚠️ No socket connection or userId available');
+        console.warn('⚠️ No socket connection available');
         // Fallback: simulate saving and navigate
         await new Promise(resolve => setTimeout(resolve, 500));
         console.log('✅ Name saved successfully (fallback)');
         setIsLoading(false);
         
         // Navigate to gender selection page
-        push(<SelectGenderPage 
-          phoneNumber={phoneNumber}
-          userId={userId}
-          email={email}
-          name={name}
-        />);
+        navigate('/gender', { 
+          state: { 
+            phoneNumber, 
+            userId, 
+            email, 
+            name 
+          }
+        });
       }
       
     } catch (error) {
@@ -130,7 +133,7 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
     <PageLayout 
       showHeader={true} 
       onMenuAction={handleMenuAction}
-      onBack={back}
+      onBack={() => navigate(-1)}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Name Entry Icon */}

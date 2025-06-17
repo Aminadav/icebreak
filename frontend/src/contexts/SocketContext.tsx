@@ -1,17 +1,11 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getDeviceId, setDeviceId, generateUUID } from '../utils/deviceManager';
-import { NavigationController, type JourneyState } from '../utils/NavigationController';
-import { useNavigation } from './NavigationContext';
 
 interface SocketContextType {
   socket: Socket | null;
   isConnected: boolean;
-  deviceId: string | null;
-  userId: string | null;
   error: string | null;
-  resetAutoNavigation: () => void;
-  resetJourneyState: () => void;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -23,35 +17,40 @@ interface SocketProviderProps {
 export function SocketProvider({ children }: SocketProviderProps) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [deviceId, setDeviceIdState] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [hasAutoNavigated, setHasAutoNavigated] = useState(false);
-  const isInitialConnectionRef = useRef(true);
-  
-  // Get navigation functions
-  const { reset: navigationReset } = useNavigation();
 
   useEffect(() => {
     console.log('🚀 SocketProvider: Initializing socket connection...');
     
-    // Create socket connection
+    // Get or create device ID immediately
+    let currentDeviceId = getDeviceId();
+    if (!currentDeviceId) {
+      currentDeviceId = generateUUID();
+      setDeviceId(currentDeviceId);
+      console.log('🆔 Generated new device ID:', currentDeviceId);
+    } else {
+      console.log('🆔 Using existing device ID from localStorage:', currentDeviceId);
+    }
+
+    // Create socket connection with device ID as query parameter
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
     const newSocket = io(backendUrl, {
       transports: ['polling', 'websocket'],
-      timeout: 10000
+      timeout: 10000,
+      query: {
+        deviceId: currentDeviceId
+      }
     });
 
     // Handle connection
     newSocket.on('connect', () => {
-      console.log('✅ Socket connected! ID:', newSocket.id);
-      console.log('🔍 Is initial connection:', isInitialConnectionRef.current);
+      console.log('✅ Socket connected! ID:', newSocket.id, 'Device ID:', currentDeviceId);
       setSocket(newSocket);
       setIsConnected(true);
       setError(null);
       
-      // Register device after connection
-      registerDevice(newSocket);
+      // Device registration happens automatically on backend
+      console.log('🔄 Device registration handled automatically by backend');
     });
 
     // Handle connection errors
@@ -65,75 +64,15 @@ export function SocketProvider({ children }: SocketProviderProps) {
     newSocket.on('disconnect', (reason) => {
       console.log('📱 Socket disconnected:', reason);
       setIsConnected(false);
-      // Mark that subsequent connections are reconnections
-      isInitialConnectionRef.current = false;
     });
 
     // Handle device registration response
     newSocket.on('device_registered', (data) => {
       console.log('✅ Device registered successfully:', data);
-      console.log('🔍 Journey state received:', data.journeyState);
-      console.log('🔍 Journey state type:', typeof data.journeyState);
-      console.log('🔍 Has already auto-navigated?', hasAutoNavigated);
-      console.log('🔍 NavigationController.shouldAutoNavigate result:', data.journeyState ? NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) : 'No journey state');
-      console.log('🔍 Should auto-navigate?', data.journeyState && NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) && !hasAutoNavigated);
       
       if (data.success) {
-        setDeviceIdState(data.deviceId);
-        setUserId(data.userId);
-        // Save device ID to localStorage for future use
-        setDeviceId(data.deviceId);
-        
-        // Check if we're on the admin page - don't auto-navigate in that case
-        const isOnAdminPage = window.location.pathname === '/admin';
-        
-        // Handle auto-navigation based on journey state (only on initial connection, not reconnections)
-        const shouldAutoNavigate = data.journeyState && 
-          NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) && 
-          !hasAutoNavigated && 
-          !isOnAdminPage && 
-          isInitialConnectionRef.current; // Only auto-navigate on initial connection
-        
-        if (shouldAutoNavigate) {
-          console.log(`🎯 Auto-navigating to journey state: ${data.journeyState}`);
-          console.log('📊 Navigation data:', data);
-          
-          try {
-            console.log(0)
-            const targetComponent = NavigationController.getComponentForJourneyState(
-              data.journeyState as JourneyState,
-              data
-            );
-            console.log(1)
-            
-            console.log('🎯 Target component:', typeof targetComponent.type === 'function' ? targetComponent.type.name : targetComponent.type);
-            console.log('🎯 Target component props:', targetComponent.props);
-            
-            if (targetComponent) {
-              // Set flag to prevent future auto-navigation
-              setHasAutoNavigated(true);
-              
-              // Use setTimeout to ensure navigation happens after current render cycle
-              setTimeout(() => {
-                console.log('🚀 Executing navigation reset...');
-                console.log('🚀 Navigation reset function available?', !!navigationReset);
-                navigationReset(targetComponent);
-                console.log('🚀 Navigation reset completed');
-              }, 100);
-            } else {
-              console.warn('⚠️ Target component is null/undefined');
-            }
-          } catch (error) {
-            console.error('❌ Error during auto-navigation:', error);
-          }
-        } else {
-          console.log('⏭️ Skipping auto-navigation - reasons:');
-          console.log('  - Has journey state?', !!data.journeyState);
-          console.log('  - Should auto-navigate?', data.journeyState ? NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) : false);
-          console.log('  - Already auto-navigated?', hasAutoNavigated);
-          console.log('  - Is on admin page?', window.location.pathname === '/admin');
-          console.log('  - Is initial connection?', isInitialConnectionRef.current);
-        }
+        // Device ID is already managed, just log confirmation
+        console.log('✅ Device registration confirmed. User ID:', data.userId || 'None (not verified)');
       } else {
         console.error('❌ Device registration failed:', data);
       }
@@ -150,52 +89,12 @@ export function SocketProvider({ children }: SocketProviderProps) {
       console.log('🧹 SocketProvider: Cleaning up socket connection...');
       newSocket.disconnect();
     };
-  }, []); // Remove navigationReset from dependencies to prevent infinite loop
-
-  const registerDevice = (socketInstance: Socket) => {
-    // Get existing device ID or generate a new one
-    let currentDeviceId = getDeviceId();
-    
-    if (!currentDeviceId) {
-      currentDeviceId = generateUUID();
-      console.log('🆔 Generated new device ID:', currentDeviceId);
-    } else {
-      console.log('🆔 Using existing device ID:', currentDeviceId);
-    }
-
-    // Emit register_device event
-    console.log('📤 Emitting register_device event with deviceId:', currentDeviceId);
-    socketInstance.emit('register_device', { deviceId: currentDeviceId });
-  };
-
-  const resetAutoNavigation = () => {
-    console.log('🔄 Resetting auto-navigation flag');
-    setHasAutoNavigated(false);
-    isInitialConnectionRef.current = true; // Reset to allow auto-navigation again
-  };
-
-  const resetJourneyState = () => {
-    if (!socket) {
-      console.warn('⚠️ Cannot reset journey state - socket not connected');
-      return;
-    }
-    
-    console.log('🔄 Resetting journey state to INITIAL');
-    socket.emit('reset_journey_state');
-    
-    // Reset the auto-navigation flag and initial connection flag so it can work again after reset
-    setHasAutoNavigated(false);
-    isInitialConnectionRef.current = true;
-  };
+  }, []); // No dependencies - device ID is managed internally
 
   const value: SocketContextType = {
     socket,
     isConnected,
-    deviceId,
-    userId,
-    error,
-    resetAutoNavigation,
-    resetJourneyState
+    error
   };
 
   return (

@@ -1,12 +1,13 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
 import ShareGameModal from '../components/ShareGameModal';
 import { useSocket } from '../contexts/SocketContext';
 import { useModal } from '../contexts/ModalContext';
-import { useNavigation } from '../contexts/NavigationContext';
-import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGameId } from '../utils/useGameId';
 
 interface CreatorGameReadyPageProps {
   phoneNumber: string;
@@ -15,59 +16,22 @@ interface CreatorGameReadyPageProps {
   name: string;
   gender: string;
   selectedImageHash: string;
+  gameId?: string; // Add gameId for React Router support
 }
 
 export default function CreatorGameReadyPage({ 
-  phoneNumber, 
-  userId, 
-  email, 
-  name, 
-  gender, 
-  selectedImageHash 
 }: CreatorGameReadyPageProps): JSX.Element {
   const { socket } = useSocket();
   const { openModal } = useModal();
-  const { push } = useNavigation();
+  const { handleMenuAction } = useMenuNavigation();
+  const navigate = useNavigate();
 
-  // Update journey state when component mounts
-  useEffect(() => {
-    const updateJourneyState = async () => {
-      if (socket) {
-        try {
-          socket.emit('update_journey_state', { 
-            journeyState: 'CREATOR_GAME_READY',
-            additionalData: {
-              phoneNumber,
-              userId,
-              email,
-              name,
-              gender,
-              selectedImageHash
-            }
-          });
-          console.log('🎯 Journey state updated to CREATOR_GAME_READY');
-        } catch (error) {
-          console.error('Failed to update journey state:', error);
-        }
-      }
-    };
-
-    updateJourneyState();
-  }, [socket, phoneNumber, userId, email, name, gender, selectedImageHash]);
+  var gameId=useGameId()
 
   const handleStartGame = () => {
     console.log('🎮 Starting game...');
     // Navigate to BeforeStartAskAboutYou page
-    push(
-      <BeforeStartAskAboutYou
-        phoneNumber={phoneNumber}
-        userId={userId}
-        email={email}
-        name={name}
-        gender={gender}
-        selectedImageHash={selectedImageHash}
-      />
-    );
+    navigate(`/game/${gameId}/before-start`);
   };
 
   const handleShareGame = () => {
@@ -77,16 +41,7 @@ export default function CreatorGameReadyPage({
         onStartPlay={() => {
           console.log('🎮 Starting game from modal...');
           // Navigate to BeforeStartAskAboutYou page
-          push(
-            <BeforeStartAskAboutYou
-              phoneNumber={phoneNumber}
-              userId={userId}
-              email={email}
-              name={name}
-              gender={gender}
-              selectedImageHash={selectedImageHash}
-            />
-          );
+          navigate(`game/${gameId}/before-start`);
         }}
         onShareGame={() => {
           console.log('📤 Sharing game from modal...');
@@ -94,11 +49,6 @@ export default function CreatorGameReadyPage({
         }}
       />
     );
-  };
-
-  const handleMenuAction = (action: string) => {
-    // Handle menu actions if needed
-    console.log('Menu action:', action);
   };
 
   return (

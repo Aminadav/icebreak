@@ -1,37 +1,29 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
-import AboutPage from '../components/AboutPage';
-import ComponentsShowcase from './ComponentsShowcase';
-import EnterNamePage from './EnterNamePage';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
 
 interface EnterEmailPageProps {
   phoneNumber?: string;
   userId?: string;
+  gameId?: string;
 }
 
-export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPageProps): JSX.Element {
+export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEmailPageProps): JSX.Element {
   const DEBUG=false
   const { texts } = useLanguage();
-  const { back, push } = useNavigation();
+  const { handleMenuAction } = useMenuNavigation(); // For menu navigation
   const { socket } = useSocket();
+  const navigate = useNavigate(); // For game flow navigation
   
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleMenuAction = (page: string) => {
-    if (page === 'about') {
-      push(<AboutPage />);
-    } else if (page === 'components') {
-      push(<ComponentsShowcase />);
-    }
-  };
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -65,36 +57,35 @@ export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPagePr
     try {
       console.log('📤 Saving email address:', email);
       
-      // Emit email save request
+      // Emit email save request (userId is auto-derived from device ID)
       socket.emit('save_email', { 
-        email: email.toLowerCase().trim(),
-        userId 
+        email: email.toLowerCase().trim()
       });
       
       // Listen for response
       const handleEmailSaved = (data: any) => {
         setIsLoading(false);
         console.log('✅ Email saved successfully:', data);
+        console.log('🎯 Navigation info:', { gameId, hasNavigate: !!navigate, hasGameId: !!gameId });
         
         // Navigate to enter name page
-        push(<EnterNamePage phoneNumber={phoneNumber} userId={userId} email={email.toLowerCase().trim()} />);
-        
-        // Cleanup listener
-        socket.off('email_saved', handleEmailSaved);
-        socket.off('email_save_error', handleEmailError);
+        if (gameId) {
+          console.log('🚀 Navigating to player-name page with gameId:', gameId);
+          navigate(`/game/${gameId}/player-name`);
+        } else {
+          console.log('🚀 Using navigation to enter name page');
+          // Legacy navigation for non-game flows
+          navigate('/game/new/player-name');
+        }
       };
       
       const handleEmailError = (data: any) => {
         setIsLoading(false);
         setError(data.message || 'שגיאה בשמירת כתובת האימייל');
         console.error('❌ Email save error:', data);
-        
-        // Cleanup listener
-        socket.off('email_saved', handleEmailSaved);
-        socket.off('email_save_error', handleEmailError);
       };
       
-      // Set up one-time listeners
+      // Set up one-time listeners (no need to manually remove with once)
       socket.once('email_saved', handleEmailSaved);
       socket.once('email_save_error', handleEmailError);
       
@@ -118,7 +109,7 @@ export default function EnterEmailPage({ phoneNumber, userId }: EnterEmailPagePr
     <PageLayout 
       showHeader={true} 
       onMenuAction={handleMenuAction}
-      onBack={back}
+      // onBack={back}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Email Icon */}

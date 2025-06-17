@@ -41,8 +41,8 @@ async function sendToMixpanel(eventData) {
       return { success: false, error: 'No distinct_id available' };
     }
     
-    console.log(`📊 Sending to Mixpanel: ${trackingId} for ${distinctId}`);
-    console.log('📊 Event properties:', JSON.stringify(eventProperties, null, 2));
+    // console.log(`📊 Sending to Mixpanel: ${trackingId} for ${distinctId}`);
+    // console.log('📊 Event properties:', JSON.stringify(eventProperties, null, 2));
     
     // Send event to Mixpanel
     try {

@@ -1,8 +1,7 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
-import HomePage from '../pages/HomePage';
 import TopMenu from './TopMenu';
 
 interface IceBreakProps {
@@ -33,19 +32,15 @@ interface MainHeaderProps {
 
 export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Element {
   const { texts } = useLanguage();
-  const { reset } = useNavigation();
-  const { resetJourneyState } = useSocket();
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isRTL = texts.direction === 'rtl';
 
   const handleLogoClick = () => {
-    console.log('🏠 Logo clicked - resetting journey state and navigating to homepage');
+    console.log('🏠 Logo clicked - navigating to homepage');
     
-    // Reset the journey state on the backend
-    resetJourneyState();
-    
-    // Navigate to homepage
-    reset(<HomePage />);
+    // Navigate to homepage using React Router
+    navigate('/');
   };
 
   const toggleMenu = () => {

@@ -1,44 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 
-// All available journey states
-const JOURNEY_STATES = [
-  'INITIAL',
-  'GAME_NAME_ENTRY',
-  'GAME_NAME_SET', 
-  'PHONE_SUBMITTED',
-  'PHONE_VERIFIED',
-  'EMAIL_SAVED',
-  'NAME_SAVED',
-  'GENDER_SELECTION',
-  'PICTURE_UPLOAD',
-  'CAMERA_ACTIVE',
-  'PICTURE_ENHANCEMENT',
-  'IMAGE_GALLERY',
-  'CREATOR_GAME_READY',
-  'BEFORE_START_ASK_ABOUT_YOU'
-];
-
-// Human-readable descriptions for journey states
-const STATE_DESCRIPTIONS: Record<string, string> = {
-  'INITIAL': 'Starting point - Home page',
-  'GAME_NAME_ENTRY': 'Game name entry page',
-  'GAME_NAME_SET': 'Game name set, ready for phone number',
-  'PHONE_SUBMITTED': 'Phone submitted, waiting for 2FA verification',
-  'PHONE_VERIFIED': 'Phone verified, ready for email',
-  'EMAIL_SAVED': 'Email saved, ready for name entry',
-  'NAME_SAVED': 'Name saved, ready for gender selection',
-  'GENDER_SELECTION': 'Gender selection in progress',
-  'PICTURE_UPLOAD': 'Picture upload in progress',
-  'CAMERA_ACTIVE': 'Camera active for photo capture',
-  'PICTURE_ENHANCEMENT': 'Picture enhancement in progress',
-  'IMAGE_GALLERY': 'Image gallery selection in progress',
-  'CREATOR_GAME_READY': 'Game is ready to play by creator',
-  'BEFORE_START_ASK_ABOUT_YOU': 'Pre-game questions introduction page'
-};
 
 export default function AdminPageSimple(): JSX.Element {
-  const { socket, deviceId, userId } = useSocket();
+  const { socket } = useSocket();
   const [currentState, setCurrentState] = useState<string>('INITIAL');
   const [selectedState, setSelectedState] = useState<string>('INITIAL');
   const [isLoading, setIsLoading] = useState(false);
@@ -89,10 +54,10 @@ export default function AdminPageSimple(): JSX.Element {
 
   // Initial device registration to get current state
   useEffect(() => {
-    if (socket && deviceId) {
-      socket.emit('register_device', { deviceId });
+    if (socket) {
+      console.log('Admin: Auto device registration handled by SocketContext');
     }
-  }, [socket, deviceId]);
+  }, [socket]);
 
   const handleUpdateState = (newState?: string) => {
     const stateToUpdate = newState || selectedState;
@@ -105,7 +70,6 @@ export default function AdminPageSimple(): JSX.Element {
     setMessage('');
     
     console.log('🎯 Admin: Updating journey state to:', stateToUpdate);
-    socket.emit('update_journey_state', { journeyState: stateToUpdate });
   };
 
   const handleStateChange = (newState: string) => {
@@ -129,33 +93,13 @@ export default function AdminPageSimple(): JSX.Element {
           <div className="font-medium">{message}&nbsp;</div>
         </div>
 
-        {/* Available States Reference */}
-        <div className="p-6 bg-gray-800 rounded-lg">
-          <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
-            {JOURNEY_STATES.map(state => (
-              <button
-                key={state}
-                onClick={() => handleStateChange(state)}
-                disabled={isLoading}
-                className={`p-2 rounded text-left transition-colors hover:bg-opacity-80 disabled:cursor-not-allowed ${
-                  state === currentState 
-                    ? 'bg-green-900 border border-green-600' 
-                    : 'bg-gray-700 hover:bg-gray-600'
-                }`}
-              >
-                <div className="font-mono text-blue-300">{state}</div>
-                <div className="text-xs text-gray-400">{STATE_DESCRIPTIONS[state]}</div>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Device Info */}
         <div className="p-6 mb-6 bg-gray-800 rounded-lg">
           <h2 className="mb-4 text-xl font-semibold">📱 Device Information</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><strong>Device ID:</strong> {deviceId || 'Not connected'}</div>
-            <div><strong>User ID:</strong> {userId || 'None'}</div>
+            <div><strong>Device ID:</strong> Auto-managed</div>
+            <div><strong>User ID:</strong> {deviceInfo?.userId || 'None'}</div>
             <div><strong>Verified:</strong> {deviceInfo?.isVerified ? 'Yes' : 'No'}</div>
             <div><strong>Phone:</strong> {deviceInfo?.phoneNumber || 'Not set'}</div>
             <div><strong>Email:</strong> {deviceInfo?.email || 'Not set'}</div>

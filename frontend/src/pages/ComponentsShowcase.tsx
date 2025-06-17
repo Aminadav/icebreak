@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import MainHeader from '../components/MainHeader';
@@ -6,7 +7,6 @@ import TopMenu from '../components/TopMenu';
 import Answer from '../components/Answer';
 import AnswerContainer from '../components/AnswerContainer';
 import AnimatedImage from '../components/AnimatedImage';
-import { useNavigation } from '../contexts/NavigationContext';
 
 // WhatsApp icon component for examples
 const WhatsAppIcon = () => (
@@ -16,7 +16,7 @@ const WhatsAppIcon = () => (
 );
 
 export default function ComponentsShowcase() {
-  const { back } = useNavigation();
+  const navigate = useNavigate();
   const [isTopMenuOpen, setIsTopMenuOpen] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   
@@ -42,7 +42,7 @@ export default function ComponentsShowcase() {
       {/* Header */}
       <div className="bg-white bg-opacity-10 backdrop-blur-sm border-b border-white border-opacity-20 p-6">
         <button
-          onClick={back}
+          onClick={() => navigate('/')}
           className="mb-4 flex items-center gap-2 text-white hover:text-purple-200 transition-colors duration-200"
         >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">

@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigation } from '../contexts/NavigationContext';
+import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../contexts/SocketContext';
 import { useLanguage } from '../contexts/LanguageContext';
-import ImageGalleryPage from './ImageGalleryPage';
 
 // Declare global FaceDetection type for MediaPipe
 declare global {
@@ -20,6 +19,7 @@ interface CameraPageProps {
   email?: string;
   name?: string;
   gender?: string;
+  gameId?: string; // Add gameId for React Router support
 }
 
 export default function CameraPage({ 
@@ -28,10 +28,11 @@ export default function CameraPage({
   userId, 
   email, 
   name, 
-  gender 
+  gender,
+  gameId 
 }: CameraPageProps): JSX.Element {
   const DEBUG=false
-  const { back, push } = useNavigation();
+  const navigate = useNavigate();
   const { socket } = useSocket();
   const { texts } = useLanguage();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -226,34 +227,6 @@ export default function CameraPage({
     };
 
     initFaceDetection();
-
-    // Update journey state when camera page mounts
-    const updateJourneyState = async () => {
-      if (socket) {
-        try {
-          socket.emit('update_journey_state', { 
-            journeyState: 'CAMERA_ACTIVE',
-            additionalData: {
-              phoneNumber,
-              userId,
-              email,
-              name,
-              gender
-            }
-          });
-          console.log('📸 Updated journey state to CAMERA_ACTIVE with user data', {
-            phoneNumber, userId, email, name, gender
-          });
-        } catch (error) {
-          console.error('Failed to update journey state:', error);
-        }
-      }
-    };
-
-    // Only update if we have the necessary data
-    if (phoneNumber && userId && email && name && gender) {
-      updateJourneyState();
-    }
 
     startCamera();
     
@@ -463,7 +436,7 @@ export default function CameraPage({
         reader.onload = () => {
           const base64Data = reader.result as string;
           const base64WithoutPrefix = base64Data.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-          
+          console.log('!!!!')
           console.log('📤 Emitting image upload...');
           socket.emit('upload_pending_image', {
             imageData: base64WithoutPrefix,
@@ -555,6 +528,7 @@ export default function CameraPage({
         height
       );
 
+      console.log(3)
       // Convert the cropped canvas to blob
       return new Promise<void>((resolve) => {
         cropCanvasRef.current!.toBlob(async (blob) => {
@@ -571,20 +545,7 @@ export default function CameraPage({
               const imageHash = await uploadImage(blob);
               
               if (imageHash) {
-                // Create object URL for the captured image to pass to gallery
-                const capturedImageUrl = URL.createObjectURL(blob);
-                
-                push(
-                  <ImageGalleryPage 
-                    originalImageHash={imageHash}
-                    phoneNumber={phoneNumber}
-                    userId={userId}
-                    email={email}
-                    name={name}
-                    gender={gender}
-                    capturedImageUrl={capturedImageUrl}
-                  />
-                );
+                navigate(`/game/${gameId}/gallery`);
               } else {
                 console.error('Failed to upload image');
                 setUploadError('שגיאה בהעלאת התמונה');
@@ -608,7 +569,7 @@ export default function CameraPage({
 
   const handleClose = () => {
     stopCamera();
-    back();
+    navigate(-1);
   };
 
   return (

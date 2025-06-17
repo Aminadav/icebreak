@@ -15,7 +15,12 @@ export default function PageLayout({ children, onBack, title, showHeader, onMenu
   const isRTL = texts.direction === 'rtl';
 
   return (
-    <div className="relative min-h-screen">
+    <div 
+      className="relative min-h-screen bg-cover bg-center bg-no-repeat"
+      style={{
+        backgroundImage: "url('/images/backgrounds/background.png')"
+      }}
+    >
       {/* Header */}
       {showHeader && (
         <MainHeader onMenuAction={onMenuAction} />

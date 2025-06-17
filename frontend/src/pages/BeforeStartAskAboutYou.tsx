@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
 import MyPoints from '../components/MyPoints';
 import { useSocket } from '../contexts/SocketContext';
+import { useGameId } from '../utils/useGameId';
 
 interface BeforeStartAskAboutYouProps {
   phoneNumber: string;
@@ -12,48 +14,22 @@ interface BeforeStartAskAboutYouProps {
   name: string;
   gender: string;
   selectedImageHash: string;
+  gameId?: string;
 }
 
-export default function BeforeStartAskAboutYou({ 
-  phoneNumber, 
-  userId, 
-  email, 
-  name, 
-  gender, 
-  selectedImageHash 
-}: BeforeStartAskAboutYouProps): JSX.Element {
-  const { socket } = useSocket();
-
-  // Update journey state when component mounts
-  useEffect(() => {
-    const updateJourneyState = async () => {
-      if (socket) {
-        try {
-          socket.emit('update_journey_state', { 
-            journeyState: 'BEFORE_START_ASK_ABOUT_YOU',
-            additionalData: {
-              phoneNumber,
-              userId,
-              email,
-              name,
-              gender,
-              selectedImageHash
-            }
-          });
-          console.log('🎯 Journey state updated to BEFORE_START_ASK_ABOUT_YOU');
-        } catch (error) {
-          console.error('Failed to update journey state:', error);
-        }
-      }
-    };
-
-    updateJourneyState();
-  }, [socket, phoneNumber, userId, email, name, gender, selectedImageHash]);
+export default function BeforeStartAskAboutYou(): JSX.Element {
+  const navigate = useNavigate();
+  var gameId=useGameId()
 
   const handleStartQuestions = () => {
     console.log('🎮 Starting questions...');
-    // TODO: Navigate to questions page when implemented
-    // For now, just log the action
+    if (gameId) {
+      // Navigate to questions page using React Router
+      navigate(`/game/${gameId}/questions`);
+    } else {
+      // For legacy non-game flows, log for now
+      console.log('⚠️ No gameId provided, cannot navigate to questions');
+    }
   };
 
   const handleMenuAction = (action: string) => {

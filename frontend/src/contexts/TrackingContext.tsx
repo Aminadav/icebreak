@@ -12,7 +12,7 @@ interface TrackingProviderProps {
 }
 
 export function TrackingProvider({ children }: TrackingProviderProps) {
-  const { socket, deviceId, userId } = useSocket();
+  const { socket,  } = useSocket();
 
   const trackEvent = (trackingId: string, eventData: Record<string, any> = {}) => {
     if (!socket || !trackingId) {
@@ -22,10 +22,10 @@ export function TrackingProvider({ children }: TrackingProviderProps) {
 
     const eventPayload = {
       trackingId,
-      deviceId,
-      userId,
-      timestamp: new Date().toISOString(),
-      ...eventData
+      // deviceId,
+      // userId,
+      // timestamp: new Date().toISOString(),
+      // ...eventData
     };
 
     console.log('📊 Tracking event:', eventPayload);

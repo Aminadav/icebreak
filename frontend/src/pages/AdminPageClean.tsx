@@ -4,6 +4,7 @@ import { useSocket } from '../contexts/SocketContext';
 // All available journey states
 const JOURNEY_STATES = [
   'INITIAL',
+  'GIVE_GAME_NAME',
   'GAME_NAME_ENTRY',
   'GAME_NAME_SET', 
   'PHONE_SUBMITTED',
@@ -21,6 +22,7 @@ const JOURNEY_STATES = [
 // Human-readable descriptions for journey states
 const STATE_DESCRIPTIONS: Record<string, string> = {
   'INITIAL': 'Starting point - Home page',
+  'GIVE_GAME_NAME': 'Router-based game name entry',
   'GAME_NAME_ENTRY': 'Game name entry page',
   'GAME_NAME_SET': 'Game name set, ready for phone number',
   'PHONE_SUBMITTED': 'Phone submitted, waiting for 2FA verification',
@@ -36,7 +38,7 @@ const STATE_DESCRIPTIONS: Record<string, string> = {
 };
 
 export default function AdminPageSimple(): JSX.Element {
-  const { socket, deviceId, userId } = useSocket();
+  const { socket } = useSocket();
   const [currentState, setCurrentState] = useState<string>('INITIAL');
   const [selectedState, setSelectedState] = useState<string>('INITIAL');
   const [isLoading, setIsLoading] = useState(false);
@@ -50,13 +52,13 @@ export default function AdminPageSimple(): JSX.Element {
 
     const interval = setInterval(() => {
       // Re-register device to get current state
-      if (deviceId) {
-        socket.emit('register_device', { deviceId });
+      if (socket) {
+        console.log('Admin: Auto device registration handled by SocketContext');
       }
     }, 500);
 
     return () => clearInterval(interval);
-  }, [socket, deviceId, autoRefresh]);
+  }, [socket, autoRefresh]);
 
   // Set up socket event listeners
   useEffect(() => {
@@ -100,10 +102,10 @@ export default function AdminPageSimple(): JSX.Element {
 
   // Initial device registration to get current state
   useEffect(() => {
-    if (socket && deviceId) {
-      socket.emit('register_device', { deviceId });
+    if (socket) {
+      console.log('Admin: Auto device registration handled by SocketContext');
     }
-  }, [socket, deviceId]);
+  }, [socket]);
 
   const handleUpdateState = () => {
     if (!socket || !selectedState) {
@@ -115,7 +117,6 @@ export default function AdminPageSimple(): JSX.Element {
     setMessage('');
     
     console.log('🎯 Admin: Updating journey state to:', selectedState);
-    socket.emit('update_journey_state', { journeyState: selectedState });
   };
 
   const handleResetToInitial = () => {
@@ -141,8 +142,8 @@ export default function AdminPageSimple(): JSX.Element {
         <div className="bg-gray-800 rounded-lg p-6 mb-6">
           <h2 className="text-xl font-semibold mb-4">📱 Device Information</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><strong>Device ID:</strong> {deviceId || 'Not connected'}</div>
-            <div><strong>User ID:</strong> {userId || 'None'}</div>
+            <div><strong>Device ID:</strong> Auto-managed</div>
+            <div><strong>User ID:</strong> {deviceInfo?.userId || 'None'}</div>
             <div><strong>Verified:</strong> {deviceInfo?.isVerified ? 'Yes' : 'No'}</div>
             <div><strong>Phone:</strong> {deviceInfo?.phoneNumber || 'Not set'}</div>
             <div><strong>Email:</strong> {deviceInfo?.email || 'Not set'}</div>

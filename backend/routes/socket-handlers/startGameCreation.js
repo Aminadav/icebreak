@@ -3,7 +3,9 @@ const { validateDeviceRegistration } = require('./utils');
 
 async function handleStartGameCreation(socket) {
   try {
-    validateDeviceRegistration(socket);
+    if (!socket.deviceId) {
+      throw new Error('Device not registered');
+    }
     
     // Update journey state to GAME_NAME_ENTRY
     await Device.updateJourneyState(socket.deviceId, 'GAME_NAME_ENTRY');

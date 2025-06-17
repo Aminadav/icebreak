@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useModal } from '../contexts/ModalContext';
 import { useSocket } from '../contexts/SocketContext';
-import AboutPage from '../components/AboutPage';
-import ComponentsShowcase from './ComponentsShowcase';
-import CameraPage from './CameraPage';
-import ImageGalleryPage from './ImageGalleryPage';
-import CreatorGameReadyPage from './CreatorGameReadyPage';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
 import SkipConfirmationModal from '../components/SkipConfirmationModal';
+import { useGameId } from '../utils/useGameId';
 
 interface PictureUploadPageProps {
   phoneNumber?: string;
@@ -18,53 +15,20 @@ interface PictureUploadPageProps {
   email?: string;
   name?: string;
   gender?: string;
+  gameId?: string; // Add gameId for React Router support
 }
 
 export default function PictureUploadPage({ phoneNumber, userId, email, name, gender }: PictureUploadPageProps): JSX.Element {
   const { texts } = useLanguage();
-  const { back, push } = useNavigation();
+  const { handleMenuAction } = useMenuNavigation();
   const { openModal } = useModal();
   const { socket } = useSocket();
+  const navigate = useNavigate();
   
   const [isLoading, setIsLoading] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<'camera' | 'gallery' | null>(null);
   const [whatsappError, setWhatsappError] = useState<string | null>(null);
   const [whatsappAvailable, setWhatsappAvailable] = useState(false);
-
-  // Update journey state when component mounts
-  useEffect(() => {
-    const updateJourneyState = async () => {
-      if (socket) {
-        try {
-          // Store all user data with journey state for proper page reload handling
-          socket.emit('update_journey_state', { 
-            journeyState: 'PICTURE_UPLOAD',
-            additionalData: {
-              phoneNumber,
-              userId,
-              email,
-              name,
-              gender
-            }
-          });
-          console.log('🎯 Updated journey state to PICTURE_UPLOAD with user data', {
-            phoneNumber, userId, email, name, gender
-          });
-        } catch (error) {
-          console.error('Failed to update journey state:', error);
-        }
-      }
-    };
-
-    // Only update if we have the necessary data
-    if (phoneNumber && userId && email && name && gender) {
-      updateJourneyState();
-    } else {
-      console.warn('⚠️ Missing user data for journey state update', {
-        phoneNumber, userId, email, name, gender
-      });
-    }
-  }, [socket, phoneNumber, userId, email, name, gender]);
 
   // Background WhatsApp download when component mounts
   useEffect(() => {
@@ -110,16 +74,16 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
         console.log('✅ WhatsApp image used successfully:', response.imageHash);
         
         // Navigate to gallery page immediately
-        push(
-          <ImageGalleryPage 
-            originalImageHash={response.imageHash}
-            phoneNumber={phoneNumber || ''}
-            userId={userId || ''}
-            email={email || ''}
-            name={name || ''}
-            gender={gender || ''}
-          />
-        );
+        navigate(`/game/${gameId}/gallery`, {
+          state: {
+            originalImageHash: response.imageHash,
+            phoneNumber: phoneNumber || '',
+            userId: userId || '',
+            email: email || '',
+            name: name || '',
+            gender: gender || ''
+          }
+        });
       } else {
         console.error('❌ WhatsApp image use failed:', response.error);
         setWhatsappError(response.message || 'Failed to use WhatsApp image');
@@ -142,7 +106,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       socket.off('whatsapp_image_used', handleWhatsappImageUsed);
       socket.off('whatsapp_image_use_error', handleWhatsappImageUseError);
     };
-  }, [socket, push, phoneNumber, userId, email, name, gender]);
+  }, [socket, navigate, phoneNumber, userId, email, name, gender]);
 
   // Handle WhatsApp image download events
   useEffect(() => {
@@ -158,16 +122,16 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
         console.log('✅ WhatsApp image downloaded successfully:', response.imageHash);
         
         // Navigate to gallery page immediately
-        push(
-          <ImageGalleryPage 
-            originalImageHash={response.imageHash}
-            phoneNumber={phoneNumber || ''}
-            userId={userId || ''}
-            email={email || ''}
-            name={name || ''}
-            gender={gender || ''}
-          />
-        );
+        navigate(`/game/${gameId}/gallery`, {
+          state: {
+            originalImageHash: response.imageHash,
+            phoneNumber: phoneNumber || '',
+            userId: userId || '',
+            email: email || '',
+            name: name || '',
+            gender: gender || ''
+          }
+        });
       } else {
         console.error('❌ WhatsApp image download failed:', response.error);
         setWhatsappError(response.message || 'Failed to download WhatsApp image');
@@ -188,15 +152,9 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       socket.off('whatsapp_image_downloaded', handleWhatsappImageDownloaded);
       socket.off('whatsapp_image_download_error', handleWhatsappImageDownloadError);
     };
-  }, [socket, push, phoneNumber, userId, email, name, gender]);
+  }, [socket, navigate, phoneNumber, userId, email, name, gender]);
 
-  const handleMenuAction = (page: string) => {
-    if (page === 'about') {
-      push(<AboutPage />);
-    } else if (page === 'components') {
-      push(<ComponentsShowcase />);
-    }
-  };
+  var gameId=useGameId();
 
   const handleCameraUpload = () => {
     setUploadMethod('camera');
@@ -205,34 +163,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
     console.log('📸 Camera upload selected - navigating to camera page');
     
     // Navigate to camera page
-    push(<CameraPage 
-      phoneNumber={phoneNumber}
-      userId={userId}
-      email={email}
-      name={name}
-      gender={gender}
-      onPictureCapture={(imageBlob: Blob) => {
-        console.log('📸 Picture captured:', imageBlob);
-        // TODO: Handle the captured image (upload to server, etc.)
-        
-        // Update journey state back to picture upload
-        if (socket) {
-          socket.emit('update_journey_state', { 
-            journeyState: 'PICTURE_UPLOAD',
-            additionalData: {
-              phoneNumber,
-              userId,
-              email,
-              name,
-              gender
-            }
-          });
-        }
-        
-        // For now, just go back to picture upload page
-        back();
-      }}
-    />);
+    navigate(`/game/${gameId}/camera`);
     
     // Reset loading state
     setIsLoading(false);
@@ -273,7 +204,11 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
     openModal(
       <SkipConfirmationModal 
         onTakePhoto={handleTakePhotoFromModal}
-        onSkip={handleConfirmedSkip}
+        phoneNumber={phoneNumber}
+        userId={userId}
+        email={email}
+        name={name}
+        gender={gender}
       />
     );
   };
@@ -283,26 +218,11 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
     handleCameraUpload();
   };
 
-  const handleConfirmedSkip = () => {
-    console.log('⏭️ User confirmed skip - navigating to Creator Game Ready page');
-    
-    // Navigate directly to Creator Game Ready page with a placeholder image hash
-    // When skipping, we use 'no-image' as a placeholder to indicate no image was selected
-    push(<CreatorGameReadyPage 
-      phoneNumber={phoneNumber || ''}
-      userId={userId || ''}
-      email={email || ''}
-      name={name || ''}
-      gender={gender || ''}
-      selectedImageHash="no-image"
-    />);
-  };
-
   return (
     <PageLayout 
       showHeader={true} 
       onMenuAction={handleMenuAction}
-      onBack={back}
+      onBack={() => navigate(-1)}
     >
       <main className="flex flex-col items-center justify-between w-full min-h-[calc(100vh-88px)] py-8 px-4">
         

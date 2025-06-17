@@ -15,6 +15,7 @@ import BeforeStartAskAboutYou from '../pages/BeforeStartAskAboutYou';
 // Journey states that match the backend
 export type JourneyState = 
   | 'INITIAL' 
+  | 'GIVE_GAME_NAME'
   | 'GAME_NAME_ENTRY'
   | 'GAME_NAME_SET' 
   | 'PHONE_SUBMITTED' 
@@ -59,25 +60,30 @@ export class NavigationController {
       case 'INITIAL':
         return <HomePage />;
         
+      case 'GIVE_GAME_NAME':
+        // This case is for React Router based navigation
+        // Should not be used for auto-navigation
+        return <HomePage />;
+        
       case 'GAME_NAME_ENTRY':
-        return <GiveGameNamePage />;
+        return <GiveGameNamePage gameId="" />;
         
       case 'GAME_NAME_SET':
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'PHONE_SUBMITTED':
         if (data.phoneNumber) {
           return <Enter2faCodePage phoneNumber={data.phoneNumber} />;
         }
         // Fallback to phone entry if no phone number stored
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'PHONE_VERIFIED':
         if (data.phoneNumber && data.userId) {
           return <EnterEmailPage phoneNumber={data.phoneNumber} userId={data.userId} />;
         }
         // Fallback to phone entry if missing data
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'EMAIL_SAVED':
         if (data.phoneNumber && data.userId && data.email) {
@@ -88,7 +94,7 @@ export class NavigationController {
           return <EnterEmailPage phoneNumber={data.phoneNumber} userId={data.userId} />;
         }
         // Ultimate fallback
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'NAME_SAVED':
         if (data.phoneNumber && data.userId && data.email && data.name) {
@@ -102,7 +108,7 @@ export class NavigationController {
         if (data.phoneNumber && data.userId) {
           return <EnterEmailPage phoneNumber={data.phoneNumber} userId={data.userId} />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'GENDER_SELECTION':
         if (data.phoneNumber && data.userId && data.email && data.name) {
@@ -112,7 +118,7 @@ export class NavigationController {
         if (data.phoneNumber && data.userId && data.email) {
           return <EnterNamePage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'PICTURE_UPLOAD':
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
@@ -122,7 +128,7 @@ export class NavigationController {
         if (data.phoneNumber && data.userId && data.email && data.name) {
           return <SelectGenderPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'CAMERA_ACTIVE':
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
@@ -132,7 +138,7 @@ export class NavigationController {
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'PICTURE_ENHANCEMENT':
         // For picture enhancement, we need a captured image blob, but since we can't store blobs in navigation data,
@@ -141,7 +147,7 @@ export class NavigationController {
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <CameraPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'IMAGE_GALLERY':
         // If we have all required data including the pending image, show the gallery
@@ -159,7 +165,7 @@ export class NavigationController {
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
         
       case 'CREATOR_GAME_READY':
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
@@ -176,7 +182,7 @@ export class NavigationController {
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
           return <PictureUploadPage phoneNumber={data.phoneNumber} userId={data.userId} email={data.email} name={data.name} gender={data.gender} />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
 
       case 'BEFORE_START_ASK_ABOUT_YOU':
         if (data.phoneNumber && data.userId && data.email && data.name && data.gender) {
@@ -200,7 +206,7 @@ export class NavigationController {
             selectedImageHash={data.selectedImageHash || 'no-image'}
           />;
         }
-        return <EnterPhoneNumberPage />;
+        return <EnterPhoneNumberPage gameId="" />;
 
         
       default:
@@ -223,6 +229,7 @@ export class NavigationController {
   static getJourneyStateDescription(journeyState: JourneyState): string {
     const descriptions: Record<JourneyState, string> = {
       'INITIAL': 'Starting point - Home page',
+      'GIVE_GAME_NAME': 'Router-based game name entry',
       'GAME_NAME_ENTRY': 'Game name entry page',
       'GAME_NAME_SET': 'Game name set, ready for phone number',
       'PHONE_SUBMITTED': 'Phone submitted, waiting for 2FA verification',

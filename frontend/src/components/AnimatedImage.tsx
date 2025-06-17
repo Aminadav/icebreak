@@ -40,7 +40,7 @@ export default function AnimatedImage({
       <img 
         src={src}
         alt={alt}
-        className={`${getSizeClasses()} max-w-full animate-float-in hover:scale-105 hover:drop-shadow-[0_20px_30px_rgba(255,165,0,0.3)] transition-all duration-300 ease-out cursor-pointer filter brightness-105 ${className}`}
+        className={`${getSizeClasses()} max-w-full animate-float-in hover:scale-105 hover:drop-shadow-[0_20px_30px_rgba(255,165,0,0.3)] transition-all duration-300 ease-out filter brightness-105 ${className}`}
         style={{
           animationDelay: '0.3s',
           animationFillMode: 'both'

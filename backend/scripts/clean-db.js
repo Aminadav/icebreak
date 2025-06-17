@@ -1,5 +1,5 @@
 const pool = require('../config/database');
-require('dotenv').config({path: '../.env'});
+require('dotenv').config({path: __dirname + '/../.env'});
 
 async function cleanDatabase() {
   // Check if cleaning is allowed

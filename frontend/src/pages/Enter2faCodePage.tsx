@@ -1,37 +1,29 @@
 import { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
-import { useNavigation } from '../contexts/NavigationContext';
 import { useSocket } from '../contexts/SocketContext';
-import AboutPage from '../components/AboutPage';
-import ComponentsShowcase from './ComponentsShowcase';
-import EnterEmailPage from './EnterEmailPage';
+import { useMenuNavigation } from '../hooks/useMenuNavigation';
 
 interface Enter2faCodePageProps {
   phoneNumber?: string;
+  gameId?: string;
 }
 
-export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps): JSX.Element {
+export default function Enter2faCodePage({ phoneNumber, gameId }: Enter2faCodePageProps): JSX.Element {
   const DEBUG=false
   const { texts } = useLanguage();
-  const { back, push } = useNavigation();
+  const { handleMenuAction } = useMenuNavigation(); // For menu navigation  
   const { socket } = useSocket();
+  const navigate = useNavigate(); // For game flow navigation
   
   const [code, setCode] = useState(['', '', '', '', '', '']);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
-
-  const handleMenuAction = (page: string) => {
-    if (page === 'about') {
-      push(<AboutPage />);
-    } else if (page === 'components') {
-      push(<ComponentsShowcase />);
-    }
-  };
 
   // Set up socket event listeners once when component mounts
   useEffect(() => {
@@ -63,7 +55,17 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
       }
       
       // Navigate to email entry page
-      push(<EnterEmailPage phoneNumber={phoneNumber} userId={userInfo?.userId} />);
+      if (gameId) {
+        // For React Router game flow - claim the game with verified user
+        if (gameCreated && userInfo?.userId) {
+          console.log('🎮 Associating game with verified user:', gameId, userInfo.userId);
+          // The game should already be associated via the backend
+        }
+        navigate(`/game/${gameId}/email`);
+      } else {
+        // Legacy navigation for non-game flows
+        navigate('/game/new/email');
+      }
     };
 
     const verificationFailureHandler = (data: any) => {
@@ -217,7 +219,7 @@ export default function Enter2faCodePage({ phoneNumber }: Enter2faCodePageProps)
     <PageLayout 
       showHeader={true} 
       onMenuAction={handleMenuAction}
-      onBack={back}
+      onBack={() => navigate(-1)}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Phone Icon */}

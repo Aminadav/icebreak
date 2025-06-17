@@ -19,7 +19,7 @@ export default function AnimatedImage({
       case 'small':
         return 'w-24 h-24';
       case 'medium':
-        return 'w-32 h-32';
+        return 'w-28 h-28';
       case 'large':
         return 'w-80 h-auto';
       case 'custom':
@@ -36,7 +36,7 @@ export default function AnimatedImage({
   };
 
   return (
-    <div className="mb-8 drop-shadow-2xl">
+    <div className="mb-4 drop-shadow-2xl">
       <img 
         src={src}
         alt={alt}

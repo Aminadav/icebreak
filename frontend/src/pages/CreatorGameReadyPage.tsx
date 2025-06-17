@@ -5,6 +5,8 @@ import AnimatedImage from '../components/AnimatedImage';
 import ShareGameModal from '../components/ShareGameModal';
 import { useSocket } from '../contexts/SocketContext';
 import { useModal } from '../contexts/ModalContext';
+import { useNavigation } from '../contexts/NavigationContext';
+import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 
 interface CreatorGameReadyPageProps {
   phoneNumber: string;
@@ -25,6 +27,7 @@ export default function CreatorGameReadyPage({
 }: CreatorGameReadyPageProps): JSX.Element {
   const { socket } = useSocket();
   const { openModal } = useModal();
+  const { push } = useNavigation();
 
   // Update journey state when component mounts
   useEffect(() => {
@@ -54,8 +57,17 @@ export default function CreatorGameReadyPage({
 
   const handleStartGame = () => {
     console.log('🎮 Starting game...');
-    // TODO: Navigate to game play page when implemented
-    // For now, just log the action
+    // Navigate to BeforeStartAskAboutYou page
+    push(
+      <BeforeStartAskAboutYou
+        phoneNumber={phoneNumber}
+        userId={userId}
+        email={email}
+        name={name}
+        gender={gender}
+        selectedImageHash={selectedImageHash}
+      />
+    );
   };
 
   const handleShareGame = () => {
@@ -64,7 +76,17 @@ export default function CreatorGameReadyPage({
       <ShareGameModal
         onStartPlay={() => {
           console.log('🎮 Starting game from modal...');
-          // TODO: Navigate to game play page when implemented
+          // Navigate to BeforeStartAskAboutYou page
+          push(
+            <BeforeStartAskAboutYou
+              phoneNumber={phoneNumber}
+              userId={userId}
+              email={email}
+              name={name}
+              gender={gender}
+              selectedImageHash={selectedImageHash}
+            />
+          );
         }}
         onShareGame={() => {
           console.log('📤 Sharing game from modal...');

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../contexts/SocketContext';
 import { useLanguage } from '../contexts/LanguageContext';
+import { getIsTesting } from '../utils/isTesting';
 
 // Declare global FaceDetection type for MediaPipe
 declare global {
@@ -31,6 +32,7 @@ export default function CameraPage({
   gender,
   gameId 
 }: CameraPageProps): JSX.Element {
+  const isTesting=getIsTesting();
   const DEBUG=false
   const navigate = useNavigate();
   const { socket } = useSocket();
@@ -65,6 +67,15 @@ export default function CameraPage({
   useEffect(() => {
     // Initialize face detection with fallback approach
     const initFaceDetection = async () => {
+      // Skip face detection if in testing mode
+      if (isTesting) {
+        console.log('🧪 Testing mode: Skipping face detection initialization');
+        setFaceDetectionReady(false);
+        setFaceDetected(true); // Allow immediate capture
+        setFacePosition(null);
+        return;
+      }
+
       try {
         console.log('👁️ Attempting to initialize face detection...');
         
@@ -228,7 +239,14 @@ export default function CameraPage({
 
     initFaceDetection();
 
-    startCamera();
+    // Skip camera initialization in testing mode
+    if (!isTesting) {
+      startCamera();
+    } else {
+      console.log('🧪 Testing mode: Skipping camera initialization');
+      setHasPermission(true);
+      setIsLoading(false);
+    }
     
     // Show smile text after a short delay
     const timer = setTimeout(() => {
@@ -247,16 +265,16 @@ export default function CameraPage({
     };
   }, [socket, phoneNumber, userId, email, name, gender]);
 
-  // Start face detection when both are ready
+  // Start face detection when both are ready (skip if testing)
   useEffect(() => {
-    if (faceDetectionReady && hasPermission && videoRef.current && !videoRef.current.paused) {
+    if (!isTesting && faceDetectionReady && hasPermission && videoRef.current && !videoRef.current.paused) {
       startFaceDetection();
     }
   }, [faceDetectionReady, hasPermission]);
 
-  // Fallback: If face detection fails to initialize after 5 seconds, allow capture anyway
+  // Fallback: If face detection fails to initialize after 5 seconds, allow capture anyway (skip if testing)
   useEffect(() => {
-    if (hasPermission && !faceDetectionReady) {
+    if (!isTesting && hasPermission && !faceDetectionReady) {
       const fallbackTimer = setTimeout(() => {
         console.log('👁️ Face detection fallback: allowing capture without face detection');
         setFaceDetected(true); // Allow capture
@@ -498,20 +516,145 @@ export default function CameraPage({
   };
 
   const capturePhoto = async () => {
-    if (!videoRef.current || !cropCanvasRef.current || isCapturing) return;
+    if (isCapturing) return;
 
     try {
       setIsCapturing(true);
 
-      // Check if we have face position for cropping
+      // In testing mode, create a mock image instead of using the camera
+      if (isTesting) {
+        console.log('📸 Testing mode: Creating mock image');
+        
+        // Create a mock canvas with a simple test image
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 480;
+        const ctx = canvas.getContext('2d');
+        
+        if (ctx) {
+          // Draw a simple mock face image
+          ctx.fillStyle = '#f4c2a1'; // Skin color background
+          ctx.fillRect(0, 0, 640, 480);
+          
+          // Draw a simple face
+          ctx.fillStyle = '#000';
+          ctx.beginPath();
+          ctx.arc(200, 200, 20, 0, 2 * Math.PI); // Left eye
+          ctx.arc(440, 200, 20, 0, 2 * Math.PI); // Right eye
+          ctx.fill();
+          
+          ctx.beginPath();
+          ctx.arc(320, 300, 50, 0, Math.PI); // Mouth
+          ctx.stroke();
+          
+          // Add text to indicate it's a test image
+          ctx.fillStyle = '#333';
+          ctx.font = '20px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('TEST IMAGE', 320, 400);
+        }
+        
+        // Convert to blob and proceed
+        return new Promise<void>((resolve) => {
+          canvas.toBlob(async (blob) => {
+            if (blob) {
+              // Call the onPictureCapture callback if provided
+              if (onPictureCapture) {
+                onPictureCapture(blob);
+              }
+              
+              // Upload image and navigate directly to gallery
+              if (phoneNumber && userId && email && name && gender) {
+                console.log('📤 Uploading mock test image and navigating to gallery...');
+                
+                const imageHash = await uploadImage(blob);
+                
+                if (imageHash) {
+                  navigate(`/game/${gameId}/gallery`);
+                } else {
+                  console.error('Failed to upload image');
+                  setUploadError('שגיאה בהעלאת התמונה');
+                }
+              }
+            }
+            
+            // Add a small delay for visual feedback
+            setTimeout(() => {
+              setIsCapturing(false);
+              resolve();
+            }, 300);
+          }, 'image/jpeg', 0.8);
+        });
+      }
+
+      // For non-testing mode, we need the video and canvas elements
+      if (!videoRef.current || !canvasRef.current) {
+        setIsCapturing(false);
+        return;
+      }
+
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      const ctx = canvas.getContext('2d');
+
+      if (!ctx) {
+        setIsCapturing(false);
+        return;
+      }
+
+      // When no face detection, capture the full video frame
+      if (!facePosition) {
+        console.log('📸 Capturing full frame (no face detected)');
+        
+        // Set canvas dimensions to video dimensions
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+
+        // Draw the full video frame (mirrored to match display)
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+        ctx.scale(-1, 1); // Reset scale
+
+        // Convert to blob and proceed
+        return new Promise<void>((resolve) => {
+          canvas.toBlob(async (blob) => {
+            if (blob) {
+              // Call the onPictureCapture callback if provided
+              if (onPictureCapture) {
+                onPictureCapture(blob);
+              }
+              
+              // Upload image and navigate directly to gallery
+              if (phoneNumber && userId && email && name && gender) {
+                console.log('📤 Uploading full frame image and navigating to gallery...');
+                
+                const imageHash = await uploadImage(blob);
+                
+                if (imageHash) {
+                  navigate(`/game/${gameId}/gallery`);
+                } else {
+                  console.error('Failed to upload image');
+                  setUploadError('שגיאה בהעלאת התמונה');
+                }
+              }
+            }
+            
+            // Add a small delay for visual feedback
+            setTimeout(() => {
+              setIsCapturing(false);
+              resolve();
+            }, 300);
+          }, 'image/jpeg', 0.8);
+        });
+      }
+
+      // Check if we have face position for cropping (non-testing mode)
       if (!facePosition) {
         console.error('No face detected for cropping');
         setIsCapturing(false);
         return;
       }
 
-      const video = videoRef.current;
-      
       // Use the crop canvas that already has the cropped face
       // First, update the crop canvas with the current face position
       const { x, y, width, height } = facePosition;
@@ -604,7 +747,7 @@ export default function CameraPage({
       />
 
       {/* Face Positioning Guide Circle */}
-      {hasPermission && !error && (
+      {hasPermission && !error && !isTesting && (
         <div className="absolute inset-0 pointer-events-none z-5">
           <div className="flex items-center justify-center w-full h-full">
             <div 
@@ -633,7 +776,7 @@ export default function CameraPage({
       )}
 
       {/* Face Detection Debug Overlay */}
-      {DEBUG && hasPermission && !error && facePosition && (
+      {DEBUG && hasPermission && !error && facePosition && !isTesting && (
         <div className="absolute inset-0 z-10 pointer-events-none">
           {/* Face position info and cropped face image */}
           <div className="absolute max-w-xs p-2 text-sm text-white rounded top-4 left-4 bg-black/70">
@@ -725,12 +868,12 @@ export default function CameraPage({
         <div className="absolute z-10 text-center transform -translate-x-1/2 bottom-8 left-1/2">
           <button
             onClick={capturePhoto}
-            disabled={isCapturing || isUploading || !faceDetected}
+            disabled={isCapturing || isUploading || (!isTesting && !faceDetected)}
             data-testid="camera-capture-button"
             className={`w-20 h-20 rounded-full transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed ${
               isCapturing || isUploading
                 ? 'bg-orange-500 animate-pulse' 
-                : faceDetected
+                : (isTesting || faceDetected)
                 ? 'bg-green-500 hover:bg-green-600 shadow-lg hover:shadow-xl'
                 : 'bg-gray-500 cursor-not-allowed'
             }`}
@@ -764,7 +907,7 @@ export default function CameraPage({
           )}
           
           {/* Instruction text below button */}
-          {!faceDetected && !isUploading && !uploadError && (
+          {!isTesting && !faceDetected && !isUploading && !uploadError && (
             <div className="mt-3 text-center">
               <p className="text-sm text-white/80">
                 מקמו את הפנים במעגל כדי לצלם את התמונה
@@ -772,6 +915,13 @@ export default function CameraPage({
             </div>
           )}
           
+          {isTesting && (
+            <div className="mt-3 text-center">
+              <p className="text-sm text-yellow-300">
+                🧪 Testing Mode - Click to capture
+              </p>
+            </div>
+          )}
           
         </div>
       )}

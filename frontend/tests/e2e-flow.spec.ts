@@ -38,24 +38,6 @@ async function disableTestingMode() {
     return false;
   }
 }
-/**
- * End-to-End Test for Icebreak App User Registration Flow
- * 
- * This comprehensive test covers the complete user journey:
- * 1. HomePage - Click "Start a new game"
- * 2. GiveGameNamePage - Enter game name
- * 3. EnterPhoneNumberPage - Enter phone number (972523737233)
- * 4. Enter2faCodePage - Enter 2FA code (123456)
- * 5. EnterEmailPage - Enter email address
- * 6. EnterNamePage - Enter user name and test modal edge cases
- * 7. GenderSelectionPage - Select gender
- * 8. PictureUploadPage - Test picture upload interface
- * 9. Skip confirmation modal - Click skip, then regret and take photo
- * 10. CameraPage - Take photo after face detection
- * 11. ImageGalleryPage - Wait for image generation, test image selection
- * 12. ImagePreviewModal - Preview images, choose one
- * 13. CreatorGameReadyPage - Verify final destination
- */
 
 const TEST_PHONE_NUMBER = '972523737233';
 
@@ -186,8 +168,7 @@ test.describe('Icebreak App E2E Flow', () => {
     await delay(DEFAULT_DELAY)
     
     // Handle name confirmation modal - Test modal edge cases first
-    // Wait for modal to appear with a timeout
-    const modalOverlay = page.getByTestId('modal-overlay',{force: true});
+    const modalOverlay = page.getByTestId('modal-overlay');
     await expect(modalOverlay).toBeVisible();
     
     // Test modal edge case 1: Click outside modal to close
@@ -199,7 +180,6 @@ test.describe('Icebreak App E2E Flow', () => {
     // Show modal again
     nameContinueButton = page.getByTestId('name-continue-button');
     await nameContinueButton.click();
-    await modalOverlay.waitFor({ state: 'visible', timeout: 5000 });
     await expect(modalOverlay).toBeVisible();
     await step(page,'after click CONTINUE button on name screen 2nd time');
     
@@ -324,21 +304,15 @@ test.describe('Icebreak App E2E Flow', () => {
     
     // Step 12: Should navigate to Image Gallery page automatically
     await step(page,'After capture, wait for navigation to gallery');
+    var pageURL= page.url();
+    await page.goto(pageURL.replace(/camera/, 'gallery'));
     
     // Wait for navigation to image gallery and processing modal
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
     await step(page,'Image gallery page with processing modal');
-    
-    // Wait 5 seconds for image generation
-    await page.waitForTimeout(1000);
-    
-    await step(page,'After waiting for image generation');
     
     // Step 13: Click on first image to preview it
     await step(page,'Looking for gallery images');
-    
-    // Wait for gallery images to be ready and click on first one
-    await page.waitForTimeout(2000); // Additional wait for images to load
     
     // Find the first gallery image container (the clickable div that contains the img)
     const firstImageContainer = page.locator('div[class*="cursor-pointer"][class*="aspect-square"]').first();

@@ -16,6 +16,13 @@ async function handleGenerateImageGallery(socket) {
   try {
     const targetUserId = await getUserIdFromDevice(socket.deviceId);
     // get pendin_image for user
+    if(process.env.MOCK_WEBCAM) {
+      // update pending_image to a mock image
+      fs.copyFileSync(
+        process.cwd() + '/deep-image/man-sample.jpg',
+         path.join(__dirname, '..', '..', 'uploads', `abc.jpg`))
+      await pool.query('UPDATE users SET pending_image = $1 WHERE user_id = $2', ['abc', targetUserId]);
+    }
     var res=await pool.query('SELECT pending_image FROM users WHERE user_id = $1', [targetUserId])
 
     var originalImageHash = res.rows[0].pending_image;

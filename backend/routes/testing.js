@@ -16,6 +16,7 @@ router.post('/start', (req, res) => {
     if (!testingMode) {
       originalValues.MOCK_SMS = process.env.MOCK_SMS || undefined;
       originalValues.MOCK_GENERATE = process.env.MOCK_GENERATE || undefined;
+      originalValues.MOCK_WEBCAM = process.env.MOCK_WEBCAM || undefined;
       console.log('📋 Stored original values:', originalValues);
     } else {
       console.log('⚠️ Testing mode already active, keeping current original values');
@@ -24,11 +25,13 @@ router.post('/start', (req, res) => {
     // Set mock environment variables to true
     process.env.MOCK_SMS = 'true';
     process.env.MOCK_GENERATE = 'true';
+    process.env.MOCK_WEBCAM = 'true';
     testingMode = true;
     
     console.log('✅ Testing mode activated:');
     console.log(`   MOCK_SMS: ${process.env.MOCK_SMS}`);
     console.log(`   MOCK_GENERATE: ${process.env.MOCK_GENERATE}`);
+    console.log(`   MOCK_WEBCAM: ${process.env.MOCK_WEBCAM}`);
     
     res.json({
       success: true,
@@ -70,6 +73,14 @@ router.post('/end', (req, res) => {
       } else {
         process.env.MOCK_GENERATE = originalValues.MOCK_GENERATE;
         console.log(`   Restored MOCK_GENERATE to: ${originalValues.MOCK_GENERATE}`);
+      }
+
+      if (originalValues.MOCK_WEBCAM === undefined) {
+        delete process.env.MOCK_WEBCAM;
+        console.log('   Removed MOCK_WEBCAM (was undefined)');
+      } else {
+        process.env.MOCK_WEBCAM = originalValues.MOCK_WEBCAM;
+        console.log(`   Restored MOCK_WEBCAM to: ${originalValues.MOCK_WEBCAM}`);
       }
       
       // Clear stored values

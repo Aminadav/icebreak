@@ -3,3 +3,10 @@
 - https://app.lottiefiles.com/animation/080a3031-870e-4959-9b19-62c701122bc2?channel=web&source=public-animation&panel=download&from=download
 - https://app.lottiefiles.com/animation/080a3031-870e-4959-9b19-62c701122bc2?channel=web&source=public-animation&panel=download&from=download
 - https://app.lottiefiles.com/animation/7e50fcdf-e01a-4bc4-9729-2516785bab6b?channel=web&source=public-animation&panel=download&from=download
+- https://assets-cdn.kahoot.it/player/v2/assets/lobby-classic-game-48-BqXHQl90.webm
+- https://create.kahoot.it/preview/1734adfa-da0c-4332-8bb1-7dfda9d46955
+- https://deep-image.ai/app/application/options/images/8a70dcb2-4ad9-11f0-acf7-4ef0eeaa6bdb
+- https://rapidapi.com/console/4551273/billing/subscriptions-and-usage
+- https://rapidapi.com/inutil-inutil-default/api/whatsapp-data
+- https://www.mural.co/blog/icebreaker-questions
+- https://docs.google.com/document/d/1QjA1YlWlRMSLcWvIiq-3yoMTswF0saR4qi_em___PmI/edit?tab=t.0

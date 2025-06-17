@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode, useRef } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getDeviceId, setDeviceId, generateUUID } from '../utils/deviceManager';
 import { NavigationController, type JourneyState } from '../utils/NavigationController';
@@ -27,6 +27,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const [userId, setUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [hasAutoNavigated, setHasAutoNavigated] = useState(false);
+  const isInitialConnectionRef = useRef(true);
   
   // Get navigation functions
   const { reset: navigationReset } = useNavigation();
@@ -44,6 +45,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     // Handle connection
     newSocket.on('connect', () => {
       console.log('✅ Socket connected! ID:', newSocket.id);
+      console.log('🔍 Is initial connection:', isInitialConnectionRef.current);
       setSocket(newSocket);
       setIsConnected(true);
       setError(null);
@@ -63,6 +65,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
     newSocket.on('disconnect', (reason) => {
       console.log('📱 Socket disconnected:', reason);
       setIsConnected(false);
+      // Mark that subsequent connections are reconnections
+      isInitialConnectionRef.current = false;
     });
 
     // Handle device registration response
@@ -83,8 +87,14 @@ export function SocketProvider({ children }: SocketProviderProps) {
         // Check if we're on the admin page - don't auto-navigate in that case
         const isOnAdminPage = window.location.pathname === '/admin';
         
-        // Handle auto-navigation based on journey state (only if we haven't already auto-navigated and not on admin page)
-        if (data.journeyState && NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) && !hasAutoNavigated && !isOnAdminPage) {
+        // Handle auto-navigation based on journey state (only on initial connection, not reconnections)
+        const shouldAutoNavigate = data.journeyState && 
+          NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) && 
+          !hasAutoNavigated && 
+          !isOnAdminPage && 
+          isInitialConnectionRef.current; // Only auto-navigate on initial connection
+        
+        if (shouldAutoNavigate) {
           console.log(`🎯 Auto-navigating to journey state: ${data.journeyState}`);
           console.log('📊 Navigation data:', data);
           
@@ -122,6 +132,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
           console.log('  - Should auto-navigate?', data.journeyState ? NavigationController.shouldAutoNavigate(data.journeyState as JourneyState) : false);
           console.log('  - Already auto-navigated?', hasAutoNavigated);
           console.log('  - Is on admin page?', window.location.pathname === '/admin');
+          console.log('  - Is initial connection?', isInitialConnectionRef.current);
         }
       } else {
         console.error('❌ Device registration failed:', data);
@@ -160,6 +171,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const resetAutoNavigation = () => {
     console.log('🔄 Resetting auto-navigation flag');
     setHasAutoNavigated(false);
+    isInitialConnectionRef.current = true; // Reset to allow auto-navigation again
   };
 
   const resetJourneyState = () => {
@@ -171,8 +183,9 @@ export function SocketProvider({ children }: SocketProviderProps) {
     console.log('🔄 Resetting journey state to INITIAL');
     socket.emit('reset_journey_state');
     
-    // Reset the auto-navigation flag so it can work again after reset
+    // Reset the auto-navigation flag and initial connection flag so it can work again after reset
     setHasAutoNavigated(false);
+    isInitialConnectionRef.current = true;
   };
 
   const value: SocketContextType = {

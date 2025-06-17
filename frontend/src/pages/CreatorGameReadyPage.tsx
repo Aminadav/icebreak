@@ -2,7 +2,9 @@ import { useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
+import ShareGameModal from '../components/ShareGameModal';
 import { useSocket } from '../contexts/SocketContext';
+import { useModal } from '../contexts/ModalContext';
 
 interface CreatorGameReadyPageProps {
   phoneNumber: string;
@@ -22,6 +24,7 @@ export default function CreatorGameReadyPage({
   selectedImageHash 
 }: CreatorGameReadyPageProps): JSX.Element {
   const { socket } = useSocket();
+  const { openModal } = useModal();
 
   // Update journey state when component mounts
   useEffect(() => {
@@ -56,9 +59,19 @@ export default function CreatorGameReadyPage({
   };
 
   const handleShareGame = () => {
-    console.log('📤 Sharing game...');
-    // TODO: Implement game sharing functionality
-    // This could open a share modal or copy a link
+    console.log('📤 Opening share game modal...');
+    openModal(
+      <ShareGameModal
+        onStartPlay={() => {
+          console.log('🎮 Starting game from modal...');
+          // TODO: Navigate to game play page when implemented
+        }}
+        onShareGame={() => {
+          console.log('📤 Sharing game from modal...');
+          // TODO: Implement actual sharing functionality
+        }}
+      />
+    );
   };
 
   const handleMenuAction = (action: string) => {

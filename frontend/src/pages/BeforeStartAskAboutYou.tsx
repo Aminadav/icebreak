@@ -6,20 +6,12 @@ import AnimatedImage from '../components/AnimatedImage';
 import MyPoints from '../components/MyPoints';
 import { useSocket } from '../contexts/SocketContext';
 import { useGameId } from '../utils/useGameId';
-
-interface BeforeStartAskAboutYouProps {
-  phoneNumber: string;
-  userId: string;
-  email: string;
-  name: string;
-  gender: string;
-  selectedImageHash: string;
-  gameId?: string;
-}
+import { usePoints } from '../contexts/GameContext';
 
 export default function BeforeStartAskAboutYou(): JSX.Element {
   const navigate = useNavigate();
-  var gameId=useGameId()
+  const gameId = useGameId();
+  const { points } = usePoints();
 
   const handleStartQuestions = () => {
     console.log('🎮 Starting questions...');
@@ -44,7 +36,7 @@ export default function BeforeStartAskAboutYou(): JSX.Element {
     >
       <main className="relative z-10 flex flex-col min-h-[calc(100vh-88px)] px-4">
         
-        <MyPoints points={0} />
+        <MyPoints points={points} />
 
         {/* Main content centered */}
         <div className="flex flex-col items-center justify-center flex-1">

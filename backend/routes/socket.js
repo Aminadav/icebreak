@@ -23,7 +23,8 @@ const {
   handleUseWhatsappImage,
   handleLoadExistingGalleryImages,
   handleGenerateImageGallery,
-  handleConfirmImageSelection
+  handleConfirmImageSelection,
+  handleGetMyPoints
 } = require('./socket-handlers');
 const { getUserIdFromDevice } = require('./socket-handlers/utils');
 
@@ -88,6 +89,7 @@ function setupSocketHandlers(io) {
     socket.on('load_existing_gallery_images', (data) => handleLoadExistingGalleryImages(socket, data));
     socket.on('generate_image_gallery', (data) => handleGenerateImageGallery(socket, data));
     socket.on('confirm_image_selection', (data) => handleConfirmImageSelection(socket, data));
+    socket.on('my_points', (data, callback) => handleGetMyPoints(socket, data, callback));
     socket.on('get_original_image_hash', async (callback) => {
       const targetUserId = await getUserIdFromDevice(socket.deviceId);
       // get pendin_image for user

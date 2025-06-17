@@ -6,6 +6,12 @@ For execute packages use npm / npx.
 No need to restart frontend or backend, they are already running (and automatically restart after cahnges).
 If need to capture output of backend, just ask the user to copy and paste.
 
+# Be focus. On the goal and task.
+If you see other things that needs to fixes or implement do not do it. You can tell me suggestions to check it later, but do not implement it.
+
+# Be Agile.
+Don't do big changes, or things that no requested. The minimum changes to implement the task.
+
 # Schema
 If needed access to the databse schema. Use Docker. the container name is icebreak_postgres, the databasename icebreak_db.  The username is: icebreak_user.
 

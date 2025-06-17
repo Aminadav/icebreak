@@ -3,7 +3,7 @@ interface MyPointsProps {
   className?: string;
 }
 
-export default function MyPoints({ points = 0, className = '' }: MyPointsProps): JSX.Element {
+export default function MyPoints({ points = 0 }: MyPointsProps): JSX.Element {
   return (
     <div className={`text-white absolute end-5 align-middle top-5`}>
       <div className="flex items-center gap-2">

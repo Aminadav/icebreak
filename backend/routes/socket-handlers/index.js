@@ -22,6 +22,7 @@ const handleUseWhatsappImage = require('./useWhatsappImage');
 const handleLoadExistingGalleryImages = require('./loadExistingGalleryImages');
 const handleGenerateImageGallery = require('./generateImageGallery');
 const handleConfirmImageSelection = require('./confirmImageSelection');
+const handleGetMyPoints = require('./getMyPoints');
 
 module.exports = {
   handleRegisterDevice,
@@ -46,5 +47,6 @@ module.exports = {
   handleUseWhatsappImage,
   handleLoadExistingGalleryImages,
   handleGenerateImageGallery,
-  handleConfirmImageSelection
+  handleConfirmImageSelection,
+  handleGetMyPoints
 };

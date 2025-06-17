@@ -180,10 +180,14 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(nameContinueButton).toBeEnabled();
     await nameContinueButton.click();
     await delay(DEFAULT_DELAY)
-    await step(page,'after click CONTINUE button on name screen 1st time');
+    // await step(page,'after click CONTINUE button on name screen 1st time');
+    await delay(DEFAULT_DELAY)
+    await step(page,'after click button on name screen 1st time');
+    await delay(DEFAULT_DELAY)
     
     // Handle name confirmation modal - Test modal edge cases first
-    const modalOverlay = page.getByTestId('modal-overlay');
+    // Wait for modal to appear with a timeout
+    const modalOverlay = page.getByTestId('modal-overlay',{force: true});
     await expect(modalOverlay).toBeVisible();
     
     // Test modal edge case 1: Click outside modal to close
@@ -195,6 +199,7 @@ test.describe('Icebreak App E2E Flow', () => {
     // Show modal again
     nameContinueButton = page.getByTestId('name-continue-button');
     await nameContinueButton.click();
+    await modalOverlay.waitFor({ state: 'visible', timeout: 5000 });
     await expect(modalOverlay).toBeVisible();
     await step(page,'after click CONTINUE button on name screen 2nd time');
     

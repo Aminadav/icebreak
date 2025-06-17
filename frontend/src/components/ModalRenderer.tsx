@@ -9,10 +9,11 @@ import Modal from './Modal';
  */
 export default function ModalRenderer(): JSX.Element {
   const { isModalOpen, modalContent } = useModal();
-
   if (!isModalOpen || !modalContent) {
     return <></>;
   }
+  //@ts-ignore
+  return modalContent
 
   return (
     <Modal>

@@ -10,6 +10,7 @@ import { usePoints } from '../contexts/GameContext';
 import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import QuestionPage from './QuestionPage';
+import GotPointsPage from './GotPointsPage';
 
 export default function Play(): JSX.Element {
   const navigate = useNavigate();
@@ -38,6 +39,9 @@ export default function Play(): JSX.Element {
   }
   if(gameState.screenName=="QUESTION") {
     return <QuestionPage gameState={gameState} />
+  }
+  if(gameState.screenName=="GOT_POINTS") {
+    return <GotPointsPage gameState={gameState} />
   }
   return <div>{JSON.stringify(gameState)}</div>;
 }

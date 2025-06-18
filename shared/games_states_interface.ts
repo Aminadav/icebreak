@@ -30,10 +30,17 @@ declare global {
     question:QUESTION,
   }
 
+  type GAME_STATE_GOT_POINTS = {
+    screenName:'GOT_POINTS',
+    points: number,
+    text: string
+  }
+
   export type GAME_STATES= 
               gameStateEmptyGameState
             | gameStateBefore
             | GAME_STATE_QUESTION
+            | GAME_STATE_GOT_POINTS
 
 
   export type QUESTION=BASIC_QUESTION

@@ -66,9 +66,19 @@ export default function AdminPage(): JSX.Element {
       }
     };
 
+    const handlePageSet = (data: { success: boolean; message: string; updatedCount: number }) => {
+      console.log('⭐ Admin: Page set response:', data);
+      if (data.success) {
+        setMessage(`✅ Success: ${data.message}`);
+        // Clear success message after 4 seconds
+        setTimeout(() => setMessage(''), 4000);
+      }
+    };
+
     socket.on('device_registered', handleDeviceRegistered);
     socket.on('journey_state_updated', handleJourneyStateUpdated);
     socket.on('admin_game_states_deleted', handleGameStatesDeleted);
+    socket.on('admin_page_set', handlePageSet);
     socket.on('error', handleError);
     socket.on('admin_game_states_deleted', handleGameStatesDeleted);
 
@@ -76,6 +86,7 @@ export default function AdminPage(): JSX.Element {
       socket.off('device_registered', handleDeviceRegistered);
       socket.off('journey_state_updated', handleJourneyStateUpdated);
       socket.off('admin_game_states_deleted', handleGameStatesDeleted);
+      socket.off('admin_page_set', handlePageSet);
       socket.off('error', handleError);
     };
   }, [socket]);
@@ -265,6 +276,16 @@ export default function AdminPage(): JSX.Element {
               disabled={!deviceInfo?.userId}
             >
               🗑️ Delete All Game States
+            </button>
+            <button
+              onClick={() => {
+                setMessage('⭐ Moving to Got Points page...');
+                socket.emit('admin-set-page');
+              }}
+              className="px-4 py-2 ml-2 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700"
+              disabled={!deviceInfo?.userId}
+            >
+              ⭐ Move to Got Points Page
             </button>
             {sampleQuestions.map((q, idx) => (
               <button

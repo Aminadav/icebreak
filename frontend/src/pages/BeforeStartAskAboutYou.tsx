@@ -15,7 +15,7 @@ export default function BeforeStartAskAboutYou(props:{gameState:GAME_STATES}): J
   const {socket} = useSocket();
 
   const handleStartQuestions = () => {
-    socket.emit('start-about-me',{gameId})
+    socket.emit('start-intro-questions',{gameId})
   };
 
   return (

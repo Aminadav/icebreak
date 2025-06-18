@@ -22,6 +22,7 @@ export default function AdminPage(): JSX.Element {
     answers: [],
     allowOther: false,
     sensitivity: 'low',
+    maxAnswersToShow: 4,
   });
   const [questionLoading, setQuestionLoading] = useState(false);
 
@@ -56,13 +57,25 @@ export default function AdminPage(): JSX.Element {
       setMessage(`❌ Error: ${data.message}`);
     };
 
+    const handleGameStatesDeleted = (data: { success: boolean; message: string; deletedCount: number }) => {
+      console.log('🗑️ Admin: Game states deleted response:', data);
+      if (data.success) {
+        setMessage(`✅ Success: ${data.message}`);
+        // Clear success message after 4 seconds
+        setTimeout(() => setMessage(''), 4000);
+      }
+    };
+
     socket.on('device_registered', handleDeviceRegistered);
     socket.on('journey_state_updated', handleJourneyStateUpdated);
+    socket.on('admin_game_states_deleted', handleGameStatesDeleted);
     socket.on('error', handleError);
+    socket.on('admin_game_states_deleted', handleGameStatesDeleted);
 
     return () => {
       socket.off('device_registered', handleDeviceRegistered);
       socket.off('journey_state_updated', handleJourneyStateUpdated);
+      socket.off('admin_game_states_deleted', handleGameStatesDeleted);
       socket.off('error', handleError);
     };
   }, [socket]);
@@ -87,11 +100,6 @@ export default function AdminPage(): JSX.Element {
     console.log('🎯 Admin: Updating journey state to:', stateToUpdate);
   };
 
-  const handleStateChange = (newState: string) => {
-    setSelectedState(newState);
-    // Automatically update the state when dropdown changes
-    handleUpdateState(newState);
-  };
 
   // Socket listeners for questions
   useEffect(() => {
@@ -102,7 +110,7 @@ export default function AdminPage(): JSX.Element {
     const handleQuestionCreated = (data: any) => {
       setQuestions((prev) => [...prev, data.question]);
       setMessage('✅ שאלה נוספה בהצלחה');
-      setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low' });
+      setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
       setEditingQuestion(null);
       setQuestionLoading(false);
     };
@@ -110,7 +118,7 @@ export default function AdminPage(): JSX.Element {
       setQuestions((prev) => prev.map(q => q.question_id === data.question.question_id ? data.question : q));
       setMessage('✅ שאלה עודכנה בהצלחה');
       setEditingQuestion(null);
-      setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low' });
+      setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
       setQuestionLoading(false);
     };
     const handleQuestionDeleted = (data: any) => {
@@ -147,6 +155,7 @@ export default function AdminPage(): JSX.Element {
       answers: q.answers && Array.isArray(q.answers) ? q.answers : (q.answers ? [] : []),
       allowOther: q.allow_other,
       sensitivity: q.sensitivity,
+      maxAnswersToShow: q.max_answers_to_show || 4,
       questionId: q.question_id,
     });
   };
@@ -189,13 +198,31 @@ export default function AdminPage(): JSX.Element {
       allowOther: questionForm.questionType === 'choose_one' ? questionForm.allowOther : false,
       questionId: editingQuestion?.question_id,
     };
-    let timeout = setTimeout(() => setQuestionLoading(false), 4000); // fallback in case no response
     socket.emit('save_question', payload);
   };
   const handleCancelEdit = () => {
     setEditingQuestion(null);
-    setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low' });
+    setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
   };
+
+  var sampleQuestions: QUESTION[] = [
+    {
+      question_type:'free_form',
+      question_text:'מה דעתך?',
+    },
+    {
+      question_type:'choose_one',
+      question_text:'כן או לא?',
+      allow_other:false,
+      answers:['כן', 'לא'],
+    },
+    {
+      question_type:'choose_one',
+      question_text:'כן או לא או משהו אחר?',
+      allow_other:true,
+      answers:['כן', 'לא'],
+    }
+  ]
 
   return (
     <div className="min-h-screen p-8 text-white bg-gray-900">
@@ -224,9 +251,37 @@ export default function AdminPage(): JSX.Element {
             <div><strong>Email:</strong> {deviceInfo?.email || 'Not set'}</div>
             <div><strong>Name:</strong> {deviceInfo?.name || 'Not set'}</div>
             <div><strong>Gender:</strong> {deviceInfo?.gender || 'Not set'}</div>
-            </div>
+          </div>
+          
+          {/* Admin Actions */}
+          <div className="pt-4 mt-4 border-t border-gray-700">
+            <h3 className="mb-2 text-lg font-semibold">🔧 Admin Actions</h3>
+            <button
+              onClick={() => {
+                setMessage('🗑️ Deleting all game states...');
+                socket.emit('admin-delete-my-game-states');
+              }}
+              className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700"
+              disabled={!deviceInfo?.userId}
+            >
+              🗑️ Delete All Game States
+            </button>
+            {sampleQuestions.map((q, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setMessage(`Setting question: ${q.question_text}`);
+                  socket.emit('admin-set-question', q);
+                }}
+                className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                disabled={!deviceInfo?.userId}
+              >
+                Set Question: {q.question_text}
+              </button>
+            ))}
           </div>
         </div>
+      </div>
 
         {/* Questions Management */}
         <div className="p-6 mb-6 bg-gray-800 rounded-lg">
@@ -248,6 +303,7 @@ export default function AdminPage(): JSX.Element {
                 <th className="p-2">סוג</th>
                 <th className="p-2">תשובות</th>
                 <th className="p-2">רגישות</th>
+                <th className="p-2">מקס׳ תשובות</th>
                 <th className="p-2">פעולות</th>
               </tr>
             </thead>
@@ -266,6 +322,7 @@ export default function AdminPage(): JSX.Element {
                     ) : '-'}
                   </td>
                   <td className="p-2">{q.sensitivity}</td>
+                  <td className="p-2">{q.max_answers_to_show || 4}</td>
                   <td className="p-2">
                     <button className="px-2 py-1 mr-2 text-xs bg-blue-700 rounded" onClick={() => handleEditQuestion(q)}>ערוך</button>
                     <button className="px-2 py-1 text-xs bg-red-700 rounded" onClick={() => handleDeleteQuestion(q.question_id)}>מחק</button>
@@ -273,7 +330,7 @@ export default function AdminPage(): JSX.Element {
                 </tr>
               ))}
               {questions.length === 0 && (
-                <tr><td colSpan={6} className="p-2 text-center text-gray-400">אין שאלות</td></tr>
+                <tr><td colSpan={7} className="p-2 text-center text-gray-400">אין שאלות</td></tr>
               )}
             </tbody>
           </table>
@@ -316,6 +373,10 @@ export default function AdminPage(): JSX.Element {
                 <option value="medium">בינוני</option>
                 <option value="high">גבוה</option>
               </select>
+            </div>
+            <div className="mb-2">
+              <label className="block mb-1">מספר תשובות מקסימלי להצגה</label>
+              <input type="number" name="maxAnswersToShow" value={questionForm.maxAnswersToShow} onChange={handleQuestionFormChange} className="w-full p-2 text-white bg-gray-800 rounded" min="1" max="20" />
             </div>
             <div className="flex gap-2 mt-4">
               <button type="submit" className="px-4 py-2 text-white bg-blue-700 rounded" disabled={questionLoading}>{editingQuestion ? 'עדכן' : 'הוסף'}</button>

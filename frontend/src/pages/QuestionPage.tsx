@@ -1,0 +1,113 @@
+import { useState } from 'react';
+import PageLayout from '../components/PageLayout';
+import MyPoints from '../components/MyPoints';
+import ProgressCircles from '../components/ProgressCircles';
+import AnswerContainer from '../components/AnswerContainer';
+import Button from '../components/Button';
+import Footer from '../components/Footer';
+
+interface QuestionPageProps {
+  gameState: GAME_STATE_QUESTION;
+}
+
+export default function QuestionPage({ 
+  gameState, 
+}: QuestionPageProps): JSX.Element {
+  var question=gameState.question;
+
+  const [selectedAnswerId, setSelectedAnswerId] = useState<string>('');
+  const [freeformAnswer, setFreeformAnswer] = useState<string>('');
+
+  const handleAnswerClick = (answerId: string) => {
+    setSelectedAnswerId(answerId);
+  };
+
+  const handleSubmit = () => {
+    if (question.question_type === 'choose_one' && selectedAnswerId) {
+      const selectedAnswer = question.answers[parseInt(selectedAnswerId)];
+      // onAnswerSubmit?.(selectedAnswer);
+    } else if (question.question_type === 'free_form' && freeformAnswer.trim()) {
+      // onAnswerSubmit?.(freeformAnswer.trim());
+    }
+  };
+
+  const canSubmit = 
+    (question.question_type === 'choose_one' && selectedAnswerId) ||
+    (question.question_type === 'free_form' && freeformAnswer.trim());
+
+  // Convert answers to the format expected by AnswerContainer
+  const answerData = question.answers?.map((answer, index) => ({
+    id: index.toString(),
+    text: answer,
+    selected: selectedAnswerId === index.toString()
+  }));
+
+  return (
+    <PageLayout 
+      showHeader={true}
+    >
+      {/* Points Display */}
+      <MyPoints  />
+      
+      {/* Progress Circles */}
+       <div className="pt-14">
+        <ProgressCircles 
+          current={gameState.introCurrentQuestion} 
+          total={gameState.introTotalQuestions} 
+        />
+      </div>
+
+      {/* Question Content */}
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
+        <div className="w-full max-w-2xl">
+          {/* Question Text */}
+          <h1 className="mb-8 text-4xl font-bold leading-tight text-center text-white md:text-5xl">
+            {question.question_text}
+          </h1>
+
+          {/* Answer Section */}
+          <div className="w-full">
+            {question.question_type === 'choose_one' ? (
+              <AnswerContainer
+                answers={answerData}
+                onAnswerClick={handleAnswerClick}
+                maxAnswers={4}
+              />
+            ) : (
+              /* Free Form Input */
+              <div className="space-y-6">
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={freeformAnswer}
+                    onChange={(e) => setFreeformAnswer(e.target.value)}
+                    placeholder="הקלד כאן ..."
+                    className="w-full h-16 px-6 text-lg text-white transition-all duration-300 bg-transparent border-2 border-white rounded-2xl placeholder-white/70 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-400/30"
+                    style={{ direction: 'rtl' }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Submit Button */}
+          <div className="flex justify-center mt-8">
+            <div className="w-full max-w-xs">
+              <Button
+                variant={canSubmit ? "primary-large" : "disabled"}
+                onClick={handleSubmit}
+                disabled={!canSubmit}
+                trackingId="question-submit"
+              >
+                שלח
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <Footer />
+    </PageLayout>
+  );
+}

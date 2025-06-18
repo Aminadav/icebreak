@@ -12,6 +12,7 @@ async function handleGetQuestions(socket, data, callback) {
         answers,
         allow_other,
         sensitivity,
+        max_answers_to_show,
         created_at
       FROM questions 
       ORDER BY created_at DESC

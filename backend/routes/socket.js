@@ -67,57 +67,45 @@ function setupSocketHandlers(io) {
       handleRegisterDevice(socket, { deviceId: socket.deviceId });
     }
 
+    function on(eventName,callback) {
+      socket.on(eventName,(...args)=>{
+        console.log('<<' + eventName, args);
+        callback(...args);
+      })
+    }
+
     // Register all socket event handlers
-    socket.on('register_device', (data) => handleRegisterDevice(socket, data));
-    socket.on('set_game_name', (data) => handleSetGameName(socket, data));
-    socket.on('start_game_creation', () => handleStartGameCreation(socket));
-    socket.on('create_game_now', () => handleCreateGameNow(socket));
-    socket.on('create_game_immediately', (data) => handleCreateGameImmediately(socket, data));
-    socket.on('get_game_data', (data) => handleGetGameData(socket, data));
-    socket.on('update_game_name', (data) => handleUpdateGameName(socket, data));
-    socket.on('submit_phone_number', (data) => handleSubmitPhoneNumber(socket, data));
-    socket.on('verify_2fa_code', (data) => handleVerify2FACode(socket, data));
-    socket.on('ping', () => handlePing(socket));
-    socket.on('trackEvent', (data) => handleTrackEvent(socket, data));
-    socket.on('save_email', (data) => handleSaveEmail(socket, data));
-    socket.on('reset_journey_state', () => handleResetJourneyState(socket));
-    socket.on('save_user_name', (data) => handleSaveUserName(socket, data));
-    socket.on('save_user_gender', (data) => handleSaveUserGender(socket, data));
-    socket.on('upload_pending_image', (data) => handleUploadPendingImage(socket, data));
-    socket.on('download_whatsapp_image', (data) => handleDownloadWhatsappImage(socket, data));
-    socket.on('background_whatsapp_download', (data) => handleBackgroundWhatsappDownload(socket, data));
-    socket.on('use_whatsapp_image', (data) => handleUseWhatsappImage(socket, data));
-    socket.on('load_existing_gallery_images', (data) => handleLoadExistingGalleryImages(socket, data));
-    socket.on('generate_image_gallery', (data) => handleGenerateImageGallery(socket, data));
-    socket.on('confirm_image_selection', (data) => handleConfirmImageSelection(socket, data));
-    socket.on('my_points', (data, callback) => handleGetMyPoints(socket, data, callback));
+    on('register_device', (data) => handleRegisterDevice(socket, data));
+    on('set_game_name', (data) => handleSetGameName(socket, data));
+    on('start_game_creation', () => handleStartGameCreation(socket));
+    on('create_game_now', () => handleCreateGameNow(socket));
+    on('create_game_immediately', (data) => handleCreateGameImmediately(socket, data));
+    on('get_game_data', (data) => handleGetGameData(socket, data));
+    on('update_game_name', (data) => handleUpdateGameName(socket, data));
+    on('submit_phone_number', (data) => handleSubmitPhoneNumber(socket, data));
+    on('verify_2fa_code', (data) => handleVerify2FACode(socket, data));
+    on('ping', () => handlePing(socket));
+    on('trackEvent', (data) => handleTrackEvent(socket, data));
+    on('save_email', (data) => handleSaveEmail(socket, data));
+    on('reset_journey_state', () => handleResetJourneyState(socket));
+    on('save_user_name', (data) => handleSaveUserName(socket, data));
+    on('save_user_gender', (data) => handleSaveUserGender(socket, data));
+    on('upload_pending_image', (data) => handleUploadPendingImage(socket, data));
+    on('download_whatsapp_image', (data) => handleDownloadWhatsappImage(socket, data));
+    on('background_whatsapp_download', (data) => handleBackgroundWhatsappDownload(socket, data));
+    on('use_whatsapp_image', (data) => handleUseWhatsappImage(socket, data));
+    on('load_existing_gallery_images', (data) => handleLoadExistingGalleryImages(socket, data));
+    on('generate_image_gallery', (data) => handleGenerateImageGallery(socket));
+    on('confirm_image_selection', (data) => handleConfirmImageSelection(socket, data));
+    on('my_points', (data, callback) => handleGetMyPoints(socket, data, callback));
     // Add this handler for saving (add/update) questions
-    socket.on('save_question', (data, callback) => handleSaveOrUpdateQuestion(socket, data, callback));
+    on('save_question', (data, callback) => handleSaveOrUpdateQuestion(socket, data, callback));
     // Add this handler for getting questions
-    socket.on('get_questions', (data, callback) => handleGetQuestions(socket, data, callback));
+    on('get_questions', (data, callback) => handleGetQuestions(socket, data, callback));
     // Add this handler for deleting questions
-    socket.on('delete_question', (data, callback) => handleDeleteQuestion(socket, data, callback));
+    on('delete_question', (data, callback) => handleDeleteQuestion(socket, data, callback));
     
-    socket.on('get-game-state', async ({gameId}) => {
-      console.log('@@@@@@@@@')
-      /** @type {GAME_STATES}*/
-      var gameState={screenName:'EMPTY_GAME_STATE'};
-      var userId= await getUserIdFromDevice(socket.deviceId);
-      // get from pool for current device id and current user id
-      var res=await pool.query('SELECT * FROM game_user_state WHERE user_id = $1 AND game_id = $2', [userId, gameId])
-      
-      if(res.rows.length > 0) {
-        gameState=res.rows[0].state;
-      } else {
-        // no row
-        gameState={screenName:'BEFORE_START_ABOUT_YOU'}
-        await pool.query('INSERT INTO game_user_state (user_id, game_id, state) VALUES ($1, $2, $3)', [userId, gameId, gameState]);
-      }
-      console.log(res)
-      console.log({gameState})
-      socket.emit('update-game-state',gameState)
-    })
-    socket.on('get_original_image_hash', async (callback) => {
+    on('get_original_image_hash', async (callback) => {
       const targetUserId = await getUserIdFromDevice(socket.deviceId);
       // get pendin_image for user
       var res = await pool.query('SELECT pending_image FROM users WHERE user_id = $1', [targetUserId])
@@ -125,19 +113,87 @@ function setupSocketHandlers(io) {
       var originalImageHash = res.rows[0].pending_image;
       callback({ originalImageHash: originalImageHash });
     })
-    socket.on('start-about-me', async ({gameId}) => {
-      console.log('get event start-about-me')
-      const userId = await getUserIdFromDevice(socket.deviceId);
-      var gameState = { screenName: 'ABOUT_YOU' };
+
+
+
+    on('get-game-state', async ({gameId}) => {
+      console.log('@@@@@@@@@')
+      /** @type {GAME_STATES}*/
+      var gameState={screenName:'EMPTY_GAME_STATE'};
+      var userId= await getUserIdFromDevice(socket.deviceId);
+      // get from pool for current device id and current user id
+      var res=await pool.query('SELECT * FROM game_user_state WHERE user_id = $1 AND game_id = $2', [userId, gameId])
+      
+      if(res.rows.length == 0) {
+        gameState={screenName:'BEFORE_START_ABOUT_YOU'}
+        await pool.query('INSERT INTO game_user_state (user_id, game_id, state) VALUES ($1, $2, $3)', [userId, gameId, gameState]);
+      } else {
+        gameState=res.rows[0].state;
+      }
+
+      console.log(res)
+      console.log({gameState})
       socket.emit('update-game-state',gameState)
     })
 
+    on('start-intro-questions', async ({gameId}) => {
+      console.log('get event start-intro-questions')
+      const userId = await getUserIdFromDevice(socket.deviceId);
+      
+      var question=await getAboutMeQuestion()
+      /** @type {GAME_STATES} */
+      var gameState = { screenName: 'QUESTION',isIntro:true,question,introCurrentQuestion:1,introTotalQuestions:5 };
+      await pool.query('UPDATE  game_user_state SET state = $1 WHERE user_id = $2 AND game_id = $3', [gameState, userId, gameId]);
+      socket.emit('update-game-state',gameState)
+    })
+
+    on('admin-set-question', async (question) => {
+      console.log('get event start-intro-questions')
+      const userId = await getUserIdFromDevice(socket.deviceId);
+      
+      /** @type {GAME_STATES} */
+      var gameState = { screenName: 'QUESTION',isIntro:true,question,introCurrentQuestion:1,introTotalQuestions:5 };
+      await pool.query('UPDATE  game_user_state SET state = $1 WHERE user_id = $2', [gameState, userId]);
+    })
+    on('admin-delete-my-game-states', async () => {
+      console.log('🗑️ Admin: Deleting game states for current user');
+      try {
+        console.log('🗑️ Admin: Deleting all game states for current user');
+        const userId = await getUserIdFromDevice(socket.deviceId);
+        
+        if (!userId) {
+          socket.emit('error', { message: 'No user found for this device' });
+          return;
+        }
+
+        // Delete all game states for the current user
+        const result = await pool.query('DELETE FROM game_user_state WHERE user_id = $1', [userId]);
+        
+        console.log(`🗑️ Admin: Deleted ${result.rowCount} game states for user ${userId}`);
+        socket.emit('admin_game_states_deleted', { 
+          success: true, 
+          message: `Successfully deleted ${result.rowCount} game states`,
+          deletedCount: result.rowCount 
+        });
+      } catch (error) {
+        console.error('❌ Admin: Error deleting game states:', error);
+        socket.emit('error', { message: 'Failed to delete game states: ' + error.message });
+      }
+    })
+
     // התנתקות
-    socket.on('disconnect', (reason) => {
+    on('disconnect', (reason) => {
       console.log(`❌ Socket.io client disconnected: ${socket.id}, Reason: ${reason}`);
       console.log(`📱 Client disconnected: ${socket.id}`);
     });
   });
+}
+
+async function getAboutMeQuestion() {
+  var row=await pool.query('select * from questions limit 1')
+  /** @type{QUESTION} */
+  var question=row.rows[0];
+  return question;
 }
 
 module.exports = setupSocketHandlers;

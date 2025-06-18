@@ -6,28 +6,34 @@ type gameStateEmptyGameState ={
 type gameStateBefore ={
   screenName:'BEFORE_START_ABOUT_YOU',
 }
-type gameState2 ={
-  screenName:'2',
-  b:string
-}
 
 type BASIC_QUESTION={
-  question_id:string,
+  question_id?:string,
   question_text:string,
-  answers:string[],
-  allow_other:boolean,
-  sensitivity:'low'|'medium'|'high',
-  created_at:string,
-  updated_at:string,
-  question_type:'free_form'
+  question_type:'free_form' | 'choose_one',
+  sensitivity?:'low'|'medium'|'high',
+  created_at?:string,
+  updated_at?:string,  
+  max_answers_to_show?:number
+  
+  // FREE FORM
+  allow_other?:boolean,
+  answers?:string[],
 }
 
 declare global {
+  type GAME_STATE_QUESTION ={
+    screenName:'QUESTION',
+    isIntro:boolean
+    introCurrentQuestion:number,
+    introTotalQuestions:number,
+    question:QUESTION,
+  }
 
   export type GAME_STATES= 
               gameStateEmptyGameState
             | gameStateBefore
-            | gameState2
+            | GAME_STATE_QUESTION
 
 
   export type QUESTION=BASIC_QUESTION

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import Answer from './Answer';
 
@@ -12,16 +13,24 @@ interface AnswerContainerProps {
   onAnswerClick?: (answerId: string) => void;
   disabled?: boolean;
   maxAnswers?: number;
+  allowOther?: boolean;
+  onOtherAnswerChange?: (value: string) => void;
+  otherAnswerValue?: string;
 }
 
 export default function AnswerContainer({ 
   answers, 
   onAnswerClick, 
   disabled = false, 
-  maxAnswers = 4 
+  maxAnswers = 4,
+  allowOther = false,
+  onOtherAnswerChange,
+  otherAnswerValue = ''
 }: AnswerContainerProps): JSX.Element {
   const { texts } = useLanguage();
   const isRTL = texts.direction === 'rtl';
+  const [showOtherInput, setShowOtherInput] = useState(false);
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
   
   // Limit answers to maxAnswers
   const displayedAnswers = answers.slice(0, maxAnswers);

@@ -9,6 +9,7 @@ import { useGameId } from '../utils/useGameId';
 import { usePoints } from '../contexts/GameContext';
 import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
+import QuestionPage from './QuestionPage';
 
 export default function Play(): JSX.Element {
   const navigate = useNavigate();
@@ -30,14 +31,13 @@ export default function Play(): JSX.Element {
   }, []);
   
   if(gameState.screenName=="EMPTY_GAME_STATE") {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-900">
-        <div className="text-xl text-red-400">Empty game state</div>
-      </div>
-    );
+    return <div></div>
   }
   if(gameState.screenName=="BEFORE_START_ABOUT_YOU") {
     return <BeforeStartAskAboutYou gameState={gameState}/>
   }
-  return <div>טוען...</div>;
+  if(gameState.screenName=="QUESTION") {
+    return <QuestionPage gameState={gameState} />
+  }
+  return <div>{JSON.stringify(gameState)}</div>;
 }

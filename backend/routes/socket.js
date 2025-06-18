@@ -125,13 +125,11 @@ function setupSocketHandlers(io) {
       var originalImageHash = res.rows[0].pending_image;
       callback({ originalImageHash: originalImageHash });
     })
-    socket.on('start-about-me', async (callback) => {
-      const targetUserId = await getUserIdFromDevice(socket.deviceId);
-      // get pendin_image for user
-      var res = await pool.query('SELECT pending_image FROM users WHERE user_id = $1', [targetUserId])
-
-      var originalImageHash = res.rows[0].pending_image;
-      callback({ originalImageHash: originalImageHash });
+    socket.on('start-about-me', async ({gameId}) => {
+      console.log('get event start-about-me')
+      const userId = await getUserIdFromDevice(socket.deviceId);
+      var gameState = { screenName: 'ABOUT_YOU' };
+      socket.emit('update-game-state',gameState)
     })
 
     // התנתקות

@@ -31,7 +31,7 @@ export default function CreatorGameReadyPage({
   const handleStartGame = () => {
     console.log('🎮 Starting game...');
     // Navigate to BeforeStartAskAboutYou page
-    navigate(`/game/${gameId}/before-start`);
+    navigate(`/game/${gameId}/play`);
   };
 
   const handleShareGame = () => {
@@ -41,7 +41,7 @@ export default function CreatorGameReadyPage({
         onStartPlay={() => {
           console.log('🎮 Starting game from modal...');
           // Navigate to BeforeStartAskAboutYou page
-          navigate(`game/${gameId}/before-start`);
+          navigate(`game/${gameId}/play`);
         }}
         onShareGame={() => {
           console.log('📤 Sharing game from modal...');

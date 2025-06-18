@@ -10,7 +10,6 @@ import PictureUploadPage from '../pages/PictureUploadPage';
 import CameraPage from '../pages/CameraPage';
 import ImageGalleryPage from '../pages/ImageGalleryPage';
 import CreatorGameReadyPage from '../pages/CreatorGameReadyPage';
-import BeforeStartAskAboutYou from '../pages/BeforeStartAskAboutYou';
 import Play from '../pages/play';
 
 function GameRoutes(): JSX.Element {
@@ -140,14 +139,6 @@ function GameRoutes(): JSX.Element {
             selectedImageHash={userData.selectedImageHash || 'no-image'}
           />
         } 
-      />
-      <Route 
-        path="before-start" 
-        element={<BeforeStartAskAboutYou />} 
-      />
-      <Route 
-        path="questions" 
-        element={<BeforeStartAskAboutYou />} 
       />
 
       <Route 

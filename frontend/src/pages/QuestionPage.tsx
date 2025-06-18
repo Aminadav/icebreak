@@ -17,22 +17,41 @@ export default function QuestionPage({
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string>('');
   const [freeformAnswer, setFreeformAnswer] = useState<string>('');
+  const [otherAnswer, setOtherAnswer] = useState<string>('');
 
-  const handleAnswerClick = (answerId: string) => {
+  const handleAnswerClick = (answerId: string, value?: string) => {
     setSelectedAnswerId(answerId);
+    if (answerId === 'other' && value) {
+      setOtherAnswer(value);
+    }
+  };
+
+  const handleOtherAnswerChange = (value: string) => {
+    setOtherAnswer(value);
   };
 
   const handleSubmit = () => {
+    let result = '';
+    
     if (question.question_type === 'choose_one' && selectedAnswerId) {
-      const selectedAnswer = question.answers[parseInt(selectedAnswerId)];
-      // onAnswerSubmit?.(selectedAnswer);
+      if (selectedAnswerId === 'other') {
+        result = otherAnswer;
+      } else if (question.answers) {
+        const selectedAnswer = question.answers[parseInt(selectedAnswerId)];
+        result = selectedAnswer;
+      }
     } else if (question.question_type === 'free_form' && freeformAnswer.trim()) {
-      // onAnswerSubmit?.(freeformAnswer.trim());
+      result = freeformAnswer.trim();
+    }
+    
+    if (result) {
+      alert(`User answer: ${result}`);
     }
   };
 
   const canSubmit = 
-    (question.question_type === 'choose_one' && selectedAnswerId) ||
+    (question.question_type === 'choose_one' && selectedAnswerId && 
+     (selectedAnswerId !== 'other' || otherAnswer.trim())) ||
     (question.question_type === 'free_form' && freeformAnswer.trim());
 
   // Convert answers to the format expected by AnswerContainer
@@ -40,7 +59,7 @@ export default function QuestionPage({
     id: index.toString(),
     text: answer,
     selected: selectedAnswerId === index.toString()
-  }));
+  })) || [];
 
   return (
     <PageLayout 
@@ -72,6 +91,9 @@ export default function QuestionPage({
                 answers={answerData}
                 onAnswerClick={handleAnswerClick}
                 maxAnswers={4}
+                allowOther={question.allow_other}
+                onOtherAnswerChange={handleOtherAnswerChange}
+                otherAnswerValue={otherAnswer}
               />
             ) : (
               /* Free Form Input */

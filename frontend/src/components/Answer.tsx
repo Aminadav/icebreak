@@ -3,25 +3,49 @@ import { useLanguage } from '../contexts/LanguageContext';
 
 interface AnswerProps {
   text: string;
-  onClick?: () => void;
+  onClick?: (value?: string) => void;
+  onChange?: (value: string) => void;
   disabled?: boolean;
   selected?: boolean;
+  allow_free_text?: boolean;
 }
 
-export default function Answer({ text, onClick, disabled = false, selected = false }: AnswerProps): JSX.Element {
+export default function Answer({ text, onClick, onChange, disabled = false, selected = false, allow_free_text = false }: AnswerProps): JSX.Element {
   const { texts } = useLanguage();
   const [isPressed, setIsPressed] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [isInputMode, setIsInputMode] = useState(false);
   const isRTL = texts.direction === 'rtl';
 
   const handleClick = () => {
     if (disabled) return;
     
+    if (allow_free_text && !isInputMode) {
+      setIsInputMode(true);
+      return;
+    }
+    
     setIsPressed(true);
     setTimeout(() => setIsPressed(false), 300);
     
     if (onClick) {
-      setTimeout(() => onClick(), 150);
+      const response = allow_free_text && isInputMode && inputValue.trim() ? inputValue : undefined;
+      setTimeout(() => onClick(response), 150);
+    }
+  };
+
+  const handleInputSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && inputValue.trim()) {
+      if (onClick) {
+        onClick(inputValue);
+      }
+    }
+  };
+
+  const handleInputBlur = () => {
+    if (!inputValue.trim()) {
+      setIsInputMode(false);
     }
   };
 
@@ -55,10 +79,10 @@ export default function Answer({ text, onClick, disabled = false, selected = fal
       {/* Floating particles effect on hover */}
       {isHovered && !disabled && (
         <>
-          <div className="absolute top-2 left-2 w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-          <div className="absolute top-3 right-3 w-1 h-1 bg-cyan-300 rounded-full animate-bounce" style={{ animationDelay: '200ms' }} />
-          <div className="absolute bottom-2 left-1/3 w-1 h-1 bg-purple-300 rounded-full animate-bounce" style={{ animationDelay: '400ms' }} />
-          <div className="absolute bottom-3 right-1/4 w-1 h-1 bg-pink-300 rounded-full animate-bounce" style={{ animationDelay: '600ms' }} />
+          <div className="absolute w-1 h-1 bg-white rounded-full top-2 left-2 animate-bounce" style={{ animationDelay: '0ms' }} />
+          <div className="absolute w-1 h-1 rounded-full top-3 right-3 bg-cyan-300 animate-bounce" style={{ animationDelay: '200ms' }} />
+          <div className="absolute w-1 h-1 bg-purple-300 rounded-full bottom-2 left-1/3 animate-bounce" style={{ animationDelay: '400ms' }} />
+          <div className="absolute w-1 h-1 bg-pink-300 rounded-full bottom-3 right-1/4 animate-bounce" style={{ animationDelay: '600ms' }} />
         </>
       )}
       
@@ -73,7 +97,7 @@ export default function Answer({ text, onClick, disabled = false, selected = fal
       {isPressed && (
         <>
           <div className="absolute inset-0 bg-white opacity-40 rounded-[6px] animate-ping" />
-          <div className="absolute top-1/2 left-1/2 w-2 h-2 bg-cyan-400 rounded-full animate-ping transform -translate-x-1/2 -translate-y-1/2" />
+          <div className="absolute w-2 h-2 transform -translate-x-1/2 -translate-y-1/2 rounded-full top-1/2 left-1/2 bg-cyan-400 animate-ping" />
         </>
       )}
       
@@ -84,7 +108,30 @@ export default function Answer({ text, onClick, disabled = false, selected = fal
         ${isPressed ? 'transform scale-95' : ''}
         ${isHovered && !disabled ? 'transform scale-105 text-shadow-lg' : ''}
       `}>
-        {text}
+        {allow_free_text && isInputMode ? (
+          <input
+            type="text"
+            value={inputValue}
+            onChange={(e) => {
+              setInputValue(e.target.value);
+              if (onChange) {
+                onChange(e.target.value);
+              }
+            }}
+            onKeyDown={handleInputSubmit}
+            onBlur={handleInputBlur}
+            placeholder="בחר תשובה אחרת"
+            className={`
+              w-full bg-transparent border-none outline-none text-white placeholder-gray-300
+              font-semibold text-[16px] text-center
+              ${isRTL ? 'text-right' : 'text-left'}
+            `}
+            style={{ direction: isRTL ? 'rtl' : 'ltr' }}
+            autoFocus
+          />
+        ) : (
+          text
+        )}
       </span>
       
       {/* Enhanced glow effects */}

@@ -10,7 +10,7 @@ interface AnswerData {
 
 interface AnswerContainerProps {
   answers: AnswerData[];
-  onAnswerClick?: (answerId: string) => void;
+  onAnswerClick?: (answerId: string, value?: string) => void;
   disabled?: boolean;
   maxAnswers?: number;
   allowOther?: boolean;
@@ -35,9 +35,32 @@ export default function AnswerContainer({
   // Limit answers to maxAnswers
   const displayedAnswers = answers.slice(0, maxAnswers);
   
-  const handleAnswerClick = (answerId: string) => {
+  const handleAnswerClick = (answerId: string, value?: string) => {
+    if (answerId === 'other') {
+      setIsOtherSelected(true);
+      if (value && onOtherAnswerChange) {
+        onOtherAnswerChange(value);
+      }
+    } else {
+      setIsOtherSelected(false);
+    }
+    
     if (onAnswerClick) {
-      onAnswerClick(answerId);
+      onAnswerClick(answerId, value);
+    }
+  };
+
+  const handleOtherChange = (value: string) => {
+    // Ensure other is selected when user starts typing
+    if (!isOtherSelected) {
+      setIsOtherSelected(true);
+      if (onAnswerClick) {
+        onAnswerClick('other');
+      }
+    }
+    
+    if (onOtherAnswerChange) {
+      onOtherAnswerChange(value);
     }
   };
 
@@ -75,10 +98,10 @@ export default function AnswerContainer({
             animationFillMode: 'both',
           }}
         >
-          <div className="transform transition-all duration-300 group-hover:scale-105">
+          <div className="transition-all duration-300 transform group-hover:scale-105">
             <Answer
               text={answer.text}
-              onClick={() => handleAnswerClick(answer.id)}
+              onClick={(value) => handleAnswerClick(answer.id, value)}
               disabled={disabled}
               selected={answer.selected}
             />
@@ -90,6 +113,35 @@ export default function AnswerContainer({
           )}
         </div>
       ))}
+      
+      {allowOther && (
+        <div
+          className={`
+            transform transition-all duration-500 ease-out
+            hover:z-10 relative animate-fadeInUp group
+          `}
+          style={{
+            animationDelay: `${displayedAnswers.length * 150}ms`,
+            animationFillMode: 'both',
+          }}
+        >
+          <div className="transition-all duration-300 transform group-hover:scale-105">
+            <Answer
+              text="הקלד תשובה אחרת ..."
+              onClick={(value) => handleAnswerClick('other', value)}
+              onChange={handleOtherChange}
+              disabled={disabled}
+              selected={isOtherSelected}
+              allow_free_text={true}
+            />
+          </div>
+          
+          {/* Floating animation for selected answer */}
+          {isOtherSelected && (
+            <div className="absolute -inset-2 bg-gradient-to-r from-cyan-400/20 to-purple-400/20 rounded-[12px] animate-pulse -z-10" />
+          )}
+        </div>
+      )}    
     </div>
   );
 }

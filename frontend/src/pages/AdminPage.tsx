@@ -216,24 +216,39 @@ export default function AdminPage(): JSX.Element {
     setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
   };
 
-  var sampleQuestions: QUESTION[] = [
-    {
-      question_type:'free_form',
-      question_text:'מה דעתך?',
+  var sampleGameStates:GAME_STATES[]=
+    [
+      {screenName:'GOT_POINTS',
+            points: 10,
+            text: 'כל הכבוד!'
+          },
+     {
+      screenName:'QUESTION',
+      question:{
+        question_type:'free_form',
+        question_text:'מה דעתך?',
+      }
     },
     {
-      question_type:'choose_one',
-      question_text:'כן או לא?',
-      allow_other:false,
-      answers:['כן', 'לא'],
-    },
-    {
-      question_type:'choose_one',
-      question_text:'כן או לא או משהו אחר?',
-      allow_other:true,
-      answers:['כן', 'לא'],
-    }
-  ]
+       screenName:'QUESTION',
+       question:{
+         question_type:'choose_one',
+         question_text:'כן או לא?',
+         allow_other:false,
+         answers:['כן', 'לא'],
+        }
+      },
+      {
+       screenName:'QUESTION',
+      question:{
+       question_type:'choose_one',
+       question_text:'כן או לא או משהו אחר?',
+       allow_other:true,
+       answers:['כן', 'לא'],
+      }
+     }
+   ]
+  
 
   return (
     <div className="min-h-screen p-8 text-white bg-gray-900">
@@ -277,27 +292,17 @@ export default function AdminPage(): JSX.Element {
             >
               🗑️ Delete All Game States
             </button>
-            <button
-              onClick={() => {
-                setMessage('⭐ Moving to Got Points page...');
-                socket.emit('admin-set-page');
-              }}
-              className="px-4 py-2 ml-2 text-white bg-yellow-600 rounded-lg hover:bg-yellow-700"
-              disabled={!deviceInfo?.userId}
-            >
-              ⭐ Move to Got Points Page
-            </button>
-            {sampleQuestions.map((q, idx) => (
+            {sampleGameStates.map((q, idx) => (
               <button
                 key={idx}
                 onClick={() => {
-                  setMessage(`Setting question: ${q.question_text}`);
-                  socket.emit('admin-set-question', q);
+                  setMessage(`Done`);
+                  socket.emit('admin-set-page', q);
                 }}
                 className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                 disabled={!deviceInfo?.userId}
               >
-                Set Question: {q.question_text}
+                {JSON.stringify(q)}
               </button>
             ))}
           </div>

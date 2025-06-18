@@ -24,9 +24,9 @@ type BASIC_QUESTION={
 declare global {
   type GAME_STATE_QUESTION ={
     screenName:'QUESTION',
-    isIntro:boolean
-    introCurrentQuestion:number,
-    introTotalQuestions:number,
+    isIntro?:boolean
+    introCurrentQuestion?:number,
+    introTotalQuestions?:number,
     question:QUESTION,
   }
 

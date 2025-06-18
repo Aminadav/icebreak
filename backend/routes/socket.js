@@ -181,23 +181,10 @@ function setupSocketHandlers(io) {
       }
     })
 
-    on('admin-set-page', async () => {
+    on('admin-set-page', async (gameState) => {
       console.log('⭐ Admin: Setting page to GOT_POINTS for current user');
-      try {
-        const userId = await getUserIdFromDevice(socket.deviceId);
         
-        if (!userId) {
-          socket.emit('error', { message: 'No user found for this device' });
-          return;
-        }
-
-        /** @type {GAME_STATES} */
-        const gameState = { 
-          screenName: 'GOT_POINTS',
-          points: 10,
-          text: 'כל הכבוד'
-        };
-
+      var userId = await getUserIdFromDevice(socket.deviceId);
         // Update all game states for the current user to GOT_POINTS
         const result = await pool.query('UPDATE game_user_state SET state = $1 WHERE user_id = $2', [gameState, userId]);
         
@@ -207,10 +194,6 @@ function setupSocketHandlers(io) {
           message: `Successfully set ${result.rowCount} games to Got Points page`,
           updatedCount: result.rowCount 
         });
-      } catch (error) {
-        console.error('❌ Admin: Error setting page:', error);
-        socket.emit('error', { message: 'Failed to set page: ' + error.message });
-      }
     })
 
     // התנתקות

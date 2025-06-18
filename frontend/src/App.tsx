@@ -5,7 +5,7 @@ import { TrackingProvider } from './contexts/TrackingContext';
 import { ModalProvider } from './contexts/ModalContext';
 import StartPage from './pages/StartPage';
 import GameRouter from './components/GameRouter';
-import AdminPageSimple from './pages/AdminPageSimple';
+import AdminPageSimple from './pages/AdminPage';
 import AboutPage from './components/AboutPage';
 import ComponentsShowcase from './pages/ComponentsShowcase';
 import ModalRenderer from './components/ModalRenderer';

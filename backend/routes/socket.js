@@ -1,31 +1,32 @@
 // Import all socket event handlers
 const pool = require('../config/database');
-const {
-  handleRegisterDevice,
-  handleSetGameName,
-  handleStartGameCreation,
-  handleCreateGameNow,
-  handleCreateGameImmediately,
-  handleGetGameData,
-  handleUpdateGameName,
-  handleSubmitPhoneNumber,
-  handleVerify2FACode,
-  handlePing,
-  handleTrackEvent,
-  handleSaveEmail,
-  handleResetJourneyState,
-  handleUpdateJourneyState,
-  handleSaveUserName,
-  handleSaveUserGender,
-  handleUploadPendingImage,
-  handleDownloadWhatsappImage,
-  handleBackgroundWhatsappDownload,
-  handleUseWhatsappImage,
-  handleLoadExistingGalleryImages,
-  handleGenerateImageGallery,
-  handleConfirmImageSelection,
-  handleGetMyPoints
-} = require('./socket-handlers');
+const handleRegisterDevice = require('./socket-handlers/registerDevice');
+const handleSetGameName = require('./socket-handlers/setGameName');
+const handleStartGameCreation = require('./socket-handlers/startGameCreation');
+const handleCreateGameNow = require('./socket-handlers/createGameNow');
+const handleCreateGameImmediately = require('./socket-handlers/createGameImmediately');
+const handleGetGameData = require('./socket-handlers/getGameData');
+const handleUpdateGameName = require('./socket-handlers/updateGameName');
+const handleSubmitPhoneNumber = require('./socket-handlers/submitPhoneNumber');
+const handleVerify2FACode = require('./socket-handlers/verify2FACode');
+const handlePing = require('./socket-handlers/ping');
+const handleTrackEvent = require('./socket-handlers/trackEvent');
+const handleSaveEmail = require('./socket-handlers/saveEmail');
+const handleResetJourneyState = require('./socket-handlers/resetJourneyState');
+const handleUpdateJourneyState = require('./socket-handlers/updateJourneyState');
+const handleSaveUserName = require('./socket-handlers/saveUserName');
+const handleSaveUserGender = require('./socket-handlers/saveUserGender');
+const handleUploadPendingImage = require('./socket-handlers/uploadPendingImage');
+const handleDownloadWhatsappImage = require('./socket-handlers/downloadWhatsappImage');
+const handleBackgroundWhatsappDownload = require('./socket-handlers/backgroundWhatsappDownload');
+const handleUseWhatsappImage = require('./socket-handlers/useWhatsappImage');
+const handleLoadExistingGalleryImages = require('./socket-handlers/loadExistingGalleryImages');
+const handleGenerateImageGallery = require('./socket-handlers/generateImageGallery');
+const handleConfirmImageSelection = require('./socket-handlers/confirmImageSelection');
+const handleGetMyPoints = require('./socket-handlers/getMyPoints');
+const handleSaveOrUpdateQuestion = require('./socket-handlers/updateQuestion');
+const handleGetQuestions = require('./socket-handlers/getQuestions');
+const handleDeleteQuestion = require('./socket-handlers/deleteQuestion');
 const { getUserIdFromDevice } = require('./socket-handlers/utils');
 
 function setupSocketHandlers(io) {
@@ -90,7 +91,41 @@ function setupSocketHandlers(io) {
     socket.on('generate_image_gallery', (data) => handleGenerateImageGallery(socket, data));
     socket.on('confirm_image_selection', (data) => handleConfirmImageSelection(socket, data));
     socket.on('my_points', (data, callback) => handleGetMyPoints(socket, data, callback));
+    // Add this handler for saving (add/update) questions
+    socket.on('save_question', (data, callback) => handleSaveOrUpdateQuestion(socket, data, callback));
+    // Add this handler for getting questions
+    socket.on('get_questions', (data, callback) => handleGetQuestions(socket, data, callback));
+    // Add this handler for deleting questions
+    socket.on('delete_question', (data, callback) => handleDeleteQuestion(socket, data, callback));
+    
+    socket.on('get-game-state', async ({gameId}) => {
+      console.log('@@@@@@@@@')
+      /** @type {GAME_STATES}*/
+      var gameState={screenName:'EMPTY_GAME_STATE'};
+      var userId= await getUserIdFromDevice(socket.deviceId);
+      // get from pool for current device id and current user id
+      var res=await pool.query('SELECT * FROM game_user_state WHERE user_id = $1 AND game_id = $2', [userId, gameId])
+      
+      if(res.rows.length > 0) {
+        gameState=res.rows[0].state;
+      } else {
+        // no row
+        gameState={screenName:'BEFORE_START_ABOUT_YOU'}
+        await pool.query('INSERT INTO game_user_state (user_id, game_id, state) VALUES ($1, $2, $3)', [userId, gameId, gameState]);
+      }
+      console.log(res)
+      console.log({gameState})
+      socket.emit('update-game-state',gameState)
+    })
     socket.on('get_original_image_hash', async (callback) => {
+      const targetUserId = await getUserIdFromDevice(socket.deviceId);
+      // get pendin_image for user
+      var res = await pool.query('SELECT pending_image FROM users WHERE user_id = $1', [targetUserId])
+
+      var originalImageHash = res.rows[0].pending_image;
+      callback({ originalImageHash: originalImageHash });
+    })
+    socket.on('start-about-me', async (callback) => {
       const targetUserId = await getUserIdFromDevice(socket.deviceId);
       // get pendin_image for user
       var res = await pool.query('SELECT pending_image FROM users WHERE user_id = $1', [targetUserId])

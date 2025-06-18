@@ -11,30 +11,31 @@ import CameraPage from '../pages/CameraPage';
 import ImageGalleryPage from '../pages/ImageGalleryPage';
 import CreatorGameReadyPage from '../pages/CreatorGameReadyPage';
 import BeforeStartAskAboutYou from '../pages/BeforeStartAskAboutYou';
+import Play from '../pages/play';
 
 function GameRoutes(): JSX.Element {
   const { gameId, gameData, userData, isLoading, error } = useGame();
 
   if (!gameId) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-red-400 text-xl">Invalid game ID</div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-xl text-red-400">Invalid game ID</div>
       </div>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-white text-xl">טוען נתוני משחק...</div>
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-xl text-white">טוען נתוני משחק...</div>
       </div>
     );
   }
 
   if (error || !gameData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="text-red-400 text-xl">
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-xl text-red-400">
           {error || 'משחק לא נמצא'}
         </div>
       </div>
@@ -147,6 +148,11 @@ function GameRoutes(): JSX.Element {
       <Route 
         path="questions" 
         element={<BeforeStartAskAboutYou />} 
+      />
+
+      <Route 
+        path="play" 
+        element={<Play />} 
       />
       {/* Default redirect to name step */}
       <Route 

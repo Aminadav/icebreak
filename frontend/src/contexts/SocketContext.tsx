@@ -3,7 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { getDeviceId, setDeviceId, generateUUID } from '../utils/deviceManager';
 
 interface SocketContextType {
-  socket: Socket | null;
+  socket: Socket;
   isConnected: boolean;
   error: string | null;
 }
@@ -92,6 +92,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   }, []); // No dependencies - device ID is managed internally
 
   const value: SocketContextType = {
+    //@ts-ignore
     socket,
     isConnected,
     error
@@ -104,6 +105,9 @@ export function SocketProvider({ children }: SocketProviderProps) {
   );
 }
 
+/**
+ * @return  {SocketContextType}
+ */
 export function useSocket(): SocketContextType {
   const context = useContext(SocketContext);
   if (context === undefined) {

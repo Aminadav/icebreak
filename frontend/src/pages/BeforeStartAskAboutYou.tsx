@@ -8,31 +8,19 @@ import { useSocket } from '../contexts/SocketContext';
 import { useGameId } from '../utils/useGameId';
 import { usePoints } from '../contexts/GameContext';
 
-export default function BeforeStartAskAboutYou(): JSX.Element {
+export default function BeforeStartAskAboutYou(props:{gameState:GAME_STATES}): JSX.Element {
   const navigate = useNavigate();
   const gameId = useGameId();
   const { points } = usePoints();
+  const {socket} = useSocket();
 
   const handleStartQuestions = () => {
-    console.log('🎮 Starting questions...');
-    if (gameId) {
-      // Navigate to questions page using React Router
-      navigate(`/game/${gameId}/questions`);
-    } else {
-      // For legacy non-game flows, log for now
-      console.log('⚠️ No gameId provided, cannot navigate to questions');
-    }
-  };
-
-  const handleMenuAction = (action: string) => {
-    // Handle menu actions if needed
-    console.log('Menu action:', action);
+    socket.emit('start-about-me')
   };
 
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
     >
       <main className="relative z-10 flex flex-col min-h-[calc(100vh-88px)] px-4">
         

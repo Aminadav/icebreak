@@ -20,6 +20,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "../shared", "../shared/games_states_interface.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

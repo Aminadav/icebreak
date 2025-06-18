@@ -2,5 +2,17 @@
   "compilerOptions": {
     "checkJs": true,
     "noEmit": true
-  }
+  },
+  "include": [
+    "../shared/**/*",
+    "**/*"
+  , "../shared/games_states_interface.ts"  
+],
+  "exclude": ["node_modules", "dist"]
+
+  // q: files vs directories?
+  // A: files is for specific files, directories is for all files in the directory
+  // q: but also I can put files in the directoy object, no?
+  // a: 
+
 }

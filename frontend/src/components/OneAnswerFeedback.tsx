@@ -60,7 +60,9 @@ export default function OneAnswerFeedback({
         `}
         style={{ 
           width: `${progressWidth}%`,
-          transformOrigin: 'right center'
+          transformOrigin: 'right center',
+          transitionProperty:'all',
+          transitionDuration: '1500ms',
         }}
       />
       

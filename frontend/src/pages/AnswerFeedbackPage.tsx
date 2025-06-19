@@ -42,9 +42,9 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
     }, 800);
 
     const timer4 = setTimeout(() => {
-      setAnimationPhase('complete');
+      // setAnimationPhase('complete');
       setShowContinueButton(true);
-    }, 2800);
+    }, 1300);
 
     return () => {
       clearTimeout(timer1);
@@ -84,19 +84,19 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
         {/* Layout differs based on correct/incorrect */}
         {hasCorrectAnswer ? (
           /* Correct Answer Layout - centered */
-          <div className="flex flex-col items-center justify-center flex-1">
+          <div className="flex flex-col items-center justify-center flex-1 mt-10">
             
             {/* Main Message - appears first */}
-            <div className={`mb-6 text-center transition-all duration-1000 ease-out transform ${
+            <div className={`text-center transition-all duration-1000 ease-out transform ${
               animationPhase !== 'initial' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
             }`}>
-              <h1 className="mb-4 text-6xl font-bold leading-tight text-white drop-shadow-2xl animate-pulse">
+              <h1 className="mb-2 text-3xl font-bold leading-tight text-white drop-shadow-2xl animate-pulse">
                 יפה מאוד
               </h1>
             </div>
 
             {/* Points Display with Stars - appears second */}
-            <div className={`mb-8 flex items-center justify-center transition-all duration-1000 ease-out transform ${
+            <div className={`mb-2 flex items-center justify-center transition-all duration-1000 ease-out transform ${
               animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
                 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-75'
             }`}>
@@ -121,7 +121,7 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
                   ? 'animate-pulse' : ''
               }`}>
                 <span className="text-[69px] leading-normal">+</span>
-                <span className="text-[136px] leading-normal drop-shadow-2xl">
+                <span className="text-[100px] leading-normal drop-shadow-2xl">
                   {gameState.pointsReceived}
                 </span>
               </div>
@@ -176,10 +176,12 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
             </div>
 
             {/* Continue Button */}
-            {showContinueButton && (
-              <div className="flex justify-center w-full max-w-md mt-8">
+              <div className={`
+              ${showContinueButton ?  'opacity-100' : 'opacity-0'}
+              flex justify-center w-full max-w-md mt-8
+              `}>
                 <Button
-                  variant="primary-large"
+                  variant="primary-small"
                   onClick={handleContinue}
                   trackingId="answer-feedback-continue"
                   data-testid="continue-button"
@@ -187,14 +189,13 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
                   {texts.answerFeedback.continueButton} {">>"}
                 </Button>
               </div>
-            )}
           </div>
         ) : (
-          /* Incorrect Answer Layout - points at top, message in center */
-          <div className="flex flex-col flex-1">
+          /* Incorrect Answer Layout - points just above message */
+          <div className="flex flex-col items-center justify-center flex-1">
             
-            {/* Points at top - smaller */}
-            <div className={`flex items-center justify-center mb-2 transition-all duration-1000 ease-out transform ${
+            {/* Points positioned directly above the message */}
+            <div className={`flex items-center justify-center mb-4 transition-all duration-1000 ease-out transform ${
               animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
                 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-75'
             }`}>
@@ -240,65 +241,62 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
               </div>
             </div>
 
-            {/* Main content centered */}
-            <div className="flex flex-col items-center justify-center flex-1">
-              
-              {/* Error Message with Black Background */}
-              <div className={`mb-8 text-center transition-all duration-1000 ease-out transform ${
-                animationPhase !== 'initial' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
-              }`}>
-                <div className="w-screen px-8 py-6 -mx-4 bg-black bg-opacity-80">
-                  <h1 className="mb-4 text-3xl font-bold leading-tight text-red-500 drop-shadow-2xl">
-                    טעות
-                  </h1>
-                  <p className="text-xl font-semibold text-orange-400">
-                    אבל מגיעות לך נקודות על ההשתדלות
-                  </p>
-                </div>
-                
-                {/* Question outside black background */}
-                <p className="text-white text-[21px] font-normal leading-normal drop-shadow-lg mt-6 px-4">
-                  {gameState.question}
+            {/* Error Message with Black Background */}
+            <div className={`mb-8 text-center transition-all duration-1000 ease-out transform ${
+              animationPhase !== 'initial' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
+            }`}>
+              <div className="w-screen px-8 py-6 -mx-4 bg-black bg-opacity-80">
+                <h1 className="mb-4 text-3xl font-bold leading-tight text-red-500 drop-shadow-2xl">
+                  טעות
+                </h1>
+                <p className="text-xl font-semibold text-orange-400">
+                  אבל מגיעות לך נקודות על ההשתדלות
                 </p>
               </div>
-
-              {/* Answers List */}
-              <div className="w-full max-w-md">
-                <div className="flex flex-col gap-[14px]">
-                  {gameState.answers.map((answer, index) => (
-                    <div
-                      key={index}
-                      className={`transition-opacity duration-300 ${
-                        index < visibleAnswersCount ? 'opacity-100' : 'opacity-0'
-                      }`}
-                    >
-                      <OneAnswerFeedback
-                        text={answer.text}
-                        startAnimation={index<visibleAnswersCount}
-                        isCorrect={answer.isCorrect}
-                        howManyUsers={answer.howManyUsers}
-                        totalUsers={totalUsers}
-                        showAnswers={animationPhase === 'answers' || animationPhase === 'complete'}
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Continue Button */}
-              {showContinueButton && (
-                <div className="flex justify-center w-full max-w-md mt-2 mb-2">
-                  <Button
-                    variant="primary-small"
-                    onClick={handleContinue}
-                    trackingId="answer-feedback-continue"
-                    data-testid="continue-button"
-                  >
-                    {texts.answerFeedback.continueButton} {">>"}
-                  </Button>
-                </div>
-              )}
+              
+              {/* Question outside black background */}
+              <p className="text-white text-[21px] font-normal leading-normal drop-shadow-lg mt-6 px-4">
+                {gameState.question}
+              </p>
             </div>
+
+            {/* Answers List */}
+            <div className="w-full max-w-md">
+              <div className="flex flex-col gap-[14px]">
+                {gameState.answers.map((answer, index) => (
+                  <div
+                    key={index}
+                    className={`transition-opacity duration-300 ${
+                      index < visibleAnswersCount ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <OneAnswerFeedback
+                      text={answer.text}
+                      startAnimation={index<visibleAnswersCount}
+                      isCorrect={answer.isCorrect}
+                      howManyUsers={answer.howManyUsers}
+                      totalUsers={totalUsers}
+                      showAnswers={animationPhase === 'answers' || animationPhase === 'complete'}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Continue Button */}
+              <div className={`
+              ${showContinueButton ?  'opacity-100' : 'opacity-0'}
+              transition-opacity duration-1000 ease-in-out
+              flex justify-center w-full max-w-md mt-2 mb-2`}>
+                <Button
+                  variant="primary-small"
+                  onClick={handleContinue}
+                  trackingId="answer-feedback-continue"
+                  data-testid="continue-button"
+                >
+                  {texts.answerFeedback.continueButton} {">>"}
+                </Button>
+              </div>
           </div>
         )}
 

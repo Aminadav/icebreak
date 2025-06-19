@@ -28,7 +28,7 @@ If you have implemented something on the backend, you can create a test file and
 # Checking for compilation errors.
 If you want to check for errors, ask the user to copy errors from the logs. Do not create test file for that.
 
-# When agent finish and after the summary give me suggessted git commit message. one line up to 10 words. such as "feature X" or "Fixed bug Y".
+# When agent finish and after the summary give me suggessted git commit message. one line up to 10 words. such as "feature X" or "Fixed bug Y". Try to run this command in terminal "./autocommit.sh "{COMMIT_MESSAGE}". If terminal not avaibable just show the command to copy to copy and paste.
 
 # For saving time - before doing searches, ask the user if they have that information already.
 

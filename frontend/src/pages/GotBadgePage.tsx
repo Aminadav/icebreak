@@ -39,6 +39,71 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
     <div
       className="relative w-full min-h-screen bg-center bg-no-repeat bg-cover"
     >
+      {/* Gaming Animation Styles */}
+      <style>{`
+        @keyframes badgeBounce {
+          0%, 100% { transform: translateY(0px) scale(1); }
+          50% { transform: translateY(-10px) scale(1.05); }
+        }
+        
+        @keyframes badgeGlow {
+          0% { filter: brightness(1) drop-shadow(0 0 20px rgba(255, 215, 0, 0.5)); }
+          100% { filter: brightness(1.2) drop-shadow(0 0 40px rgba(255, 215, 0, 0.8)); }
+        }
+        
+        @keyframes badgeRotate {
+          0% { transform: rotate(0deg); }
+          70% { transform: rotate(360deg); }
+          100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes badgeScale {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.5); }
+          100% { transform: scale(1); }
+        }
+        
+        @keyframes sparkle-0 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+          50% { opacity: 1; transform: scale(1) rotate(180deg); }
+        }
+        
+        @keyframes sparkle-1 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(45deg); }
+          50% { opacity: 1; transform: scale(1.2) rotate(225deg); }
+        }
+        
+        @keyframes sparkle-2 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(90deg); }
+          50% { opacity: 1; transform: scale(0.8) rotate(270deg); }
+        }
+        
+        @keyframes sparkle-3 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(135deg); }
+          50% { opacity: 1; transform: scale(1.1) rotate(315deg); }
+        }
+        
+        @keyframes sparkle-4 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(180deg); }
+          50% { opacity: 1; transform: scale(0.9) rotate(360deg); }
+        }
+        
+        @keyframes sparkle-5 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(225deg); }
+          50% { opacity: 1; transform: scale(1.3) rotate(405deg); }
+        }
+        
+        @keyframes sparkle-6 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(270deg); }
+          50% { opacity: 1; transform: scale(0.7) rotate(450deg); }
+        }
+        
+        @keyframes sparkle-7 {
+          0%, 100% { opacity: 0; transform: scale(0) rotate(315deg); }
+          50% { opacity: 1; transform: scale(1.1) rotate(495deg); }
+        }
+      `}</style>
+      
       <div className="relative w-full">
         {/* Header Section */}
         <div className="relative w-full">
@@ -64,7 +129,28 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
                 {/* Current Badge Display */}
                 <div className="flex items-center justify-center relative w-full mb-[20px]">
                   <div className="relative">
-                    <div className="relative w-[170px] h-[170px]">
+                    {/* Sparkle particles */}
+                    <div className="absolute inset-0 pointer-events-none">
+                      {[...Array(8)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-2 h-2 bg-yellow-300 rounded-full opacity-80"
+                          style={{
+                            top: `${20 + Math.sin(i * Math.PI / 4) * 80}px`,
+                            left: `${85 + Math.cos(i * Math.PI / 4) * 80}px`,
+                            animation: `sparkle-${i} 2s infinite ease-in-out`,
+                            animationDelay: `${i * 0.2}s`
+                          }}
+                        />
+                      ))}
+                    </div>
+                    
+                    <div 
+                      className="relative w-[170px] h-[170px]"
+                      style={{
+                        animation: 'badgeBounce 3s infinite ease-in-out, badgeGlow 2s infinite alternate ease-in-out, badgeScale 1s ease-in-out 3s forwards'
+                      }}
+                    >
                       <img
                         alt={currentBadge.name}
                         className="block max-w-none size-full"
@@ -73,7 +159,8 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
                           borderRadius: '170.099px',
                           border: '2px solid #FFD700',
                           background: `url('${currentBadge.image}') lightgray 50% / cover no-repeat`,
-                          boxShadow: '0px 0px 22px 10px rgba(255, 255, 255, 0.60)'
+                          boxShadow: '0px 0px 22px 10px rgba(255, 215, 0, 0.8), 0px 0px 44px 20px rgba(255, 255, 255, 0.4)',
+                          animation: 'badgeRotate 3s linear forwards'
                         }}
                       />
                     </div>

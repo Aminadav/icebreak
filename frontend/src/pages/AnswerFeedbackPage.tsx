@@ -81,123 +81,226 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
         
         <MyPoints />
 
-        {/* Main content centered */}
-        <div className="flex flex-col items-center justify-center flex-1">
-          
-          {/* Main Message - appears first */}
-          <div className={`mb-6 text-center transition-all duration-1000 ease-out transform ${
-            animationPhase !== 'initial' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
-          }`}>
-            {hasCorrectAnswer ? (
+        {/* Layout differs based on correct/incorrect */}
+        {hasCorrectAnswer ? (
+          /* Correct Answer Layout - centered */
+          <div className="flex flex-col items-center justify-center flex-1">
+            
+            {/* Main Message - appears first */}
+            <div className={`mb-6 text-center transition-all duration-1000 ease-out transform ${
+              animationPhase !== 'initial' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
+            }`}>
               <h1 className="mb-4 text-6xl font-bold leading-tight text-white drop-shadow-2xl animate-pulse">
                 יפה מאוד
               </h1>
-            ) : (
-              <>
-                <h1 className="mb-4 text-6xl font-bold leading-tight text-red-500 drop-shadow-2xl">
-                  טעות
-                </h1>
-                <p className="text-xl font-semibold text-orange-400">
-                  אבל מגיעות לך נקודות על ההשתדלות
-                </p>
-              </>
+            </div>
+
+            {/* Points Display with Stars - appears second */}
+            <div className={`mb-8 flex items-center justify-center transition-all duration-1000 ease-out transform ${
+              animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
+                ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-75'
+            }`}>
+              {/* Left Star */}
+              <div 
+                className="w-[88px] h-[84px] mr-4 transition-all duration-700 ease-out"
+                style={{ 
+                  transform: `scale(${starScale})`,
+                  animation: starScale > 0 ? 'bounce 0.5s ease-out' : 'none'
+                }}
+              >
+                <img 
+                  src="/videos/star4.gif" 
+                  alt="star" 
+                  className="object-contain w-full h-full"
+                />
+              </div>
+              
+              {/* Points */}
+              <div className={`flex items-center text-white font-normal transition-all duration-500 ${
+                animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
+                  ? 'animate-pulse' : ''
+              }`}>
+                <span className="text-[69px] leading-normal">+</span>
+                <span className="text-[136px] leading-normal drop-shadow-2xl">
+                  {gameState.pointsReceived}
+                </span>
+              </div>
+              
+              {/* Right Star */}
+              <div 
+                className="w-[88px] h-[84px] ml-4 transition-all duration-700 ease-out"
+                style={{ 
+                  transform: `scale(${starScale})`,
+                  animation: starScale > 0 ? 'bounce 0.5s ease-out 0.1s' : 'none'
+                }}
+              >
+                <img 
+                  src="/videos/star4.gif" 
+                  alt="star" 
+                  className="object-contain w-full h-full"
+                />
+              </div>
+            </div>
+
+            {/* Question Text */}
+            <div className={`mb-8 text-center max-w-md transition-all duration-1000 ease-out ${
+              animationPhase === 'answers' || animationPhase === 'complete' 
+                ? 'opacity-100' : 'opacity-0'
+            }`}>
+              <p className="text-white text-[21px] font-normal leading-normal drop-shadow-lg">
+                {gameState.question}
+              </p>
+            </div>
+
+            {/* Answers List */}
+            <div className="w-full max-w-md">
+              <div className="flex flex-col gap-[21px]">
+                {gameState.answers.map((answer, index) => (
+                  <div
+                    key={index}
+                    className={`transition-opacity duration-300 ${
+                      index < visibleAnswersCount ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <OneAnswerFeedback
+                      text={answer.text}
+                      startAnimation={index<visibleAnswersCount}
+                      isCorrect={answer.isCorrect}
+                      howManyUsers={answer.howManyUsers}
+                      totalUsers={totalUsers}
+                      showAnswers={animationPhase === 'answers' || animationPhase === 'complete'}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Continue Button */}
+            {showContinueButton && (
+              <div className="flex justify-center w-full max-w-md mt-8">
+                <Button
+                  variant="primary-large"
+                  onClick={handleContinue}
+                  trackingId="answer-feedback-continue"
+                  data-testid="continue-button"
+                >
+                  {texts.answerFeedback.continueButton} {">>"}
+                </Button>
+              </div>
             )}
           </div>
-
-          {/* Points Display with Stars - appears second */}
-          <div className={`mb-8 flex items-center justify-center transition-all duration-1000 ease-out transform ${
-            animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
-              ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-75'
-          }`}>
-            {/* Left Star */}
-            <div 
-              className="w-[88px] h-[84px] mr-4 transition-all duration-700 ease-out"
-              style={{ 
-                transform: `scale(${starScale})`,
-                animation: starScale > 0 ? 'bounce 0.5s ease-out' : 'none'
-              }}
-            >
-              <img 
-                src="/videos/star4.gif" 
-                alt="star" 
-                className="object-contain w-full h-full"
-              />
-            </div>
+        ) : (
+          /* Incorrect Answer Layout - points at top, message in center */
+          <div className="flex flex-col flex-1">
             
-            {/* Points */}
-            <div className={`flex items-center text-white font-normal transition-all duration-500 ${
+            {/* Points at top - smaller */}
+            <div className={`flex items-center justify-center mb-4 transition-all duration-1000 ease-out transform ${
               animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
-                ? 'animate-pulse' : ''
+                ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-75'
             }`}>
-              <span className="text-[69px] leading-normal">+</span>
-              <span className="text-[136px] leading-normal drop-shadow-2xl">
-                {gameState.pointsReceived}
-              </span>
-            </div>
-            
-            {/* Right Star */}
-            <div 
-              className="w-[88px] h-[84px] ml-4 transition-all duration-700 ease-out"
-              style={{ 
-                transform: `scale(${starScale})`,
-                animation: starScale > 0 ? 'bounce 0.5s ease-out 0.1s' : 'none'
-              }}
-            >
-              <img 
-                src="/videos/star4.gif" 
-                alt="star" 
-                className="object-contain w-full h-full"
-              />
-            </div>
-          </div>
-
-          {/* Question Text */}
-          <div className={`mb-8 text-center max-w-md transition-all duration-1000 ease-out ${
-            animationPhase === 'answers' || animationPhase === 'complete' 
-              ? 'opacity-100' : 'opacity-0'
-          }`}>
-            <p className="text-white text-[21px] font-normal leading-normal drop-shadow-lg">
-              {gameState.question}
-            </p>
-          </div>
-
-          {/* Answers List - appears third */}
-          <div className="w-full max-w-md">
-            <div className="flex flex-col gap-[21px]">
-              {gameState.answers.map((answer, index) => (
-                <div
-                  key={index}
-                  className={`transition-opacity duration-300 ${
-                    index < visibleAnswersCount ? 'opacity-100' : 'opacity-0'
-                  }`}
-                >
-                  <OneAnswerFeedback
-                    text={answer.text}
-                    startAnimation={index<visibleAnswersCount}
-                    isCorrect={answer.isCorrect}
-                    howManyUsers={answer.howManyUsers}
-                    totalUsers={totalUsers}
-                    showAnswers={animationPhase === 'answers' || animationPhase === 'complete'}
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Continue Button - appears last */}
-          {showContinueButton && (
-            <div className="flex justify-center w-full max-w-md mt-8">
-              <Button
-                variant="primary-large"
-                onClick={handleContinue}
-                trackingId="answer-feedback-continue"
-                data-testid="continue-button"
+              {/* Left Star - smaller */}
+              <div 
+                className="w-[44px] h-[42px] mr-2 transition-all duration-700 ease-out"
+                style={{ 
+                  transform: `scale(${starScale})`,
+                  animation: starScale > 0 ? 'bounce 0.5s ease-out' : 'none'
+                }}
               >
-                {texts.answerFeedback.continueButton} {">>"}
-              </Button>
+                <img 
+                  src="/videos/star4.gif" 
+                  alt="star" 
+                  className="object-contain w-full h-full"
+                />
+              </div>
+              
+              {/* Points - smaller */}
+              <div className={`flex items-center text-white font-normal transition-all duration-500 ${
+                animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
+                  ? 'animate-pulse' : ''
+              }`}>
+                <span className="text-[34px] leading-normal">+</span>
+                <span className="text-[68px] leading-normal drop-shadow-2xl">
+                  {gameState.pointsReceived}
+                </span>
+              </div>
+              
+              {/* Right Star - smaller */}
+              <div 
+                className="w-[44px] h-[42px] ml-2 transition-all duration-700 ease-out"
+                style={{ 
+                  transform: `scale(${starScale})`,
+                  animation: starScale > 0 ? 'bounce 0.5s ease-out 0.1s' : 'none'
+                }}
+              >
+                <img 
+                  src="/videos/star4.gif" 
+                  alt="star" 
+                  className="object-contain w-full h-full"
+                />
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* Main content centered */}
+            <div className="flex flex-col items-center justify-center flex-1">
+              
+              {/* Error Message with Black Background */}
+              <div className={`mb-8 text-center transition-all duration-1000 ease-out transform ${
+                animationPhase !== 'initial' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
+              }`}>
+                <div className="px-8 py-6 bg-black bg-opacity-80 w-screen -mx-4">
+                  <h1 className="mb-4 text-6xl font-bold leading-tight text-red-500 drop-shadow-2xl">
+                    טעות
+                  </h1>
+                  <p className="text-xl font-semibold text-orange-400">
+                    אבל מגיעות לך נקודות על ההשתדלות
+                  </p>
+                </div>
+                
+                {/* Question outside black background */}
+                <p className="text-white text-[21px] font-normal leading-normal drop-shadow-lg mt-6 px-4">
+                  {gameState.question}
+                </p>
+              </div>
+
+              {/* Answers List */}
+              <div className="w-full max-w-md">
+                <div className="flex flex-col gap-[21px]">
+                  {gameState.answers.map((answer, index) => (
+                    <div
+                      key={index}
+                      className={`transition-opacity duration-300 ${
+                        index < visibleAnswersCount ? 'opacity-100' : 'opacity-0'
+                      }`}
+                    >
+                      <OneAnswerFeedback
+                        text={answer.text}
+                        startAnimation={index<visibleAnswersCount}
+                        isCorrect={answer.isCorrect}
+                        howManyUsers={answer.howManyUsers}
+                        totalUsers={totalUsers}
+                        showAnswers={animationPhase === 'answers' || animationPhase === 'complete'}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Continue Button */}
+              {showContinueButton && (
+                <div className="flex justify-center w-full max-w-md mt-8">
+                  <Button
+                    variant="primary-large"
+                    onClick={handleContinue}
+                    trackingId="answer-feedback-continue"
+                    data-testid="continue-button"
+                  >
+                    {texts.answerFeedback.continueButton} {">>"}
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Gaming-style background effects */}
         <div className="fixed inset-0 z-0 pointer-events-none">

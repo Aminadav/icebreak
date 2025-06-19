@@ -194,7 +194,7 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
           <div className="flex flex-col flex-1">
             
             {/* Points at top - smaller */}
-            <div className={`flex items-center justify-center mb-4 transition-all duration-1000 ease-out transform ${
+            <div className={`flex items-center justify-center mb-2 transition-all duration-1000 ease-out transform ${
               animationPhase === 'points' || animationPhase === 'answers' || animationPhase === 'complete' 
                 ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-75'
             }`}>
@@ -219,7 +219,7 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
                   ? 'animate-pulse' : ''
               }`}>
                 <span className="text-[34px] leading-normal">+</span>
-                <span className="text-[68px] leading-normal drop-shadow-2xl">
+                <span className="text-[48px] leading-normal drop-shadow-2xl">
                   {gameState.pointsReceived}
                 </span>
               </div>
@@ -247,8 +247,8 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
               <div className={`mb-8 text-center transition-all duration-1000 ease-out transform ${
                 animationPhase !== 'initial' ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-90'
               }`}>
-                <div className="px-8 py-6 bg-black bg-opacity-80 w-screen -mx-4">
-                  <h1 className="mb-4 text-6xl font-bold leading-tight text-red-500 drop-shadow-2xl">
+                <div className="w-screen px-8 py-6 -mx-4 bg-black bg-opacity-80">
+                  <h1 className="mb-4 text-3xl font-bold leading-tight text-red-500 drop-shadow-2xl">
                     טעות
                   </h1>
                   <p className="text-xl font-semibold text-orange-400">
@@ -264,7 +264,7 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
 
               {/* Answers List */}
               <div className="w-full max-w-md">
-                <div className="flex flex-col gap-[21px]">
+                <div className="flex flex-col gap-[14px]">
                   {gameState.answers.map((answer, index) => (
                     <div
                       key={index}
@@ -287,9 +287,9 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
 
               {/* Continue Button */}
               {showContinueButton && (
-                <div className="flex justify-center w-full max-w-md mt-8">
+                <div className="flex justify-center w-full max-w-md mt-2 mb-2">
                   <Button
-                    variant="primary-large"
+                    variant="primary-small"
                     onClick={handleContinue}
                     trackingId="answer-feedback-continue"
                     data-testid="continue-button"
@@ -315,8 +315,6 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
           )}
         </div>
       </main>
-      
-      <Footer />
     </PageLayout>
   );
 }

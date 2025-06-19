@@ -7,6 +7,7 @@ export type ButtonVariant =
   | 'ghost' 
   | 'disabled' 
   | 'primary-large' 
+  | 'primary-small' 
   | 'secondary-small' 
   | 'outline-purple' 
   | 'outline-purple-icon';
@@ -26,6 +27,15 @@ const buttonVariants = {
   primary: `
     bg-gradient-to-r from-orange-400 to-orange-500 
     text-white font-semibold py-3 px-8 rounded-2xl
+    hover:from-orange-500 hover:to-orange-600 
+    hover:scale-105
+    active:scale-95
+    transition-all duration-200 ease-in-out
+    border-2 border-orange-300
+  `,
+  ['primary-small']: `
+    bg-gradient-to-r from-orange-400 to-orange-500 
+    text-white font-semibold py-2 px-8 rounded-2xl
     hover:from-orange-500 hover:to-orange-600 
     hover:scale-105
     active:scale-95

@@ -46,7 +46,7 @@ export default function OneAnswerFeedback({
   return (
     <div 
       className={`
-        relative bg-black h-[73px] w-full transition-all duration-200 ease-out
+        relative bg-black h-[50px] w-full transition-all duration-200 ease-out
         ${isAnimated ? 'opacity-100' : 'opacity-0'}
         ${!isCorrect ? 'opacity-60' : ''}
         ${isCorrect ? 'border-2 border-green-400 bg-green-900 bg-opacity-20 font-bold' : 'border border-white'}
@@ -74,7 +74,7 @@ export default function OneAnswerFeedback({
       
       {/* User Count - On top of progress bar, no background */}
       <div className={`
-        absolute bottom-0 top-0 right-0 left-[88.515%] flex items-center justify-center text-black text-[28px] font-bold z-20
+        absolute bottom-0 top-0 right-0 left-[88.515%] flex items-center justify-center text-black text-[18px] font-bold z-20
       `}>
         <p className="leading-normal">{howManyUsers}</p>
       </div>

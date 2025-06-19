@@ -27,7 +27,7 @@ declare global {
   type gameStateTextMessageToUser ={
   screenName:'TEXT_MESSAGE_TO_USER',
   text: string,
-  messageId: string,
+  messageId: "TWO_MORE_QUESTIONS_ABOUT_YOU",
   image?: string,
 }
 

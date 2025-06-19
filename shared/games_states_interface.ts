@@ -31,6 +31,19 @@ declare global {
   image?: string,
 }
 
+  type gameStateAnswerFeedback = {
+    screenName:'ANSWER_FEEDBACK',
+    mainMessage: string,
+    question: string,
+    pointsReceived: number,
+    correctStatus: "YOU_CORRECT" | "YOU_INCORRECT",
+    answers: {
+      text: string,
+      isCorrect: boolean,
+      howManyUsers: number
+    }[]
+  }
+
   type gameStatePleaseTakeAPicture ={
     screenName:'PLEASE_TAKE_A_PICTURE',
   }
@@ -71,6 +84,7 @@ declare global {
               gameStateEmptyGameState
             | gameStateBefore
             | gameStateTextMessageToUser
+            | gameStateAnswerFeedback
             | gameStatePleaseTakeAPicture
             | GAME_STATE_QUESTION
             | GAME_STATE_GOT_POINTS

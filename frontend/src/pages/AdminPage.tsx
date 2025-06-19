@@ -259,6 +259,64 @@ export default function AdminPage(): JSX.Element {
        screenName:'GOT_BADGE',
        badgeId:'badge1',
        friendsInLevel:[]
+     },
+     {
+       screenName:'ANSWER_FEEDBACK',
+       mainMessage: 'יפה מאוד',
+       question: 'מה החג שלדעתך עמינדב הכי אוהב?',
+       pointsReceived: 10,
+       correctStatus: "YOU_CORRECT" as const,
+       answers: [
+         {
+           text: 'פסח',
+           isCorrect: true,
+           howManyUsers: 1
+         },
+         {
+           text: 'שבועות',
+           isCorrect: false,
+           howManyUsers: 8
+         },
+         {
+           text: 'סוכות',
+           isCorrect: false,
+           howManyUsers: 13
+         },
+         {
+           text: 'פורים',
+           isCorrect: false,
+           howManyUsers: 25
+         }
+       ]
+     },
+     {
+       screenName:'ANSWER_FEEDBACK',
+       mainMessage: 'טעות',
+       question: 'מה החג שלדעתך עמינדב הכי אוהב?',
+       pointsReceived: 1,
+       correctStatus: "YOU_INCORRECT" as const,
+       answers: [
+         {
+           text: 'פסח',
+           isCorrect: true,
+           howManyUsers: 1
+         },
+         {
+           text: 'שבועות',
+           isCorrect: false,
+           howManyUsers: 8
+         },
+         {
+           text: 'סוכות',
+           isCorrect: false,
+           howManyUsers: 13
+         },
+         {
+           text: 'פורים',
+           isCorrect: false,
+           howManyUsers: 25
+         }
+       ]
      }
    ]
   

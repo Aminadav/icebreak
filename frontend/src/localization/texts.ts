@@ -108,6 +108,17 @@ interface Texts {
     photoWithImageButton: string;
     gameWithoutPhotosButton: string;
   };
+  answerFeedback: {
+    correct: {
+      title: string;
+      subtitle: string;
+    };
+    incorrect: {
+      title: string;
+      subtitle: string;
+    };
+    continueButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -216,10 +227,21 @@ export const texts: Record<'he' | 'en', Texts> = {
       ghostButton: 'משחק ללא תמונות'
     },
     pleaseTakeAPicture: {
-      title: 'תוכל בבקשה לצלם תמונה?',
-      introText: 'יש כאלה שקשה להם עם שמות, וזה ממש יעזור להם לחבר שם לפרצוף.\n\nזה לא חייב להיות מושלם.\nהAI כבר ידאג שתצא יפה, גם אם הרגע קמת משנ"צ.\n\nזה משחק של חיבורים, ופרצוף מחבר יותר ממילים.',
+      title: 'אולי תוכל לצלם תמונה?',
+      introText: 'יש אנשים שקשה להם עם שמות, וזה ממש יעזור להם לחבר שם לפרצוף.\n\nזה לא חייב להיות מושלם.\nהAI כבר ידאג שתצא יפה, גם אם הרגע קמת משנ"צ.\n\nזה משחק של חיבורים, ופרצוף מחבר יותר ממילים.',
       photoWithImageButton: 'צילום תמונה',
       gameWithoutPhotosButton: 'משחק ללא תמונה'
+    },
+    answerFeedback: {
+      correct: {
+        title: 'יפה מאוד',
+        subtitle: ''
+      },
+      incorrect: {
+        title: 'טעות',
+        subtitle: 'אבל מגיעות לך נקודות על ההשתדלות'
+      },
+      continueButton: 'המשך'
     }
   },
   en: {
@@ -331,6 +353,17 @@ export const texts: Record<'he' | 'en', Texts> = {
       introText: 'Some people have trouble with names, and it would really help them connect a name to a face.\n\nIt doesn\'t have to be perfect.\nThe AI will make sure you look great, even if you just woke up.\n\nThis is a game about connections, and a face connects more than words.',
       photoWithImageButton: 'Take Photo',
       gameWithoutPhotosButton: 'Game without photos'
+    },
+    answerFeedback: {
+      correct: {
+        title: 'Very Nice!',
+        subtitle: ''
+      },
+      incorrect: {
+        title: 'Mistake',
+        subtitle: 'But you deserve points for trying'
+      },
+      continueButton: 'Continue'
     }
   }
 };

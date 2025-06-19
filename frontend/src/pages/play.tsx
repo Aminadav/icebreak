@@ -10,6 +10,7 @@ import { usePoints } from '../contexts/GameContext';
 import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import TextMessageToUserPage from './TextMessageToUserPage';
+import AnswerFeedbackPage from './AnswerFeedbackPage';
 import PleaseTakeAPicturePage from './PleaseTakeAPicturePage';
 import QuestionPage from './QuestionPage';
 import GotPointsPage from './GotPointsPage';
@@ -42,6 +43,9 @@ export default function Play(): JSX.Element {
   }
   if(gameState.screenName=="TEXT_MESSAGE_TO_USER") {
     return <TextMessageToUserPage gameState={gameState}/>
+  }
+  if(gameState.screenName=="ANSWER_FEEDBACK") {
+    return <AnswerFeedbackPage gameState={gameState}/>
   }
   if(gameState.screenName=="PLEASE_TAKE_A_PICTURE") {
     return <PleaseTakeAPicturePage gameState={gameState}/>

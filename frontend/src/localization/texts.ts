@@ -102,6 +102,12 @@ interface Texts {
     mainButton: string;
     ghostButton: string;
   };
+  pleaseTakeAPicture: {
+    title: string;
+    introText: string;
+    photoWithImageButton: string;
+    gameWithoutPhotosButton: string;
+  };
 }
 
 export const texts: Record<'he' | 'en', Texts> = {
@@ -208,6 +214,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       introText: 'יש אנשים שקשה להם לזכור שמות ופנים. אנשים רוצים לזכור מי זה מי, להתחבר לפנים ולסיפור.\nהתמונה שלך עוזרת לאחרים לזהות אותך וליצור חיבור אמיתי.',
       mainButton: 'צילום תמונה',
       ghostButton: 'משחק ללא תמונות'
+    },
+    pleaseTakeAPicture: {
+      title: 'תוכל בבקשה לצלם תמונה?',
+      introText: 'יש כאלה שקשה להם עם שמות, וזה ממש יעזור להם לחבר שם לפרצוף.\n\nזה לא חייב להיות מושלם.\nהAI כבר ידאג שתצא יפה, גם אם הרגע קמת משנ"צ.\n\nזה משחק של חיבורים, ופרצוף מחבר יותר ממילים.',
+      photoWithImageButton: 'צילום תמונה',
+      gameWithoutPhotosButton: 'משחק ללא תמונה'
     }
   },
   en: {
@@ -313,6 +325,12 @@ export const texts: Record<'he' | 'en', Texts> = {
       introText: 'Some people have trouble remembering names and faces. People want to remember who is who, connect to faces and stories.\nYour photo helps others identify you and create a real connection.',
       mainButton: 'Take Photo',
       ghostButton: 'Game without photos'
+    },
+    pleaseTakeAPicture: {
+      title: 'Could you please take a picture?',
+      introText: 'Some people have trouble with names, and it would really help them connect a name to a face.\n\nIt doesn\'t have to be perfect.\nThe AI will make sure you look great, even if you just woke up.\n\nThis is a game about connections, and a face connects more than words.',
+      photoWithImageButton: 'Take Photo',
+      gameWithoutPhotosButton: 'Game without photos'
     }
   }
 };

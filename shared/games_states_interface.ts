@@ -31,6 +31,10 @@ declare global {
   image?: string,
 }
 
+  type gameStatePleaseTakeAPicture ={
+    screenName:'PLEASE_TAKE_A_PICTURE',
+  }
+
   type GAME_STATE_QUESTION ={
     screenName:'QUESTION',
     isIntro?:boolean
@@ -67,6 +71,7 @@ declare global {
               gameStateEmptyGameState
             | gameStateBefore
             | gameStateTextMessageToUser
+            | gameStatePleaseTakeAPicture
             | GAME_STATE_QUESTION
             | GAME_STATE_GOT_POINTS
             | GAME_STATE_GOT_BADGE;

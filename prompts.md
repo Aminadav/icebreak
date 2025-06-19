@@ -35,3 +35,18 @@ The server can push update for points. Not just from this connection. The user "
 In the admin panel Add an input box: "set my user points" and "update". It will update the database, and trigger the update points event (to who in the room).
 Should be utilitil library to get user points per game, per user_id, and update user points per game per_id
 Please summarise what you want to do, do not start just plan
+
+
+#
+Please implement this page from figma and add it to the screen type interface.
+Also add it to the admin panel, to allow testing it.
+
+https://www.figma.com/design/gnQS8qPoztgVCBkZR3wtjI/IceBreak-?node-id=251-3600&t=nzagDNml0nLnmsIQ-11
+
+Edit only the files I attached.
+
+Use ButtonComponent for the button.
+Use Footer Element for the bottom.
+For the text, get it from the screen.
+Add the screen to the Play component.
+For points use MyPoints. 

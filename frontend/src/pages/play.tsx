@@ -10,6 +10,7 @@ import { usePoints } from '../contexts/GameContext';
 import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import TextMessageToUserPage from './TextMessageToUserPage';
+import PleaseTakeAPicturePage from './PleaseTakeAPicturePage';
 import QuestionPage from './QuestionPage';
 import GotPointsPage from './GotPointsPage';
 import GotBadgePage from './GotBadgePage';
@@ -41,6 +42,9 @@ export default function Play(): JSX.Element {
   }
   if(gameState.screenName=="TEXT_MESSAGE_TO_USER") {
     return <TextMessageToUserPage gameState={gameState}/>
+  }
+  if(gameState.screenName=="PLEASE_TAKE_A_PICTURE") {
+    return <PleaseTakeAPicturePage gameState={gameState}/>
   }
   if(gameState.screenName=="QUESTION") {
     return <QuestionPage gameState={gameState} />

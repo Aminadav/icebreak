@@ -227,6 +227,9 @@ export default function AdminPage(): JSX.Element {
         text: 'נשארו רק עוד 2 שאלות',
         messageId: 'TWO_MORE_QUESTIONS_ABOUT_YOU'
       },
+      {
+        screenName:'PLEASE_TAKE_A_PICTURE'
+      },
      {
       screenName:'QUESTION',
       question:{

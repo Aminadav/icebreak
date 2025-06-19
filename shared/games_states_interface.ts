@@ -7,6 +7,7 @@ type gameStateBefore ={
   screenName:'BEFORE_START_ABOUT_YOU',
 }
 
+
 type BASIC_QUESTION={
   question_id?:string,
   question_text:string,
@@ -22,6 +23,14 @@ type BASIC_QUESTION={
 }
 
 declare global {
+
+  type gameStateTextMessageToUser ={
+  screenName:'TEXT_MESSAGE_TO_USER',
+  text: string,
+  messageId: string,
+  image?: string,
+}
+
   type GAME_STATE_QUESTION ={
     screenName:'QUESTION',
     isIntro?:boolean
@@ -57,6 +66,7 @@ declare global {
   export type GAME_STATES= 
               gameStateEmptyGameState
             | gameStateBefore
+            | gameStateTextMessageToUser
             | GAME_STATE_QUESTION
             | GAME_STATE_GOT_POINTS
             | GAME_STATE_GOT_BADGE;

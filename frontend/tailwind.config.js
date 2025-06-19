@@ -21,6 +21,7 @@ export default {
         'entrance': 'entrance 0.8s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards',
         'zoom-in': 'zoom-in 0.5s ease-out forwards',
         'fade-in-bounce': 'fade-in-bounce 0.8s ease-out forwards',
+        'fade-in': 'fade-in 0.6s ease-out forwards',
         'flash': 'flash 0.3s ease-out forwards',
       },
       animationDelay: {
@@ -135,6 +136,16 @@ export default {
           },
           '100%': {
             opacity: '0',
+          },
+        },
+        'fade-in': {
+          '0%': {
+            opacity: '0',
+            transform: 'translateY(20px)',
+          },
+          '100%': {
+            opacity: '1',
+            transform: 'translateY(0)',
           },
         },
       },

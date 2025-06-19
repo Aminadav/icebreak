@@ -9,6 +9,7 @@ import { useGameId } from '../utils/useGameId';
 import { usePoints } from '../contexts/GameContext';
 import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
+import TextMessageToUserPage from './TextMessageToUserPage';
 import QuestionPage from './QuestionPage';
 import GotPointsPage from './GotPointsPage';
 import GotBadgePage from './GotBadgePage';
@@ -37,6 +38,9 @@ export default function Play(): JSX.Element {
   }
   if(gameState.screenName=="BEFORE_START_ABOUT_YOU") {
     return <BeforeStartAskAboutYou gameState={gameState}/>
+  }
+  if(gameState.screenName=="TEXT_MESSAGE_TO_USER") {
+    return <TextMessageToUserPage gameState={gameState}/>
   }
   if(gameState.screenName=="QUESTION") {
     return <QuestionPage gameState={gameState} />

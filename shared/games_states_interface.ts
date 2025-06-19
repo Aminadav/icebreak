@@ -36,11 +36,30 @@ declare global {
     text: string
   }
 
+  type GAME_STATE_GOT_BADGE={
+    screenName:'GOT_BADGE',
+    badgeId:string,
+    friendsInLevel:{
+      user_id:string,
+      name:string,
+      image:string
+    }[]    
+  }
+
+  type ONE_BADGE={
+    name:string,
+    image:string,
+    description:string,
+    points:number,
+    badgeId:string,
+  }
+
   export type GAME_STATES= 
               gameStateEmptyGameState
             | gameStateBefore
             | GAME_STATE_QUESTION
             | GAME_STATE_GOT_POINTS
+            | GAME_STATE_GOT_BADGE;
 
 
   export type QUESTION=BASIC_QUESTION

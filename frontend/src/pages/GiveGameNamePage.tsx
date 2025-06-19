@@ -195,7 +195,7 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
           value={gameName}
           onChange={setGameName}
           onKeyPress={handleKeyPress}
-          placeholder={texts.giveGameName.placeholder}
+          // placeholder={texts.giveGameName.placeholder}
           className="mb-8"
           autoFocus
           trackingId="game_name"

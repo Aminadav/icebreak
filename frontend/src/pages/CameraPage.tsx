@@ -671,7 +671,6 @@ export default function CameraPage({
         height
       );
 
-      console.log(3)
       // Convert the cropped canvas to blob
       return new Promise<void>((resolve) => {
         cropCanvasRef.current!.toBlob(async (blob) => {
@@ -682,7 +681,6 @@ export default function CameraPage({
             }
             
             // Upload image and navigate directly to gallery
-            if (phoneNumber && userId && email && name && gender) {
               console.log('📤 Uploading cropped face image and navigating to gallery...');
               
               const imageHash = await uploadImage(blob);
@@ -693,7 +691,6 @@ export default function CameraPage({
                 console.error('Failed to upload image');
                 setUploadError('שגיאה בהעלאת התמונה');
               }
-            }
           }
           
           // Add a small delay for visual feedback

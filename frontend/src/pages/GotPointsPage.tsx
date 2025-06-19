@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react';
 
-interface GotPointsPageProps {
-  gameState: GAME_STATE_GOT_POINTS;
-}
-
-export default function GotPointsPage({ gameState }: GotPointsPageProps): JSX.Element {
+export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}): JSX.Element {
+  let gameState = props.gameState
   const [displayPoints, setDisplayPoints] = useState(0);
   const [animationComplete, setAnimationComplete] = useState(false);
 
@@ -115,7 +112,7 @@ export default function GotPointsPage({ gameState }: GotPointsPageProps): JSX.El
             alt="Star"
             className="w-48 h-48 mx-auto border-0 outline-none"
             style={{ imageRendering: 'auto' }}
-            key={Date.now()}
+            // key={Date.now()}
           />
         </div>
 

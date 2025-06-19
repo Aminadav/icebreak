@@ -15,9 +15,9 @@ async function handleCreateGameImmediately(socket, data) {
       throw new Error('Device not registered');
     }
     
-    if (!gameName || gameName.trim().length === 0) {
-      throw new Error('Game name is required');
-    }
+    // if (!gameName || gameName.trim().length === 0) {
+    //   throw new Error('Game name is required');
+    // }
     
     // For immediate game creation, we create an anonymous game first
     // The user will be prompted to verify later to claim the game

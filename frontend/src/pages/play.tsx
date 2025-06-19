@@ -11,6 +11,7 @@ import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import QuestionPage from './QuestionPage';
 import GotPointsPage from './GotPointsPage';
+import GotBadgePage from './GotBadge';
 
 export default function Play(): JSX.Element {
   const navigate = useNavigate();
@@ -42,6 +43,9 @@ export default function Play(): JSX.Element {
   }
   if(gameState.screenName=="GOT_POINTS") {
     return <GotPointsPage gameState={gameState} />
+  }
+  if(gameState.screenName=="GOT_BADGE") {
+    return <GotBadgePage  gameState={gameState} />
   }
   return <div>{JSON.stringify(gameState)}</div>;
 }

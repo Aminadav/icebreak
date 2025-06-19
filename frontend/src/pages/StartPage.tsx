@@ -60,12 +60,13 @@ export default function StartPage(): JSX.Element {
     socket.once('error', errorHandler);
     
     // Create game immediately with a default name (user will customize it)
-    const defaultGameName = `משחק ${new Date().toLocaleString('he-IL', { 
-      day: '2-digit', 
-      month: '2-digit', 
-      hour: '2-digit', 
-      minute: '2-digit' 
-    })}`;
+    const defaultGameName =''
+    //  `משחק ${new Date().toLocaleString('he-IL', { 
+    //   day: '2-digit', 
+    //   month: '2-digit', 
+    //   hour: '2-digit', 
+    //   minute: '2-digit' 
+    // })}`;
     
     socket.emit('create_game_immediately', { gameName: defaultGameName });
   };

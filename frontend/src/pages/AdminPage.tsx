@@ -246,6 +246,11 @@ export default function AdminPage(): JSX.Element {
        allow_other:true,
        answers:['כן', 'לא'],
       }
+     },
+      {
+       screenName:'GOT_BADGE',
+       badgeId:'badge1',
+       friendsInLevel:[]
      }
    ]
   

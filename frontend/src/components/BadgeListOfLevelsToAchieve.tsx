@@ -1,4 +1,4 @@
-import { Badge } from "../components/BadgeSystem";
+import { Badge } from "./BadgeSystem";
 
 interface ListOfLevelsToAchieveProps {
   badges: Badge[];

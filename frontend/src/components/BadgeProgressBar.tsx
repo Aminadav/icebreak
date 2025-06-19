@@ -5,7 +5,7 @@ interface ProgressBarProps {
   animated?: boolean;
 }
 
-export function ProgressBar({ percentage, animated = true }: ProgressBarProps) {
+export function BadgeProgressBar({ percentage, animated = true }: ProgressBarProps) {
   const [displayPercentage, setDisplayPercentage] = useState(0);
 
   useEffect(() => {

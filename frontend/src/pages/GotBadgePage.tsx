@@ -2,9 +2,9 @@ import { useState, useEffect } from 'react';
 import { usePoints } from '../contexts/GameContext';
 import { badges, getCurrentBadge, getNextBadge, getProgressToNextLevel, mockFriends } from '../components/BadgeSystem';
 import { BadgeSectionHeader } from '../components/BadgeSectionHeader';
-import { ListOfFriendsInYourLevel } from './ListOfFriendsInYourLevel';
-import { BadgeListOfLevelsToAchieve } from './ListOfLevelsToAchieve';
-import { ProgressBar } from './ProgressBar';
+import { BadgeListOfFriendsInYourLevel } from '../components/BadgeListOfFriendsInYourLevel';
+import { BadgeListOfLevelsToAchieve } from '../components/BadgeListOfLevelsToAchieve';
+import { BadgeProgressBar } from '../components/BadgeProgressBar';
 
 // Badge types array based on the Figma design
 // const badges = [
@@ -159,7 +159,7 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
 
                   {/* Animated Progress Bar */}
                   <div className="px-[6px] mb-[40px]">
-                    <ProgressBar percentage={progress.percentage} animated={true} />
+                    <BadgeProgressBar percentage={progress.percentage} animated={true} />
                   </div>
                 </div>
               ) : (
@@ -178,7 +178,7 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
               </div>
 
               <div className="px-[27px] pb-[40px]">
-                <ListOfFriendsInYourLevel friends={mockFriends} />
+                <BadgeListOfFriendsInYourLevel friends={mockFriends} />
               </div>
 
               {/* List of Levels Section */}

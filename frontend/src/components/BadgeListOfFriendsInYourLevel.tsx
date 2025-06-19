@@ -1,10 +1,10 @@
-import { Friend } from "../components/BadgeSystem";
+import { Friend } from "./BadgeSystem";
 
 interface ListOfFriendsInYourLevelProps {
   friends: Friend[];
 }
 
-export function ListOfFriendsInYourLevel({ friends }: ListOfFriendsInYourLevelProps) {
+export function BadgeListOfFriendsInYourLevel({ friends }: ListOfFriendsInYourLevelProps) {
   return (
     <div className="[flex-flow:wrap] box-border content-start flex gap-[9px] items-start justify-center p-0 relative w-full">
       {friends.map((friend) => (

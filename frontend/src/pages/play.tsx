@@ -11,7 +11,7 @@ import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import QuestionPage from './QuestionPage';
 import GotPointsPage from './GotPointsPage';
-import GotBadgePage from './GotBadge';
+import GotBadgePage from './GotBadgePage';
 
 export default function Play(): JSX.Element {
   const navigate = useNavigate();

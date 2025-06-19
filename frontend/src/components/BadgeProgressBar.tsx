@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useIsVisible } from "../hooks/useIsVisible";
 
 interface ProgressBarProps {
   percentage: number;
@@ -7,20 +8,22 @@ interface ProgressBarProps {
 
 export function BadgeProgressBar({ percentage, animated = true }: ProgressBarProps) {
   const [displayPercentage, setDisplayPercentage] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  const isVisible = useIsVisible(progressBarRef);
 
   useEffect(() => {
-    if (animated) {
+    if (animated && isVisible) {
       const timer = setTimeout(() => {
         setDisplayPercentage(percentage);
       }, 500);
       return () => clearTimeout(timer);
-    } else {
+    } else if (!animated) {
       setDisplayPercentage(percentage);
     }
-  }, [percentage, animated]);
+  }, [percentage, animated, isVisible]);
 
   return (
-    <div className="relative w-full">
+    <div ref={progressBarRef} className="relative w-full">
       <div className="bg-[#d9d9d9] relative rounded-[27px] h-[18px] w-full" />
       <div 
         className="bg-[#539203] absolute top-0 left-0 rounded-[27px] h-[18px] transition-all duration-1000 ease-out"

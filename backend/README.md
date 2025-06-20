@@ -253,5 +253,5 @@ docker-compose restart
 - בדוק שהפורט 5432 פנוי
 
 ### Socket.io לא מתחבר
-- בדוק שהfrontend רץ על port 5173
+- בדוק שהfrontend רץ על port 4001
 - בדוק את הגדרות CORS בserver.js

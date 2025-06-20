@@ -62,6 +62,7 @@ router.get('/callback', async (req, res) => {
     }
     
     // Exchange code for access token
+    //@ts-ignore
     const tokenResponse = await axios.post('https://oauth2.googleapis.com/token', {
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_SECRET,
@@ -73,6 +74,7 @@ router.get('/callback', async (req, res) => {
     const { access_token } = tokenResponse.data;
     
     // Get user info from Google
+    //@ts-ignore
     const userResponse = await axios.get('https://www.googleapis.com/oauth2/v2/userinfo', {
       headers: {
         'Authorization': `Bearer ${access_token}`

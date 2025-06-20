@@ -36,6 +36,10 @@ app.use('/api/testing', testingRouter);
 const adminRouter = require('./routes/admin');
 app.use('/admin', adminRouter);
 
+// Google OAuth routes
+const googleRouter = require('./routes/google');
+app.use('/api/google', googleRouter);
+
 // הגדרת Socket.io עם CORS
 const io = socketIo(server, {
   cors: {

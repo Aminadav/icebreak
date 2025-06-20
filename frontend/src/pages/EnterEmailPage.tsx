@@ -18,11 +18,12 @@ export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEma
   const DEBUG=false
   const { texts } = useLanguage();
   const { handleMenuAction } = useMenuNavigation(); // For menu navigation
-  const { socket } = useSocket();
+  const { socket, deviceId } = useSocket();
   const navigate = useNavigate(); // For game flow navigation
   
   const [email, setEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const validateEmail = (email: string): boolean => {
@@ -96,6 +97,42 @@ export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEma
     }
   };
 
+  const handleGoogleLogin = async () => {
+    if (isGoogleLoading) {
+      return;
+    }
+
+    setIsGoogleLoading(true);
+    setError(null);
+
+    try {
+      // Get Google OAuth URL from backend
+      const response = await fetch('http://localhost:4001/api/google/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          gameId: gameId,
+          deviceId: deviceId // Send actual device ID
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to get Google login URL');
+      }
+
+      const data = await response.json();
+      
+      // Redirect to Google OAuth
+      window.location.href = data.url;
+    } catch (error) {
+      console.error('Google login error:', error);
+      setError('שגיאה בהתחברות עם Google');
+      setIsGoogleLoading(false);
+    }
+  };
+
   const handleInputChange = (value: string) => {
     setEmail(value);
     if (error) {
@@ -157,7 +194,7 @@ export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEma
         </div>
         
         {/* Continue Button */}
-        <div className="mb-20">
+        <div className="mb-8">
           <Button
             variant="primary-large"
             onClick={handleContinue}
@@ -179,6 +216,43 @@ export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEma
               texts.enterEmail.continueButton
             )}
           </Button>
+        </div>
+
+        {/* Divider */}
+        <div className="flex items-center justify-center w-full max-w-md mb-8">
+          <div className="flex-grow h-px bg-white opacity-30"></div>
+          <span className="px-4 text-white opacity-60">או</span>
+          <div className="flex-grow h-px bg-white opacity-30"></div>
+        </div>
+
+        {/* Google Login Button */}
+        <div className="mb-20">
+          <button
+            onClick={handleGoogleLogin}
+            disabled={isGoogleLoading}
+            className={`flex items-center justify-center text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
+              !isGoogleLoading
+                ? 'bg-white text-gray-800 hover:bg-gray-100 cursor-pointer' 
+                : 'bg-gray-300 cursor-not-allowed opacity-50'
+            }`}
+            data-testid="google-login-button"
+          >
+            {isGoogleLoading ? (
+              <div className="flex items-center justify-center">
+                <div className="w-6 h-6 mr-2 border-b-2 border-gray-800 rounded-full animate-spin"></div>
+                מתחבר...
+              </div>
+            ) : (
+              <div className="flex items-center justify-center">
+                <img 
+                  src="/images/google-login.png" 
+                  alt="Google" 
+                  className="w-6 h-6 mr-3"
+                />
+                התחבר עם Google
+              </div>
+            )}
+          </button>
         </div>
 
         {/* Debug info - only show in development */}

@@ -6,6 +6,7 @@ interface SocketContextType {
   socket: Socket;
   isConnected: boolean;
   error: string | null;
+  deviceId: string | null;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -18,6 +19,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deviceId, setDeviceIdState] = useState<string | null>(null);
 
   useEffect(() => {
     console.log('🚀 SocketProvider: Initializing socket connection...');
@@ -31,6 +33,9 @@ export function SocketProvider({ children }: SocketProviderProps) {
     } else {
       console.log('🆔 Using existing device ID from localStorage:', currentDeviceId);
     }
+
+    // Set device ID in state
+    setDeviceIdState(currentDeviceId);
 
     // Create socket connection with device ID as query parameter
     const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
@@ -95,7 +100,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
     //@ts-ignore
     socket,
     isConnected,
-    error
+    error,
+    deviceId
   };
 
   return (

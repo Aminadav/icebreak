@@ -22,7 +22,7 @@ router.post('/login', async (req, res) => {
       'client_id=' + encodeURIComponent(process.env.GOOGLE_CLIENT_ID) +
       '&redirect_uri=' + encodeURIComponent(process.env.BACKEND_URL + '/api/google/callback') +
       '&response_type=code' +
-      '&scope=' + encodeURIComponent('email profile') +
+      '&scope=' + encodeURIComponent('email profile') + //  https://www.googleapis.com/auth/user.gender.read https://www.googleapis.com/auth/user.birthday.read
       '&state=' + encodeURIComponent(state);
     
     console.log('🔑 Generated Google OAuth URL for gameId:', gameId);
@@ -39,14 +39,27 @@ router.get('/callback', async (req, res) => {
   try {
     const { code, state, error } = req.query;
     
-    // Check for OAuth error
+    // Get state data first
+    const stateData = oauthStates.get(state);
+    
+    // Check for OAuth error or user cancellation
     if (error) {
       console.error('❌ Google OAuth error:', error);
+      
+      // If user cancelled (access_denied), redirect back to email page
+      if (error === 'access_denied') {
+        console.log('🔙 User cancelled Google login, redirecting to email page');
+        const redirectUrl = stateData && stateData.gameId 
+          ? `${process.env.FRONTEND_URL}/game/${stateData.gameId}/email`
+          : `${process.env.FRONTEND_URL}/game/new/email`;
+        return res.redirect(redirectUrl);
+      }
+      
+      // For other errors, show error page
       return res.redirect(process.env.FRONTEND_URL + '/error?message=' + encodeURIComponent('Google login failed'));
     }
     
     // Validate state parameter
-    const stateData = oauthStates.get(state);
     if (!stateData) {
       console.error('❌ Invalid or expired OAuth state');
       return res.redirect(process.env.FRONTEND_URL + '/error?message=' + encodeURIComponent('Invalid login session'));

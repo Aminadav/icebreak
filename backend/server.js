@@ -41,6 +41,7 @@ const googleRouter = require('./routes/google');
 app.use('/api/google', googleRouter);
 
 // הגדרת Socket.io עם CORS
+//@ts-ignore
 const io = socketIo(server, {
   cors: {
     origin: ["http://localhost:4000", "http://localhost:5173"],

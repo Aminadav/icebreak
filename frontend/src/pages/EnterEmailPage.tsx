@@ -249,6 +249,7 @@ export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEma
                   alt="Google" 
                   className="w-6 h-6 mr-3"
                 />
+                &nbsp;
                 התחבר עם Google
               </div>
             )}

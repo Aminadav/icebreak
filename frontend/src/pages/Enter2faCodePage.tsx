@@ -6,15 +6,17 @@ import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGameId } from '../utils/useGameId';
 
 interface Enter2faCodePageProps {
   phoneNumber?: string;
   gameId?: string;
 }
 
-export default function Enter2faCodePage({ phoneNumber, gameId }: Enter2faCodePageProps): JSX.Element {
+export default function Enter2faCodePage(): JSX.Element {
   const DEBUG=false
   const { texts } = useLanguage();
+  var gameId=useGameId() 
   const { handleMenuAction } = useMenuNavigation(); // For menu navigation  
   const { socket } = useSocket();
   const navigate = useNavigate(); // For game flow navigation
@@ -61,10 +63,10 @@ export default function Enter2faCodePage({ phoneNumber, gameId }: Enter2faCodePa
           console.log('🎮 Associating game with verified user:', gameId, userInfo.userId);
           // The game should already be associated via the backend
         }
-        navigate(`/game/${gameId}/email`);
+        // navigate(`/game/${gameId}/email`);
       } else {
         // Legacy navigation for non-game flows
-        navigate('/game/new/email');
+        // navigate('/game/new/email');
       }
     };
 
@@ -201,7 +203,7 @@ export default function Enter2faCodePage({ phoneNumber, gameId }: Enter2faCodePa
     try {
       // Emit verification request (listeners are already set up in useEffect)
       console.log('📤 Emitting verify_2fa_code:', fullCode);
-      socket.emit('verify_2fa_code', { code: fullCode });
+      socket.emit('verify_2fa_code', { code: fullCode,gameId });
     } catch (error) {
       console.error('Failed to verify 2FA code:', error);
       setError('שגיאה באימות הקוד');

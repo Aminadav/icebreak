@@ -1,10 +1,11 @@
 const Device = require('../../models/Device');
 const { sendVerificationCode } = require('../../utils/smsService');
+const moveUserToGameState = require('./moveUserToGameState');
 const { validateDeviceRegistration } = require('./utils');
 
 async function handleSubmitPhoneNumber(socket, data) {
   try {
-    const { phoneNumber } = data;
+    const { phoneNumber,gameId } = data;
     
     validateDeviceRegistration(socket);
     
@@ -12,7 +13,6 @@ async function handleSubmitPhoneNumber(socket, data) {
       throw new Error('Phone number is required');
     }
     
-    console.log(`📱 Phone number submitted: ${phoneNumber} by device: ${socket.deviceId}`);
     
     // שליחת SMS אמיתי עם קוד אימות
     const smsResult = await sendVerificationCode(phoneNumber);
@@ -26,13 +26,10 @@ async function handleSubmitPhoneNumber(socket, data) {
         pendingPhoneNumber: smsResult.phoneNumber
       });
       
-      socket.emit('sms_sent', {
-        phoneNumber: smsResult.phoneNumber,
-        success: true,
-        message: 'SMS sent successfully'
-      });
+      moveUserToGameState(socket, gameId, socket.userId, {
+        screenName: 'ASK_USER_VERIFICATION_CODE',
+      })
       
-      console.log(`✅ SMS sent successfully to: ${smsResult.phoneNumber}`);
     } else {
       throw new Error(smsResult.error || 'Failed to send SMS');
     }

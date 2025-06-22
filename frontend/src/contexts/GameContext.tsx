@@ -191,7 +191,6 @@ export function GameProvider({ children }: GameProviderProps) {
     socket.on('2fa_verified', twoFAVerifiedHandler);
     socket.on('sms_sent', smsSentHandler);
     socket.on('name_saved', nameUpdatedHandler);
-    socket.on('email_saved', emailUpdatedHandler);
     socket.on('gender_saved', genderUpdatedHandler);
     socket.on('my_points', pointsUpdatedHandler);
     socket.on('points_updated', pointsUpdatedHandler);
@@ -203,7 +202,6 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.off('2fa_verified', twoFAVerifiedHandler);
       socket.off('sms_sent', smsSentHandler);
       socket.off('name_saved', nameUpdatedHandler);
-      socket.off('email_saved', emailUpdatedHandler);
       socket.off('gender_saved', genderUpdatedHandler);
       socket.off('my_points', pointsUpdatedHandler);
       socket.off('points_updated', pointsUpdatedHandler);

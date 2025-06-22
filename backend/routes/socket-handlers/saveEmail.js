@@ -1,10 +1,11 @@
 const Device = require('../../models/Device');
 const User = require('../../models/User');
+const moveUserToGameState = require('./moveUserToGameState');
 const { validateUserVerification, getUserIdFromDevice } = require('./utils');
 
 async function handleSaveEmail(socket, data) {
   try {
-    const { email } = data;
+    const { email,gameId } = data;
     
     if (!email || !email.trim()) {
       throw new Error('Email address is required');
@@ -33,16 +34,9 @@ async function handleSaveEmail(socket, data) {
     
     if (result.success) {
       // Update journey state to EMAIL_SAVED
-      await Device.updateJourneyState(socket.deviceId, 'EMAIL_SAVED');
-      
-      socket.emit('email_saved', {
-        success: true,
-        message: 'Email address saved successfully',
-        email: normalizedEmail,
-        userId: targetUserId
-      });
-      
-      console.log(`✅ Email saved successfully for user ${targetUserId}: ${normalizedEmail}`);
+      moveUserToGameState(socket, gameId, targetUserId, {
+        screenName: 'ASK_PLAYER_NAME',
+      })
     } else {
       throw new Error(result.error || 'Failed to save email address');
     }

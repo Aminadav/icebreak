@@ -1,33 +1,19 @@
 const Device = require('../../models/Device');
-const { validateDeviceRegistration } = require('./utils');
+const moveUserToGameState = require('./moveUserToGameState');
+const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 
 async function handleSetGameName(socket, data) {
   try {
-    const { gameName } = data;
+    const { gameName,gameId } = data;
+    var userID=await getUserIdFromDevice(socket.deviceId);
+
+    console.log({gameName,gameId,userID})
     
-    if (!socket.deviceId) {
-      throw new Error('Device not registered');
-    }
-    
-    if (!gameName || gameName.trim().length === 0) {
-      throw new Error('Game name is required');
-    }
-    
-    // שמירת שם המשחק ב-socket ובמסד הנתונים
-    socket.pendingGameName = gameName.trim();
-    
-    // Update journey state to GAME_NAME_SET
-    await Device.updateJourneyState(socket.deviceId, 'GAME_NAME_SET', {
-      pendingGameName: gameName.trim()
-    });
-    
-    socket.emit('game_name_saved', {
-      gameName: socket.pendingGameName,
-      success: true,
-      message: 'Game name saved. Please verify your phone number to create the game.'
-    });
-    
-    console.log(`🎮 Game name saved: "${socket.pendingGameName}" for device: ${socket.deviceId}`);
+    // socket.emit('game_name_saved', {
+    //   gameName: socket.pendingGameName,
+    //   success: true,
+    //   message: 'Game name saved. Please verify your phone number to create the game.'
+    // });
   } catch (error) {
     console.error('Error saving game name:', error);
     socket.emit('error', {

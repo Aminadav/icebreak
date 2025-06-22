@@ -9,6 +9,7 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useModal } from '../contexts/ModalContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGameId } from '../utils/useGameId';
 
 interface EnterNamePageProps {
   phoneNumber?: string;
@@ -17,8 +18,9 @@ interface EnterNamePageProps {
   gameId?: string;
 }
 
-export default function EnterNamePage({ phoneNumber, userId, email, gameId }: EnterNamePageProps): JSX.Element {
+export default function EnterNamePage(): JSX.Element {
   const DEBUG = false;
+  var gameId=useGameId()
   const { texts } = useLanguage();
   const { handleMenuAction } = useMenuNavigation();
   const { openModal } = useModal();
@@ -52,46 +54,18 @@ export default function EnterNamePage({ phoneNumber, userId, email, gameId }: En
       if (socket) {
         // Save name to backend via socket (userId is auto-derived from device ID)
         socket.emit('save_user_name', {
-          name: name.trim()
+          name: name.trim(),
+          gameId
         });
         
-        // Listen for response
-        const handleNameSaved = (data: any) => {
-          console.log('✅ Name saved successfully:', data);
-          console.log('🎮 gameId:', gameId, 'type:', typeof gameId);
-          setIsLoading(false);
-          
-          // Navigate to gender selection page
-          if (gameId) {
-            console.log('🚀 Navigating to gender page with gameId:', gameId);
-            navigate(`/game/${gameId}/gender`);
-          } else {
-            // Legacy navigation for non-game flows
-            console.log('🚀 Using navigate to gender page');
-            navigate('/gender', { 
-              state: { 
-                phoneNumber, 
-                userId, 
-                email, 
-                name 
-              }
-            });
-          }
-          
-          // Clean up listener
-          socket.off('name_saved', handleNameSaved);
-          socket.off('name_save_error', handleNameError);
-        };
         
         const handleNameError = (error: any) => {
           console.error('❌ Failed to save name:', error);
           setIsLoading(false);
           // Clean up listener
-          socket.off('name_saved', handleNameSaved);
           socket.off('name_save_error', handleNameError);
         };
         
-        socket.on('name_saved', handleNameSaved);
         socket.on('name_save_error', handleNameError);
         
       } else {
@@ -100,16 +74,6 @@ export default function EnterNamePage({ phoneNumber, userId, email, gameId }: En
         await new Promise(resolve => setTimeout(resolve, 500));
         console.log('✅ Name saved successfully (fallback)');
         setIsLoading(false);
-        
-        // Navigate to gender selection page
-        navigate('/gender', { 
-          state: { 
-            phoneNumber, 
-            userId, 
-            email, 
-            name 
-          }
-        });
       }
       
     } catch (error) {

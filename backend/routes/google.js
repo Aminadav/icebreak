@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 const pool = require('../config/database');
+const moveUserToGameState = require('./socket-handlers/moveUserToGameState');
 const router = express.Router();
 
 // Store temporary state for OAuth
@@ -111,17 +112,16 @@ router.get('/callback', async (req, res) => {
           'UPDATE users SET email = $1, name = $2, email_verified = $3, updated_at = CURRENT_TIMESTAMP WHERE user_id = $4',
           [email.toLowerCase(), name, verified_email || true, userId]
         );
+        moveUserToGameState(null,stateData.gameId,userId, { screenName: 'ASK_PLAYER_NAME' });
         
         console.log('✅ Updated user email via Google login:', { userId, email, name });
       } else {
         console.warn('⚠️ No user found for device ID:', stateData.deviceId);
       }
     }
+
     
-    // Redirect to frontend with success
-    const redirectUrl = stateData.gameId 
-      ? `${process.env.FRONTEND_URL}/game/${stateData.gameId}/player-name`
-      : `${process.env.FRONTEND_URL}/game/new/player-name`;
+    const redirectUrl = `${process.env.FRONTEND_URL}/game/${stateData.gameId}/play`
     
     console.log('🚀 Redirecting to:', redirectUrl);
     res.redirect(redirectUrl);

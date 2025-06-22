@@ -5,6 +5,8 @@ import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGame } from '../contexts/GameContext';
+import { useGameId } from '../utils/useGameId';
 
 interface SelectGenderPageProps {
   phoneNumber?: string;
@@ -16,8 +18,9 @@ interface SelectGenderPageProps {
 
 type Gender = 'male' | 'female';
 
-export default function SelectGenderPage({ phoneNumber, userId, email, name, gameId }: SelectGenderPageProps): JSX.Element {
+export default function SelectGenderPage(): JSX.Element {
   const { texts } = useLanguage();
+  var gameId=useGameId()
   const { handleMenuAction } = useMenuNavigation();
   const { socket } = useSocket();
   const navigate = useNavigate();
@@ -25,8 +28,6 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name, gam
   const [selectedGender, setSelectedGender] = useState<Gender | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Silence unused warnings - keeping for future use and navigation data
-  void phoneNumber; void email;
 
   // Journey state is now managed by URL routing
   useEffect(() => {
@@ -46,35 +47,10 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name, gam
         // Save gender to backend - backend auto-derives userId from deviceId
         socket.emit('save_user_gender', {
           gender,
-          name: name || 'Unknown'
+          gameId
         });
         
-        // Listen for response
-        const handleGenderSaved = (data: any) => {
-          console.log('✅ Gender saved successfully:', data);
-          setIsLoading(false);
-          
-          // Navigate to picture upload page
-          console.log('🎯 Moving to picture upload page');
-          if (gameId) {
-            navigate(`/game/${gameId}/avatar`);
-          } else {
-            // Legacy navigation for non-game flows
-            navigate('/avatar', { 
-              state: { 
-                phoneNumber, 
-                userId, 
-                email, 
-                name, 
-                gender 
-              }
-            });
-          }
-          
-          // Clean up listeners
-          socket.off('gender_saved', handleGenderSaved);
-          socket.off('gender_save_error', handleGenderError);
-        };
+  
         
         const handleGenderError = (error: any) => {
           console.error('❌ Failed to save gender:', error);
@@ -82,11 +58,9 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name, gam
           setSelectedGender(null);
           
           // Clean up listeners  
-          socket.off('gender_saved', handleGenderSaved);
           socket.off('gender_save_error', handleGenderError);
         };
         
-        socket.on('gender_saved', handleGenderSaved);
         socket.on('gender_save_error', handleGenderError);
         
       } else {
@@ -97,15 +71,6 @@ export default function SelectGenderPage({ phoneNumber, userId, email, name, gam
           
           // Navigate to picture upload page
           console.log('🎯 Moving to picture upload page');
-          navigate('/avatar', { 
-            state: { 
-              phoneNumber, 
-              userId, 
-              email, 
-              name, 
-              gender 
-            }
-          });
           
         }, 1000);
       }

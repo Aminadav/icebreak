@@ -79,10 +79,22 @@ declare global {
     points:number,
     badgeId:string,
   }
+  type OTHER_SCREENS={
+    screenName: 'GALLERY' 
+              | "GIVE_GAME_NAME" 
+              | "ASK_USER_PHONE" 
+              | 'ASK_USER_VERIFICATION_CODE'
+              | 'ASK_FOR_EMAIL'
+              | 'ASK_PLAYER_NAME'
+              | 'ASK_PLAYER_GENDER'
+              | 'ASK_FOR_PICTURE'
+              | 'CAMERA'
+  }
 
   export type GAME_STATES= 
               gameStateEmptyGameState
             | gameStateBefore
+            | OTHER_SCREENS
             | gameStateTextMessageToUser
             | gameStateAnswerFeedback
             | gameStatePleaseTakeAPicture

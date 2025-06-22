@@ -1,10 +1,11 @@
 const Device = require('../../models/Device');
 const User = require('../../models/User');
+const moveUserToGameState = require('./moveUserToGameState');
 const { getUserIdFromDevice } = require('./utils');
 
 async function handleSaveUserName(socket, data) {
   try {
-    const { name } = data;
+    const { name,gameId } = data;
     
     if (!name || !name.trim()) {
       throw new Error('Name is required');
@@ -35,7 +36,6 @@ async function handleSaveUserName(socket, data) {
     
     if (result.success) {
       // Update journey state to NAME_SAVED
-      await Device.updateJourneyState(socket.deviceId, 'NAME_SAVED');
       
       socket.emit('name_saved', {
         success: true,
@@ -43,6 +43,11 @@ async function handleSaveUserName(socket, data) {
         name: trimmedName,
         userId: targetUserId
       });
+
+      moveUserToGameState(socket, gameId, targetUserId, {
+        screenName: 'ASK_PLAYER_GENDER',
+      })
+
       
       console.log(`✅ Name saved successfully for user ${targetUserId}: ${trimmedName}`);
     } else {

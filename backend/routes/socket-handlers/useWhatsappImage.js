@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { getUserIdFromDevice } = require('./utils');
+const moveUserToGameState = require('./moveUserToGameState');
 
 async function handleUseWhatsappImage(socket, data) {
   try {
@@ -77,14 +78,8 @@ async function handleUseWhatsappImage(socket, data) {
       throw new Error('User not found');
     }
 
-    // Update journey state to IMAGE_GALLERY
-    await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
-
-    socket.emit('whatsapp_image_used', {
-      success: true,
-      message: 'WhatsApp image set as pending image successfully',
-      imageHash: imageHash,
-      userId: targetUserId
+    moveUserToGameState(socket, data.gameId, targetUserId, {
+      screenName: 'GALLERY',
     });
 
     console.log(`✅ WhatsApp image used successfully for user ${targetUserId}: ${imageHash}`);

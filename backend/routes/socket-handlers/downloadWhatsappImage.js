@@ -5,6 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const axios = require('axios');
 const { getUserIdFromDevice } = require('./utils');
+const moveUserToGameState = require('./moveUserToGameState');
 
 async function handleDownloadWhatsappImage(socket, data) {
   try {
@@ -105,13 +106,9 @@ async function handleDownloadWhatsappImage(socket, data) {
     // Update journey state to IMAGE_GALLERY
     await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
     
-    socket.emit('whatsapp_image_downloaded', {
-      success: true,
-      message: 'WhatsApp image downloaded successfully',
-      imageHash: imageHash,
-      userId: targetUserId
+    moveUserToGameState(socket, data.gameId, targetUserId, {
+      screenName: 'GALLERY',
     });
-    
     console.log(`✅ WhatsApp image downloaded successfully for user ${targetUserId}: ${imageHash}`);
     
   } catch (error) {

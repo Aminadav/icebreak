@@ -7,7 +7,7 @@ const { getUserIdFromDevice } = require('./utils');
 
 async function handleUploadPendingImage(socket, data) {
   try {
-    const { imageData, phoneNumber, email, name, gender } = data;
+    const { imageData,  } = data;
     
     if (!imageData) {
       throw new Error('Image data is required');

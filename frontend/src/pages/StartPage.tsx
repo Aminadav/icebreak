@@ -38,8 +38,8 @@ export default function StartPage(): JSX.Element {
       console.log('🎮 Game created immediately:', data);
       setIsCreating(false);
       
-      // Navigate to the game name step with the gameId
-      navigate(`/game/${data.gameId}/name`);
+      // // Navigate to the game name step with the gameId
+      navigate(`/game/${data.gameId}/play`);
       
       // Clean up listeners
       socket.off('game_created_immediately', successHandler);

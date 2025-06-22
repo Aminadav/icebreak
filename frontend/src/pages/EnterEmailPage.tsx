@@ -7,6 +7,7 @@ import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGameId } from '../utils/useGameId';
 
 interface EnterEmailPageProps {
   phoneNumber?: string;
@@ -14,9 +15,10 @@ interface EnterEmailPageProps {
   gameId?: string;
 }
 
-export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEmailPageProps): JSX.Element {
+export default function EnterEmailPage(): JSX.Element {
   const DEBUG=false
   const { texts } = useLanguage();
+  var gameId = useGameId(); 
   const { handleMenuAction } = useMenuNavigation(); // For menu navigation
   const { socket, deviceId } = useSocket();
   const navigate = useNavigate(); // For game flow navigation
@@ -60,25 +62,11 @@ export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEma
       
       // Emit email save request (userId is auto-derived from device ID)
       socket.emit('save_email', { 
-        email: email.toLowerCase().trim()
+        email: email.toLowerCase().trim(),
+        gameId
       });
       
-      // Listen for response
-      const handleEmailSaved = (data: any) => {
-        setIsLoading(false);
-        console.log('✅ Email saved successfully:', data);
-        console.log('🎯 Navigation info:', { gameId, hasNavigate: !!navigate, hasGameId: !!gameId });
-        
-        // Navigate to enter name page
-        if (gameId) {
-          console.log('🚀 Navigating to player-name page with gameId:', gameId);
-          navigate(`/game/${gameId}/player-name`);
-        } else {
-          console.log('🚀 Using navigation to enter name page');
-          // Legacy navigation for non-game flows
-          navigate('/game/new/player-name');
-        }
-      };
+
       
       const handleEmailError = (data: any) => {
         setIsLoading(false);
@@ -87,7 +75,6 @@ export default function EnterEmailPage({ phoneNumber, userId, gameId }: EnterEma
       };
       
       // Set up one-time listeners (no need to manually remove with once)
-      socket.once('email_saved', handleEmailSaved);
       socket.once('email_save_error', handleEmailError);
       
     } catch (error) {

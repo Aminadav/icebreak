@@ -34,16 +34,6 @@ export default function Input({
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onChange(e.target.value);
-    
-    // Track input changes if trackingId is provided
-    if (trackingId) {
-      trackEvent(`${trackingId}_input_changed`, {
-        input_type: type,
-        input_length: e.target.value.length,
-        has_value: !!e.target.value.trim(),
-        placeholder: placeholder
-      });
-    }
   };
   
   const handleFocus = () => {

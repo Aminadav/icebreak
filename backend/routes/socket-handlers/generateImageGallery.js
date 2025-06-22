@@ -232,6 +232,7 @@ async function handleGenerateImageGallery(socket) {
         
       } catch (error) {
         console.error(`❌ [${index + 1}/${GENERATED_IMAGES}] Generation failed:`, error.message);
+        console.log(error.stack)
         
         // Emit error to client
         socket.emit('gallery_image_error', {

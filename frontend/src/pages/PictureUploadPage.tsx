@@ -20,6 +20,7 @@ interface PictureUploadPageProps {
 
 export default function PictureUploadPage({ phoneNumber, userId, email, name, gender }: PictureUploadPageProps): JSX.Element {
   const { texts } = useLanguage();
+  var gameId = useGameId(); // Get gameId from context or utility
   const { handleMenuAction } = useMenuNavigation();
   const { openModal } = useModal();
   const { socket } = useSocket();
@@ -64,31 +65,6 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       }
     };
 
-    const handleWhatsappImageUsed = (response: any) => {
-      console.log('📱 WhatsApp image used:', response);
-      setIsLoading(false);
-      setUploadMethod(null);
-      setWhatsappError(null);
-      
-      if (response.success) {
-        console.log('✅ WhatsApp image used successfully:', response.imageHash);
-        
-        // Navigate to gallery page immediately
-        navigate(`/game/${gameId}/gallery`, {
-          state: {
-            originalImageHash: response.imageHash,
-            phoneNumber: phoneNumber || '',
-            userId: userId || '',
-            email: email || '',
-            name: name || '',
-            gender: gender || ''
-          }
-        });
-      } else {
-        console.error('❌ WhatsApp image use failed:', response.error);
-        setWhatsappError(response.message || 'Failed to use WhatsApp image');
-      }
-    };
 
     const handleWhatsappImageUseError = (error: any) => {
       console.error('❌ WhatsApp image use error:', error);
@@ -98,12 +74,10 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
     };
 
     socket.on('background_whatsapp_status', handleBackgroundWhatsappStatus);
-    socket.on('whatsapp_image_used', handleWhatsappImageUsed);
     socket.on('whatsapp_image_use_error', handleWhatsappImageUseError);
 
     return () => {
       socket.off('background_whatsapp_status', handleBackgroundWhatsappStatus);
-      socket.off('whatsapp_image_used', handleWhatsappImageUsed);
       socket.off('whatsapp_image_use_error', handleWhatsappImageUseError);
     };
   }, [socket, navigate, phoneNumber, userId, email, name, gender]);
@@ -112,31 +86,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   useEffect(() => {
     if (!socket) return;
 
-    const handleWhatsappImageDownloaded = (response: any) => {
-      console.log('📱 WhatsApp image downloaded:', response);
-      setIsLoading(false);
-      setUploadMethod(null);
-      setWhatsappError(null);
-      
-      if (response.success) {
-        console.log('✅ WhatsApp image downloaded successfully:', response.imageHash);
-        
-        // Navigate to gallery page immediately
-        navigate(`/game/${gameId}/gallery`, {
-          state: {
-            originalImageHash: response.imageHash,
-            phoneNumber: phoneNumber || '',
-            userId: userId || '',
-            email: email || '',
-            name: name || '',
-            gender: gender || ''
-          }
-        });
-      } else {
-        console.error('❌ WhatsApp image download failed:', response.error);
-        setWhatsappError(response.message || 'Failed to download WhatsApp image');
-      }
-    };
+
 
     const handleWhatsappImageDownloadError = (error: any) => {
       console.error('❌ WhatsApp image download error:', error);
@@ -145,11 +95,9 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       setWhatsappError(error.message || 'Failed to download WhatsApp image');
     };
 
-    socket.on('whatsapp_image_downloaded', handleWhatsappImageDownloaded);
     socket.on('whatsapp_image_download_error', handleWhatsappImageDownloadError);
 
     return () => {
-      socket.off('whatsapp_image_downloaded', handleWhatsappImageDownloaded);
       socket.off('whatsapp_image_download_error', handleWhatsappImageDownloadError);
     };
   }, [socket, navigate, phoneNumber, userId, email, name, gender]);
@@ -158,16 +106,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
 
   const handleCameraUpload = () => {
     setUploadMethod('camera');
-    setIsLoading(true);
-    
-    console.log('📸 Camera upload selected - navigating to camera page');
-    
-    // Navigate to camera page
-    navigate(`/game/${gameId}/camera`);
-    
-    // Reset loading state
-    setIsLoading(false);
-    setUploadMethod(null);
+    socket.emit('camera_upload_requested', { gameId });
   };
 
   const handleGalleryUpload = () => {

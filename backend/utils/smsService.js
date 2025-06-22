@@ -148,11 +148,11 @@ async function sendVerificationCode(phoneNumber) {
   try {
     // Format phone number
     const formattedPhone = formatPhoneNumber(phoneNumber);
-    console.log(`📱 Formatted phone: ${phoneNumber} -> ${formattedPhone}`);
+    // console.log(`📱 Formatted phone: ${phoneNumber} -> ${formattedPhone}`);
     
     // Generate verification code
     const verificationCode = generateVerificationCode(formattedPhone);
-    console.log(`🔐 Generated verification code: ${verificationCode} for ${formattedPhone}`);
+    // console.log(`🔐 Generated verification code: ${verificationCode} for ${formattedPhone}`);
     
     // Create message
     const message = `קוד האימות שלך ב-Icebreak: ${verificationCode}`;

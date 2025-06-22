@@ -290,6 +290,9 @@ export default function AdminPage(): JSX.Element {
        ]
      },
      {
+      screenName:'GALLERY',
+     },
+     {
        screenName:'ANSWER_FEEDBACK',
        mainMessage: 'טעות',
        question: 'מה החג שלדעתך עמינדב הכי אוהב?',

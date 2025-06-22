@@ -8,28 +8,23 @@ import PageTracking from '../components/PageTracking';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGameId } from '../utils/useGameId';
 
 interface GiveGameNamePageProps {
   gameId?: string; // Optional for legacy navigation, required for React Router
   initialGameName?: string;
 }
 
-export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveGameNamePageProps): JSX.Element {
+export default function GiveGameNamePage(): JSX.Element {
+  var gameId=useGameId()
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
   const navigate = useNavigate(); // For game flow navigation
   const { handleMenuAction } = useMenuNavigation(); // For menu navigation
   
-  const [gameName, setGameName] = useState(initialGameName);
+  const [gameName, setGameName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Set initial game name when component mounts
-  useEffect(() => {
-    if (initialGameName && !gameName) {
-      setGameName(initialGameName);
-    }
-  }, [initialGameName, gameName]);
 
   const handleContinue = async () => {
     if (!gameName.trim()) {
@@ -45,78 +40,8 @@ export default function GiveGameNamePage({ gameId, initialGameName = '' }: GiveG
     setIsLoading(true);
     setError(null);
     
-    try {
-      if (gameId) {
-        // React Router flow - update existing game name
-        // Set up listener for game_name_updated response
-        const gameNameUpdatedHandler = (data: any) => {
-          setIsLoading(false);
-          if (data.success && data.gameId === gameId) {
-            console.log('📝 Game name updated successfully:', data);
-            // Navigate to phone number page
-            navigate(`/game/${gameId}/phone`);
-          } else {
-            setError('שגיאה בעדכון שם המשחק');
-          }
-          // Remove the listener after use
-          socket.off('game_name_updated', gameNameUpdatedHandler);
-        };
+    socket.emit('update_game_name', { gameId, gameName: gameName.trim() });
 
-        // Set up error handler
-        const errorHandler = (data: any) => {
-          setIsLoading(false);
-          setError(data.message || 'שגיאה בעדכון שם המשחק');
-          console.error('❌ Game name update error:', data);
-          // Remove the listener after use
-          socket.off('error', errorHandler);
-        };
-
-        // Add event listeners
-        socket.on('game_name_updated', gameNameUpdatedHandler);
-        socket.on('error', errorHandler);
-        
-        // Emit the update_game_name event
-        console.log('📤 Emitting update_game_name event with name:', gameName.trim());
-        socket.emit('update_game_name', { gameId, gameName: gameName.trim() });
-      } else {
-        // Legacy navigation flow - set game name in memory
-        // Set up listener for game_name_saved response
-        const gameNameSavedHandler = (data: any) => {
-          setIsLoading(false);
-          if (data.success) {
-            console.log('📝 Game name saved successfully:', data);
-            // Navigate to phone number page using React Router
-            navigate('/game/new/phone');
-          } else {
-            setError('שגיאה בשמירת שם המשחק');
-          }
-          // Remove the listener after use
-          socket.off('game_name_saved', gameNameSavedHandler);
-        };
-
-        // Set up error handler
-        const errorHandler = (data: any) => {
-          setIsLoading(false);
-          setError(data.message || 'שגיאה בשמירת שם המשחק');
-          console.error('❌ Game name save error:', data);
-          // Remove the listener after use
-          socket.off('error', errorHandler);
-        };
-
-        // Add event listeners
-        socket.on('game_name_saved', gameNameSavedHandler);
-        socket.on('error', errorHandler);
-        
-        // Emit the set_game_name event
-        console.log('📤 Emitting set_game_name event with name:', gameName.trim());
-        socket.emit('set_game_name', { gameName: gameName.trim() });
-      }
-      
-    } catch (error) {
-      console.error('Failed to process game name:', error);
-      setError('שגיאה בעיבוד שם המשחק');
-      setIsLoading(false);
-    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

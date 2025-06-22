@@ -28,7 +28,12 @@ const handleSaveOrUpdateQuestion = require('./socket-handlers/updateQuestion');
 const handleGetQuestions = require('./socket-handlers/getQuestions');
 const handleDeleteQuestion = require('./socket-handlers/deleteQuestion');
 const { getUserIdFromDevice } = require('./socket-handlers/utils');
-
+const colors=require('colors');
+const moveUserToGameState = require('./socket-handlers/moveUserToGameState');
+/**
+ * Setup socket event handlers for the application.
+ * @param {import('socket.io').Server} io - The Socket.IO server instance.
+ */
 function setupSocketHandlers(io) {
   // Add middleware to extract device ID and attach to socket
   io.use((socket, next) => {
@@ -50,10 +55,16 @@ function setupSocketHandlers(io) {
       // Call register device handler immediately
       handleRegisterDevice(socket, { deviceId: socket.deviceId });
     }
+    let _emit= socket.emit;
+    //@ts-ignore
+    socket.emit=function(eventName, ...args) {
+      console.log(colors.green('>> ' + eventName + ': ' + JSON.stringify(args)));
+      _emit.call(socket, eventName, ...args);
+    }
 
     function on(eventName,callback) {
       socket.on(eventName,(...args)=>{
-        console.log('<< ' + eventName, args);
+        console.log(colors.cyan('<< ' + eventName + ': ' +  JSON.stringify(args)));
         callback(...args);
       })
     }
@@ -93,11 +104,18 @@ function setupSocketHandlers(io) {
       const targetUserId = await getUserIdFromDevice(socket.deviceId);
       // get pendin_image for user
       var res = await pool.query('SELECT pending_image FROM users WHERE user_id = $1', [targetUserId])
-
+      
       var originalImageHash = res.rows[0].pending_image;
       callback({ originalImageHash: originalImageHash });
     })
-
+    
+    on('camera_upload_requested', async (data) =>{
+      var {gameId} = data;
+      var userId= await getUserIdFromDevice(socket.deviceId);
+      moveUserToGameState(socket, gameId, userId, {
+        screenName: 'CAMERA',
+      })
+    })
 
 
     on('get-game-state', async ({gameId}) => {

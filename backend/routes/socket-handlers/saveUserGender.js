@@ -2,10 +2,11 @@ const Device = require('../../models/Device');
 const User = require('../../models/User');
 const pool = require('../../config/database');
 const { getUserIdFromDevice } = require('./utils');
+const moveUserToGameState = require('./moveUserToGameState');
 
 async function handleSaveUserGender(socket, data) {
   try {
-    const { gender, name } = data;
+    const { gender, name,gameId } = data;
     
     if (!gender || !['male', 'female'].includes(gender)) {
       throw new Error('Invalid gender. Must be "male" or "female"');
@@ -45,13 +46,9 @@ async function handleSaveUserGender(socket, data) {
       // Update journey state to PICTURE_UPLOAD instead of COMPLETED
       await Device.updateJourneyState(socket.deviceId, 'PICTURE_UPLOAD');
       
-      socket.emit('gender_saved', {
-        success: true,
-        message: 'Gender saved successfully',
-        gender: gender,
-        name: name,
-        userId: targetUserId
-      });
+      moveUserToGameState(socket, gameId, targetUserId, {
+        screenName: 'ASK_FOR_PICTURE',
+      })
       
       console.log(`✅ Gender saved successfully for user ${targetUserId}: ${gender}`);
     } else {

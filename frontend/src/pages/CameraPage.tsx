@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSocket } from '../contexts/SocketContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import { getIsTesting } from '../utils/isTesting';
+import { useGameId } from '../utils/useGameId';
 
 // Declare global FaceDetection type for MediaPipe
 declare global {
@@ -13,27 +14,12 @@ declare global {
   var FaceDetection: any;
 }
 
-interface CameraPageProps {
-  onPictureCapture?: (imageBlob: Blob) => void;
-  phoneNumber?: string;
-  userId?: string;
-  email?: string;
-  name?: string;
-  gender?: string;
-  gameId?: string; // Add gameId for React Router support
-}
 
-export default function CameraPage({ 
-  onPictureCapture, 
-  phoneNumber, 
-  userId, 
-  email, 
-  name, 
-  gender,
-  gameId 
-}: CameraPageProps): JSX.Element {
+
+export default function CameraPage(): JSX.Element {
   const isTesting=getIsTesting();
   const DEBUG=false
+  var gameId = useGameId(); // Use a custom hook to get the game ID 
   const navigate = useNavigate();
   const { socket } = useSocket();
   const { texts } = useLanguage();
@@ -263,7 +249,7 @@ export default function CameraPage({
         window.clearInterval(detectionIntervalRef.current);
       }
     };
-  }, [socket, phoneNumber, userId, email, name, gender]);
+  }, []);
 
   // Start face detection when both are ready (skip if testing)
   useEffect(() => {
@@ -458,11 +444,7 @@ export default function CameraPage({
           console.log('📤 Emitting image upload...');
           socket.emit('upload_pending_image', {
             imageData: base64WithoutPrefix,
-            phoneNumber,
-            userId,
-            email,
-            name,
-            gender
+            gameId,
           });
 
           // Listen for upload response
@@ -558,13 +540,7 @@ export default function CameraPage({
         return new Promise<void>((resolve) => {
           canvas.toBlob(async (blob) => {
             if (blob) {
-              // Call the onPictureCapture callback if provided
-              if (onPictureCapture) {
-                onPictureCapture(blob);
-              }
               
-              // Upload image and navigate directly to gallery
-              if (phoneNumber && userId && email && name && gender) {
                 console.log('📤 Uploading mock test image and navigating to gallery...');
                 
                 const imageHash = await uploadImage(blob);
@@ -575,7 +551,6 @@ export default function CameraPage({
                   console.error('Failed to upload image');
                   setUploadError('שגיאה בהעלאת התמונה');
                 }
-              }
             }
             
             // Add a small delay for visual feedback
@@ -620,12 +595,8 @@ export default function CameraPage({
           canvas.toBlob(async (blob) => {
             if (blob) {
               // Call the onPictureCapture callback if provided
-              if (onPictureCapture) {
-                onPictureCapture(blob);
-              }
               
               // Upload image and navigate directly to gallery
-              if (phoneNumber && userId && email && name && gender) {
                 console.log('📤 Uploading full frame image and navigating to gallery...');
                 
                 const imageHash = await uploadImage(blob);
@@ -636,7 +607,6 @@ export default function CameraPage({
                   console.error('Failed to upload image');
                   setUploadError('שגיאה בהעלאת התמונה');
                 }
-              }
             }
             
             // Add a small delay for visual feedback
@@ -675,10 +645,6 @@ export default function CameraPage({
       return new Promise<void>((resolve) => {
         cropCanvasRef.current!.toBlob(async (blob) => {
           if (blob) {
-            // Call the onPictureCapture callback if provided
-            if (onPictureCapture) {
-              onPictureCapture(blob);
-            }
             
             // Upload image and navigate directly to gallery
               console.log('📤 Uploading cropped face image and navigating to gallery...');

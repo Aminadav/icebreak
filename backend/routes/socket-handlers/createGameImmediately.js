@@ -1,7 +1,7 @@
 const Game = require('../../models/Game');
 const { sendToMixpanel } = require('../../utils/mixpanelService');
-const { validateDeviceRegistration } = require('./utils');
-
+const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
+var moveUserToGameState=require( './moveUserToGameState');
 /**
  * Handle immediate game creation with name
  * This creates a game immediately without requiring phone verification
@@ -52,7 +52,9 @@ async function handleCreateGameImmediately(socket, data) {
       success: true,
       message: 'Game created successfully. Complete verification to claim ownership.'
     });
-    
+    var userId=await getUserIdFromDevice(socket.deviceId);
+    await moveUserToGameState(socket, game.game_id, userId, { screenName: 'GIVE_GAME_NAME' });
+
     console.log(`🎮 Game created immediately: ${game.name} (${game.game_id}) for device: ${socket.deviceId}`);
     
   } catch (error) {

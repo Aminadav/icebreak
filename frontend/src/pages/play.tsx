@@ -15,6 +15,15 @@ import PleaseTakeAPicturePage from './PleaseTakeAPicturePage';
 import QuestionPage from './QuestionPage';
 import GotPointsPage from './GotPointsPage';
 import GotBadgePage from './GotBadgePage';
+import ImageGalleryPage from './ImageGalleryPage';
+import GiveGameNamePage from './GiveGameNamePage';
+import EnterPhoneNumberPage from './EnterPhoneNumberPage';
+import Enter2faCodePage from './Enter2faCodePage';
+import EnterEmailPage from './EnterEmailPage';
+import EnterNamePage from './EnterNamePage';
+import SelectGenderPage from './SelectGenderPage';
+import PictureUploadPage from './PictureUploadPage';
+import CameraPage from './CameraPage';
 
 export default function Play(): JSX.Element {
   const navigate = useNavigate();
@@ -35,29 +44,69 @@ export default function Play(): JSX.Element {
     }
   }, []);
   
-  if(gameState.screenName=="EMPTY_GAME_STATE") {
-    return <div></div>
-  }
-  if(gameState.screenName=="BEFORE_START_ABOUT_YOU") {
-    return <BeforeStartAskAboutYou gameState={gameState}/>
-  }
-  if(gameState.screenName=="TEXT_MESSAGE_TO_USER") {
-    return <TextMessageToUserPage gameState={gameState}/>
-  }
-  if(gameState.screenName=="ANSWER_FEEDBACK") {
-    return <AnswerFeedbackPage gameState={gameState}/>
-  }
-  if(gameState.screenName=="PLEASE_TAKE_A_PICTURE") {
-    return <PleaseTakeAPicturePage gameState={gameState}/>
-  }
-  if(gameState.screenName=="QUESTION") {
-    return <QuestionPage gameState={gameState} />
-  }
-  if(gameState.screenName=="GOT_POINTS") {
-    return <GotPointsPage gameState={gameState} />
-  }
-  if(gameState.screenName=="GOT_BADGE") {
-    return <GotBadgePage  gameState={gameState} />
-  }
-  return <div>{JSON.stringify(gameState)}</div>;
+  return (
+    <div>
+      {gameState.screenName=="GIVE_GAME_NAME" && 
+        <GiveGameNamePage/>
+      }
+      {gameState.screenName=="ASK_USER_PHONE" && 
+        <EnterPhoneNumberPage/>
+      }
+      {gameState.screenName=='ASK_USER_VERIFICATION_CODE' &&
+      <Enter2faCodePage/>
+      }
+      { gameState.screenName=="ASK_FOR_EMAIL" &&
+        <EnterEmailPage/>
+      }
+      {gameState.screenName=="ASK_PLAYER_NAME" &&
+        <EnterNamePage/>
+      }
+      {gameState.screenName=="ASK_PLAYER_GENDER" &&
+        <SelectGenderPage/>
+      }
+      {gameState.screenName=="ASK_FOR_PICTURE" &&
+      <PictureUploadPage/>
+      }
+      {gameState.screenName=="CAMERA" && 
+        <CameraPage/>
+      }
+      {gameState.screenName=="GALLERY" && 
+        <ImageGalleryPage/>
+      }
+      {gameState.screenName=="BEFORE_START_ABOUT_YOU" && 
+        <BeforeStartAskAboutYou gameState={gameState}/>
+      }
+      {gameState.screenName=="TEXT_MESSAGE_TO_USER" && 
+        <TextMessageToUserPage gameState={gameState}/>
+      }
+      {gameState.screenName=="ANSWER_FEEDBACK" && 
+        <AnswerFeedbackPage gameState={gameState}/>
+      }
+      {gameState.screenName=="PLEASE_TAKE_A_PICTURE" && 
+        <PleaseTakeAPicturePage gameState={gameState}/>
+      }
+      {gameState.screenName=="QUESTION" && 
+        <QuestionPage gameState={gameState} />
+      }
+      {gameState.screenName=="GOT_POINTS" && 
+        <GotPointsPage gameState={gameState} />
+      }
+      {gameState.screenName=="GOT_BADGE" && 
+        <GotBadgePage gameState={gameState} />
+      }
+        <div dir="ltr"style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        border: '1px solid red',
+        backgroundColor: 'white',
+        padding: '10px',
+        textAlign: 'center',
+        zIndex: 1000,
+      }}>
+        {JSON.stringify(gameState,null,2)}
+        </div>
+    </div>
+  );
 }

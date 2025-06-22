@@ -7,13 +7,15 @@ import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
+import { useGameId } from '../utils/useGameId';
 
 interface EnterPhoneNumberPageProps {
   gameId?: string;
 }
 
-export default function EnterPhoneNumberPage({ gameId }: EnterPhoneNumberPageProps = {}): JSX.Element {
+export default function EnterPhoneNumberPage(): JSX.Element {
   const { texts } = useLanguage();
+  var gameId = useGameId(); // Get gameId from context or utility
   const { socket } = useSocket();
   const { handleMenuAction } = useMenuNavigation(); // For menu navigation
   const navigate = useNavigate(); // For game flow navigation
@@ -21,48 +23,6 @@ export default function EnterPhoneNumberPage({ gameId }: EnterPhoneNumberPagePro
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Set up socket event listeners once when component mounts
-  useEffect(() => {
-    if (!socket) return;
-
-    const smsSentHandler = (data: any) => {
-      setIsLoading(false);
-      if (data.success) {
-        console.log('📱 SMS sent successfully:', data);
-        // Navigate to 2FA page with React Router
-        if (gameId) {
-          navigate(`/game/${gameId}/verify`);
-        } else {
-          navigate('/game/new/verify');
-        }
-      } else {
-        setError(data.message || 'שגיאה בשליחת SMS');
-      }
-    };
-
-    const errorHandler = (data: any) => {
-      // Only handle errors that don't have a specific handler
-      if (data.context === 'sms' || !data.context) {
-        setIsLoading(false);
-        setError(data.message || 'שגיאה בשליחת מספר הטלפון');
-        console.error('❌ Phone number submission error:', data);
-      }
-    };
-
-    // Remove any existing listeners first to prevent duplicates
-    socket.off('sms_sent');
-    
-    // Add event listeners
-    socket.on('sms_sent', smsSentHandler);
-    socket.on('error', errorHandler);
-
-    // Cleanup function to remove listeners when component unmounts
-    return () => {
-      socket.off('sms_sent', smsSentHandler);
-      socket.off('error', errorHandler);
-    };
-  }, [socket, phoneNumber]); // Removed 'push' from dependencies to prevent re-renders
 
   const handleContinue = async () => {
     if (!phoneNumber.trim()) {
@@ -81,7 +41,7 @@ export default function EnterPhoneNumberPage({ gameId }: EnterPhoneNumberPagePro
     try {
       // Emit phone number (listeners are already set up in useEffect)
       console.log('📤 Emitting submit_phone_number:', phoneNumber);
-      socket.emit('submit_phone_number', { phoneNumber });
+      socket.emit('submit_phone_number', { phoneNumber,gameId });
     } catch (error) {
       console.error('Failed to process phone number:', error);
       setError('שגיאה בשמירת מספר הטלפון');

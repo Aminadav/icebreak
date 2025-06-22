@@ -4,10 +4,11 @@ const Game = require('../../models/Game');
 const { verifyCode } = require('../../utils/smsService');
 const { sendToMixpanel, setUserProfile, trackLogin, trackRegistration } = require('../../utils/mixpanelService');
 const { validateDeviceRegistration } = require('./utils');
+const moveUserToGameState = require('./moveUserToGameState');
 
 async function handleVerify2FACode(socket, data) {
   try {
-    const { code } = data;
+    const { code,gameId } = data;
     
     validateDeviceRegistration(socket);
     
@@ -68,57 +69,11 @@ async function handleVerify2FACode(socket, data) {
         });
       }
       
-      // אם יש שם משחק ממתין, ניצור את המשחק עכשיו
-      let gameCreated = null;
-      if (socket.pendingGameName) {
-        try {
-          const game = await Game.createGame(socket.pendingGameName, user.user_id);
-          socket.join(game.game_id);
-          gameCreated = {
-            gameId: game.game_id,
-            gameName: game.name,
-            status: game.status,
-            createdAt: game.created_at
-          };
-          delete socket.pendingGameName;
-          
-          // Track auto game creation after verification
-          await sendToMixpanel({
-            trackingId: 'game_created_after_verification',
-            userId: user.user_id,
-            deviceId: socket.deviceId,
-            timestamp: new Date().toISOString(),
-            game_id: game.game_id,
-            game_name: game.name,
-            socketId: socket.id
-          });
-          
-          console.log(`🎮 Auto-created game: ${game.name} (${game.game_id}) after verification`);
-        } catch (gameError) {
-          console.error('Error auto-creating game after verification:', gameError);
-          // Don't fail the verification if game creation fails
-        }
-      }
       
-      // Update journey state to PHONE_VERIFIED and clear pending phone number
-      await Device.updateJourneyState(socket.deviceId, 'PHONE_VERIFIED', {
-        pendingPhoneNumber: null
-      });
-      
-      socket.emit('2fa_verified', {
-        success: true,
-        message: 'Phone number verified successfully',
-        phoneNumber: socket.phoneNumber,
-        user: {
-          userId: user.user_id,
-          phoneNumber: user.phone_number,
-          createdAt: user.created_at,
-          deviceCount: userStats.deviceCount,
-          gamesCreated: userStats.gamesCreated
-        },
-        gameCreated: gameCreated // Will be null if no pending game
-      });
-      
+      moveUserToGameState(socket, gameId, user.user_id, {
+        screenName: 'ASK_FOR_EMAIL',
+      })
+
       console.log(`🎉 User logged in successfully: ${user.user_id} with ${userStats.deviceCount} devices`);
     } else {
       socket.emit('2fa_verification_failed', {

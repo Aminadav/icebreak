@@ -11,7 +11,7 @@ async function handleGetGameData(socket, data) {
       throw new Error('Game ID is required');
     }
     
-    console.log(`🎮 Getting game data for: ${gameId}`);
+    // console.log(`🎮 Getting game data for: ${gameId}`);
     
     // Get game data
     const game = await Game.getGame(gameId);
@@ -30,7 +30,7 @@ async function handleGetGameData(socket, data) {
       creatorUserId: game.creator_user_id
     });
     
-    console.log(`✅ Game data sent for: ${gameId}`);
+    // console.log(`✅ Game data sent for: ${gameId}`);
     
   } catch (error) {
     console.error('Error getting game data:', error);

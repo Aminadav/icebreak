@@ -24,12 +24,12 @@ async function handleTrackEvent(socket, data) {
       ...eventData
     };
 
-    console.log('📊 Tracking Event:', JSON.stringify(trackingEventData, null, 2));
+    // console.log('📊 Tracking Event:', JSON.stringify(trackingEventData, null, 2));
     
     // שליחה ל-Mixpanel
     const mixpanelResult = await sendToMixpanel(trackingEventData);
     if (mixpanelResult.success) {
-      console.log('✅ Event sent to Mixpanel successfully');
+      // console.log('✅ Event sent to Mixpanel successfully');
     } else {
       console.error('❌ Failed to send event to Mixpanel:', mixpanelResult.error);
     }

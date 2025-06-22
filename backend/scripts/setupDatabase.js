@@ -3,12 +3,8 @@ const MigrationManager = require('./MigrationManager');
 
 async function setupDatabase() {
   try {
-    console.log('🔧 Setting up database with migrations...');
-    
     const migrationManager = new MigrationManager();
     await migrationManager.runPendingMigrations();
-    
-    console.log('✅ Database setup completed successfully');
   } catch (error) {
     console.error('❌ Error setting up database:', error);
     throw error;

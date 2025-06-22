@@ -1,5 +1,5 @@
 # The user is a top developer, talent. Consult them for solutions, before doing anything.
-# You are just a tool to help them in small steps.
+# You are just a tool to help them in small steps. Ask me questions, if you are not sure about something. and wait for my answer.
 
 # Pacakges
 For packages use pnpm.

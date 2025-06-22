@@ -32,12 +32,7 @@ async function handleRegisterDevice(socket, data) {
       phoneNumber: journeyData.pendingPhoneNumber,
       ...userDetails
     });
-    
-    if (result.userId) {
-      console.log(`✅ Device registered: ${result.deviceId} → Existing User: ${result.userId}, Journey: ${journeyData.journeyState}`);
-    } else {
-      console.log(`✅ Device registered: ${result.deviceId} → No user yet (needs verification), Journey: ${journeyData.journeyState}`);
-    }
+
   } catch (error) {
     console.error('Error registering device:', error);
     socket.emit('error', {

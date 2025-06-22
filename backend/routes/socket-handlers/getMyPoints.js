@@ -22,9 +22,6 @@ async function handleGetMyPoints(socket, data, callback) {
       return;
     }
     
-    console.log(`🎯 Getting points for user ${targetUserId} in game ${gameId}`);
-    
-    // Get user points for this game from database
     const result = await pool.query(
       'SELECT points FROM user_points WHERE user_id = $1 AND game_id = $2',
       [targetUserId, gameId]
@@ -47,8 +44,6 @@ async function handleGetMyPoints(socket, data, callback) {
       userId: targetUserId,
       gameId: gameId
     };
-    
-    console.log(`✅ Points retrieved for user ${targetUserId} in game ${gameId}: ${points}`);
     
     // Use callback if provided, otherwise emit
     if (callback) {

@@ -2,6 +2,8 @@ const pool = require('../config/database');
 const fs = require('fs').promises;
 const path = require('path');
 
+require('dotenv').config({path: path.join(__dirname, '../.env')});
+
 class MigrationManager {
   constructor() {
     this.migrationsDir = path.join(__dirname, '../migrations');
@@ -15,7 +17,6 @@ class MigrationManager {
           executed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
       `);
-      console.log('✅ Schema migrations table initialized');
     } catch (error) {
       console.error('❌ Error initializing migrations table:', error);
       throw error;
@@ -103,6 +104,9 @@ class MigrationManager {
       }
       
       console.log('✅ All migrations executed successfully');
+      
+      // Generate updated schema file after successful migrations
+      await this.generateSchemaFile();
     } catch (error) {
       console.error('❌ Error running migrations:', error);
       throw error;
@@ -189,6 +193,22 @@ class MigrationManager {
     } catch (error) {
       console.error('❌ Error getting migration status:', error);
       throw error;
+    }
+  }
+
+  async generateSchemaFile() {
+    try {
+      console.log('🔄 Generating schema.sql file...');
+      
+      // Use our custom update-schema script
+      const updateSchema = require('./update-schema');
+      await updateSchema();
+      
+      console.log('✅ Schema file generated successfully');
+      
+    } catch (error) {
+      console.error('❌ Error generating schema file:', error);
+      // Don't throw error to avoid breaking migration process
     }
   }
 }

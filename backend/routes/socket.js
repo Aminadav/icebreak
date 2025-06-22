@@ -30,23 +30,13 @@ const handleDeleteQuestion = require('./socket-handlers/deleteQuestion');
 const { getUserIdFromDevice } = require('./socket-handlers/utils');
 
 function setupSocketHandlers(io) {
-  console.log('🔧 Setting up Socket.io handlers...');
-  console.log('🎯 IO instance received:', !!io);
-  console.log('🎯 IO engine:', !!io.engine);
-  console.log('🎯 IO supported transports:', io.engine.opts.transports);
-  console.log('🎯 IO CORS settings:', JSON.stringify(io.engine.opts.cors, null, 2));
-
   // Add middleware to extract device ID and attach to socket
   io.use((socket, next) => {
-    console.log('🔌 Socket middleware: New connection attempt from:', socket.handshake.address);
-    console.log('🔌 Socket middleware: Headers:', socket.handshake.headers.origin);
-    console.log('🔌 Socket middleware: Query params:', JSON.stringify(socket.handshake.query));
 
     // Extract device ID from query parameters
     const deviceId = socket.handshake.query.deviceId;
     if (deviceId && typeof deviceId === 'string') {
       socket.deviceId = deviceId;
-      console.log(`🆔 Device ID attached to socket: ${deviceId}`);
     } else {
       console.warn('⚠️ No device ID found in connection query parameters');
     }
@@ -55,21 +45,15 @@ function setupSocketHandlers(io) {
   });
 
   io.on('connection', (socket) => {
-    console.log('✅ Socket.io client connected:', socket.id);
-    console.log('🤝 Transport type:', socket.conn.transport.name);
-    console.log(`📱 NEW HIGH-LEVEL CONNECTION: ${socket.id} with device ID: ${socket.deviceId || 'NONE'}`);
-    console.log(`👥 Total connected clients: ${io.engine.clientsCount}`);
-
     // Auto-register device if we have a device ID
     if (socket.deviceId) {
-      console.log(`🚀 Auto-registering device: ${socket.deviceId}`);
       // Call register device handler immediately
       handleRegisterDevice(socket, { deviceId: socket.deviceId });
     }
 
     function on(eventName,callback) {
       socket.on(eventName,(...args)=>{
-        console.log('<<' + eventName, args);
+        console.log('<< ' + eventName, args);
         callback(...args);
       })
     }
@@ -117,7 +101,6 @@ function setupSocketHandlers(io) {
 
 
     on('get-game-state', async ({gameId}) => {
-      console.log('@@@@@@@@@')
       /** @type {GAME_STATES}*/
       var gameState={screenName:'EMPTY_GAME_STATE'};
       var userId= await getUserIdFromDevice(socket.deviceId);
@@ -131,8 +114,8 @@ function setupSocketHandlers(io) {
         gameState=res.rows[0].state;
       }
 
-      console.log(res)
-      console.log({gameState})
+      // console.log(res)
+      // console.log({gameState})
       socket.emit('update-game-state',gameState)
     })
 
@@ -198,8 +181,8 @@ function setupSocketHandlers(io) {
 
     // התנתקות
     on('disconnect', (reason) => {
-      console.log(`❌ Socket.io client disconnected: ${socket.id}, Reason: ${reason}`);
-      console.log(`📱 Client disconnected: ${socket.id}`);
+      // console.log(`❌ Socket.io client disconnected: ${socket.id}, Reason: ${reason}`);
+      // console.log(`📱 Client disconnected: ${socket.id}`);
     });
   });
 }

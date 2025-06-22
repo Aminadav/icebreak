@@ -27,7 +27,7 @@ async function registerDevice(existingDeviceId = null) {
       );
       
       const device = existingDevice.rows[0];
-      console.log(`📱 Device reconnected: ${deviceId}${device.user_id ? ` (User: ${device.user_id})` : ' (No user yet)'}`);
+      // console.log(`📱 Device reconnected: ${deviceId}${device.user_id ? ` (User: ${device.user_id})` : ' (No user yet)'}`);
       
       return {
         deviceId,

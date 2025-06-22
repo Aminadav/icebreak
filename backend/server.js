@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const socketIo = require('socket.io');
 const cors = require('cors');
+require('./console-logger')
 require('dotenv').config();
 
 const setupSocketHandlers = require('./routes/socket');
@@ -57,28 +58,8 @@ const io = socketIo(server, {
   debug: true,
 });
 
-// הוספת לוג לדיבוג
-console.log('⚡ Socket.io instance created with options:', {
-  cors: io._corsObj,
-  transports: io._opts?.transports || 'default',
-  path: io.path(),
-  adapter: io.adapter && io.adapter.constructor.name,
-});
-
-// הגדרת Socket handlers תחילה
 setupSocketHandlers(io);
-console.log('🔗 Socket handlers setup completed');
 
-// Add direct connection event for debugging - למטרות דיבוג בלבד
-io.on('connection', (socket) => {
-  console.log('⭐ DIRECT connection handler in server.js: client connected:', socket.id);
-  console.log('⭐ Transport type:', socket.conn.transport.name);
-  console.log('⭐ Handshake data:', JSON.stringify({
-    headers: socket.handshake.headers,
-    query: socket.handshake.query,
-    auth: socket.handshake.auth,
-  }, null, 2));
-});
 
 // Add Socket.io engine debugging
 io.engine.on('connection_error', (err) => {
@@ -86,20 +67,6 @@ io.engine.on('connection_error', (err) => {
   console.log('❌ Error code:', err.code);
   console.log('❌ Error message:', err.message);
   console.log('❌ Error context:', err.context);
-});
-
-io.engine.on('initial_headers', (headers, req) => {
-  console.log('📋 Initial headers for:', req.url);
-  console.log('📋 Origin:', req.headers.origin);
-  console.log('📋 User-Agent:', req.headers['user-agent']);
-});
-
-io.engine.on('headers', (headers, req) => {
-  console.log('📨 Response headers for:', req.url);
-});
-
-io.engine.on('connection', (socket) => {
-  console.log('🔌 Engine connection established:', socket.id);
 });
 
 io.engine.on('disconnect', (socket) => {
@@ -141,8 +108,6 @@ async function startServer() {
     
     server.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📡 Socket.io ready for connections`);
-      console.log(`🌐 Health check: http://localhost:${PORT}/health`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

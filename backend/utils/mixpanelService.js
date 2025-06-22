@@ -61,7 +61,7 @@ async function sendToMixpanel(eventData) {
         });
       }
       
-      console.log(`✅ Mixpanel event sent: ${trackingId}`);
+      // console.log(`✅ Mixpanel event sent: ${trackingId}`);
       return { success: true };
       
     } catch (trackError) {

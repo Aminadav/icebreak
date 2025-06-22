@@ -26,9 +26,7 @@ import PictureUploadPage from './PictureUploadPage';
 import CameraPage from './CameraPage';
 
 export default function Play(): JSX.Element {
-  const navigate = useNavigate();
   const gameId = useGameId();
-  const { points } = usePoints();
   const {socket}=useSocket();
   const [gameState, setGameState] = useState<GAME_STATES>(EMPTY_GAME_STATE);
 

@@ -1,5 +1,4 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
@@ -9,16 +8,11 @@ import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
 import { useGameId } from '../utils/useGameId';
 
-interface GiveGameNamePageProps {
-  gameId?: string; // Optional for legacy navigation, required for React Router
-  initialGameName?: string;
-}
 
 export default function GiveGameNamePage(): JSX.Element {
   var gameId=useGameId()
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
-  const navigate = useNavigate(); // For game flow navigation
   const { handleMenuAction } = useMenuNavigation(); // For menu navigation
   
   const [gameName, setGameName] = useState('');

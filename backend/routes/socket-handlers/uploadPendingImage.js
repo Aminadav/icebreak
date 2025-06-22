@@ -1,3 +1,5 @@
+
+const moveUserToGameState =require( './moveUserToGameState');
 const Device = require('../../models/Device');
 const pool = require('../../config/database');
 const fs = require('fs');
@@ -8,26 +10,26 @@ const { getUserIdFromDevice } = require('./utils');
 module.exports.registerUploadPendingImageHandler = async function(socket) {
   socket.on('upload_pending_image', async (data) => {
     try {
-      const { imageData } = data;
+      const { imageData,gameId } = data;
       
       if (!imageData) {
         throw new Error('Image data is required');
       }
       
       // Security: Always derive userId from deviceId
-      const targetUserId = await getUserIdFromDevice(socket.deviceId);
+      const userId = await getUserIdFromDevice(socket.deviceId);
       
-      if (!targetUserId) {
+      if (!userId) {
         throw new Error('User not authenticated. Please complete phone verification first.');
       }
       
-      console.log(`📸 Processing image upload for user ${targetUserId}`);
+      console.log(`📸 Processing image upload for user ${userId}`);
       
       // Create unique filename with timestamp and user ID
       const timestamp = Date.now();
       const imageHash = crypto
         .createHash('md5')
-        .update(`${targetUserId}-${timestamp}`)
+        .update(`${userId}-${timestamp}`)
         .digest('hex');
       
       const filename = `${imageHash}.jpg`;
@@ -46,10 +48,12 @@ module.exports.registerUploadPendingImageHandler = async function(socket) {
       console.log(`📸 Image saved to: ${filePath}`);
       
       // Update user's image_original field in database
+      console.log(0)
       const result = await pool.query(
         'UPDATE users SET pending_image = $1 WHERE user_id = $2 RETURNING *',
-        [imageHash, targetUserId]
+        [imageHash, userId]
       );
+      console.log(1)
       
       if (result.rows.length === 0) {
         // Clean up the file if user update failed
@@ -58,14 +62,16 @@ module.exports.registerUploadPendingImageHandler = async function(socket) {
       }
       
       
-      socket.emit('upload_pending_image_response', {
-        success: true,
-        message: 'Image uploaded successfully',
-        imageHash: imageHash,
-        userId: targetUserId
-      });
-      
-      console.log(`✅ Image uploaded successfully for user ${targetUserId}: ${imageHash}`);
+      // socket.emit('upload_pending_image_response', {
+      //   success: true,
+      //   message: 'Image uploaded successfully',
+      //   imageHash: imageHash,
+      //   userId: targetUserId
+      // });
+      moveUserToGameState(socket, gameId,userId, {
+        screenName: 'GALLERY', 
+      })
+      console.log(`✅ Image uploaded successfully for user ${userId}: ${imageHash}`);
       
     } catch (error) {
       console.error('Error uploading image:', error);

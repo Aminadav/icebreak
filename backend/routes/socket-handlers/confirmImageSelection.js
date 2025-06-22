@@ -1,11 +1,14 @@
+
 const Device = require('../../models/Device');
 const User = require('../../models/User');
+const moveUserToGameState = require('./moveUserToGameState');
 const { getUserIdFromDevice } = require('./utils');
 
 module.exports.registerConfirmImageSelectionHandler = async function(socket) {
   socket.on('confirm_image_selection', async (data) => {
     try {
-      const { selectedImageHash, originalImageHash, phoneNumber, email, name } = data;
+      const { selectedImageHash, gameId} = data;
+      var userId= await getUserIdFromDevice(socket.deviceId);
       
       if (!selectedImageHash) {
         throw new Error('Selected image hash is required');
@@ -29,12 +32,9 @@ module.exports.registerConfirmImageSelectionHandler = async function(socket) {
       
       console.log(`📸 User image updated successfully for user ${targetUserId}: ${selectedImageHash}`);
       
-      socket.emit('image_selection_confirmed', {
-        success: true,
-        message: 'Image selection confirmed successfully',
-        selectedImageHash: selectedImageHash,
-        userId: targetUserId
-      });
+      moveUserToGameState(socket,gameId,userId,{
+        screenName:'BEFORE_START_ABOUT_YOU',
+      })
       
       console.log(`🎉 Image selection confirmed for user ${targetUserId}: ${selectedImageHash}`);
       

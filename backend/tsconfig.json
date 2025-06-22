@@ -3,8 +3,8 @@
     "checkJs": true,
     "noEmit": true,
     "target": "esnext",
-    "moduleResolution": "nodenext",
-    "module": "nodenext"
+    "moduleResolution": "node",
+    "module": "commonjs"
   },
   "include": [
     "../shared/**/*",

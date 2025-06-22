@@ -243,10 +243,11 @@ export default function ImageGalleryPage(): JSX.Element {
         // Emit confirmation in background
         socket?.emit('confirm_image_selection', {
           selectedImageHash: selectedImage.imageHash,
+          gameId
         });
         
         // Navigate to game ready page immediately
-        navigate(`/game/${gameId}/ready`);
+        // navigate(`/game/${gameId}/ready`);
       }
     }
   };

@@ -546,7 +546,7 @@ export default function CameraPage(): JSX.Element {
                 const imageHash = await uploadImage(blob);
                 
                 if (imageHash) {
-                  navigate(`/game/${gameId}/gallery`);
+                  // navigate(`/game/${gameId}/gallery`);
                 } else {
                   console.error('Failed to upload image');
                   setUploadError('שגיאה בהעלאת התמונה');
@@ -602,7 +602,7 @@ export default function CameraPage(): JSX.Element {
                 const imageHash = await uploadImage(blob);
                 
                 if (imageHash) {
-                  navigate(`/game/${gameId}/gallery`);
+                  // navigate(`/game/${gameId}/gallery`);
                 } else {
                   console.error('Failed to upload image');
                   setUploadError('שגיאה בהעלאת התמונה');
@@ -652,7 +652,7 @@ export default function CameraPage(): JSX.Element {
               const imageHash = await uploadImage(blob);
               
               if (imageHash) {
-                navigate(`/game/${gameId}/gallery`);
+                // navigate(`/game/${gameId}/gallery`);
               } else {
                 console.error('Failed to upload image');
                 setUploadError('שגיאה בהעלאת התמונה');

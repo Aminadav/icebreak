@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { get2FACode } from './test-utils';
+//@ts-ignore
+import fs from 'fs'
 
 var DEFAULT_DELAY=200
 
@@ -347,7 +349,6 @@ test.describe('Icebreak App E2E Flow', () => {
 });
 
 
-import fs from 'fs';
 fs.rmSync('screenshots', { recursive: true, force: true });
 let index=0
 async function step(page,name) {

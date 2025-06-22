@@ -4,12 +4,8 @@ const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 var moveUserToGameState=require( './moveUserToGameState');
 const { generateGameId } = require('../../utils/idGenerator');
 const pool = require('../../config/database');
-/**
- * Handle immediate game creation with name
- * This creates a game immediately without requiring phone verification
- * Used for the new URL-based navigation system
- */
-async function handleCreateGameImmediately(socket, data) {
+module.exports.registerCreateGameImmediatelyHandler = async function(socket) {
+  socket.on('create_game_immediately', async (data) => {
     const { gameName } = data;
     
     if (!socket.deviceId) {
@@ -26,7 +22,7 @@ async function handleCreateGameImmediately(socket, data) {
     
     // Create game with anonymous creator (will be updated after verification)
     var userId = await getUserIdFromDevice(socket.deviceId);
-      const gameId = generateGameId();
+    const gameId = generateGameId();
     
     const result = await pool.query(
       'INSERT INTO games (game_id, name, creator_user_id) VALUES ($1, $2, $3) RETURNING *',
@@ -44,10 +40,9 @@ async function handleCreateGameImmediately(socket, data) {
       success: true,
       message: 'Game created successfully. Complete verification to claim ownership.'
     });
-    var userId=await getUserIdFromDevice(socket.deviceId);
+    var userId = await getUserIdFromDevice(socket.deviceId);
     await moveUserToGameState(socket, gameId, userId, { screenName: 'GIVE_GAME_NAME' });
 
     console.log(`🎮 Game created immediately: ${gameName} (${gameId}) for device: ${socket.deviceId}`);
-}
-
-module.exports = handleCreateGameImmediately;
+  });
+};

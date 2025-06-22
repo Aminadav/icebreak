@@ -12,7 +12,8 @@ require('dotenv').config();
 // Get number of images to generate from environment variable, default to 6 if not set
 const GENERATED_IMAGES = parseInt(process.env.GENERATED_IMAGES) || 6;
 
-async function handleGenerateImageGallery(socket) {
+module.exports.registerGenerateImageGalleryHandler = async function(socket) {
+  socket.on('generate_image_gallery', async (data) => {
   try {
     const targetUserId = await getUserIdFromDevice(socket.deviceId);
     // get pendin_image for user
@@ -259,6 +260,5 @@ async function handleGenerateImageGallery(socket) {
       error: error.message
     });
   }
-}
-
-module.exports = handleGenerateImageGallery;
+  });
+};

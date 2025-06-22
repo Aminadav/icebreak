@@ -54,64 +54,64 @@ function validateQuestionData(data, isUpdate = false) {
   return { isValid: true };
 }
 
-async function handleSaveOrUpdateQuestion(socket, data, callback) {
-  try {
-    data.maxAnswersToShow =parseInt(data.maxAnswersToShow)
-    var { questionId, questionText, questionType, answers, allowOther, sensitivity, maxAnswersToShow } = data;
-    maxAnswersToShow=parseInt(maxAnswersToShow)
-    const isUpdate = !!questionId;
+module.exports.registerSaveOrUpdateQuestionHandler = async function(socket) {
+  socket.on('save_question', async (data, callback) => {
+    try {
+      data.maxAnswersToShow = parseInt(data.maxAnswersToShow)
+      var { questionId, questionText, questionType, answers, allowOther, sensitivity, maxAnswersToShow } = data;
+      maxAnswersToShow = parseInt(maxAnswersToShow)
+      const isUpdate = !!questionId;
 
-    console.log(`📝 Admin: ${isUpdate ? 'Updating' : 'Creating'} question${isUpdate ? ': ' + questionId : ''}`);
-// Validate input data
-const validation = validateQuestionData(data, isUpdate);
-if (!validation.isValid) {
-  console.log(`❌ Validation error: ${validation.message} + ${maxAnswersToShow} ${typeof maxAnswersToShow}`);
-  const errorResponse = { success: false, message: validation.message };
-  sendResponse(socket, callback, errorResponse);
-  return;
-}
-console.log(1)
+      console.log(`📝 Admin: ${isUpdate ? 'Updating' : 'Creating'} question${isUpdate ? ': ' + questionId : ''}`);
+      // Validate input data
+      const validation = validateQuestionData(data, isUpdate);
+      if (!validation.isValid) {
+        console.log(`❌ Validation error: ${validation.message} + ${maxAnswersToShow} ${typeof maxAnswersToShow}`);
+        const errorResponse = { success: false, message: validation.message };
+        sendResponse(socket, callback, errorResponse);
+        return;
+      }
+      console.log(1)
 
-const query = isUpdate
-? `UPDATE questions SET question_text = $1, question_type = $2, answers = $3, allow_other = $4, sensitivity = $5, max_answers_to_show = $6 WHERE question_id = $7 RETURNING question_id, question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`
-: `INSERT INTO questions (question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show) VALUES ($1, $2, $3, $4, $5, $6) RETURNING question_id, question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`;
+      const query = isUpdate
+        ? `UPDATE questions SET question_text = $1, question_type = $2, answers = $3, allow_other = $4, sensitivity = $5, max_answers_to_show = $6 WHERE question_id = $7 RETURNING question_id, question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`
+        : `INSERT INTO questions (question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show) VALUES ($1, $2, $3, $4, $5, $6) RETURNING question_id, question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`;
 
-const maxAnswers = maxAnswersToShow || 4; // Default to 4 if not provided
-console.log(1)
+      const maxAnswers = maxAnswersToShow || 4; // Default to 4 if not provided
+      console.log(1)
 
-    const params = isUpdate
-      ? [questionText, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers, questionId]
-      : [questionText, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers];
+      const params = isUpdate
+        ? [questionText, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers, questionId]
+        : [questionText, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers];
 
-    const result = await pool.query(query, params);
-    console.log(result)
+      const result = await pool.query(query, params);
+      console.log(result)
 
-    if (isUpdate && result.rows.length === 0) {
-      const errorResponse = { success: false, message: 'Question not found' };
+      if (isUpdate && result.rows.length === 0) {
+        const errorResponse = { success: false, message: 'Question not found' };
+        sendResponse(socket, callback, errorResponse);
+        return;
+      }
+
+      const savedQuestion = result.rows[0];
+      console.log(`✅ Question ${isUpdate ? 'updated' : 'created'} successfully:`, savedQuestion.question_id);
+
+      const successResponse = {
+        success: true,
+        message: isUpdate ? 'Question updated successfully' : 'Question created successfully',
+        question: savedQuestion,
+        isUpdate
+      };
+
+      sendResponse(socket, callback, successResponse, isUpdate ? 'question_updated' : 'question_created');
+    } catch (error) {
+      console.error(`❌ Error ${data.questionId ? 'updating' : 'creating'} question:`, error);
+      const errorResponse = {
+        success: false,
+        message: `Failed to ${data.questionId ? 'update' : 'create'} question`
+      };
+
       sendResponse(socket, callback, errorResponse);
-      return;
     }
-
-    const savedQuestion = result.rows[0];
-    console.log(`✅ Question ${isUpdate ? 'updated' : 'created'} successfully:`, savedQuestion.question_id);
-
-    const successResponse = {
-      success: true,
-      message: isUpdate ? 'Question updated successfully' : 'Question created successfully',
-      question: savedQuestion,
-      isUpdate
-    };
-
-    sendResponse(socket, callback, successResponse, isUpdate ? 'question_updated' : 'question_created');
-  } catch (error) {
-    console.error(`❌ Error ${data.questionId ? 'updating' : 'creating'} question:`, error);
-    const errorResponse = {
-      success: false,
-      message: `Failed to ${data.questionId ? 'update' : 'create'} question`
-    };
-
-    sendResponse(socket, callback, errorResponse);
-  }
-}
-
-module.exports = handleSaveOrUpdateQuestion;
+  });
+};

@@ -13,12 +13,13 @@ async function cleanDatabase() {
   try {
     console.log('🔍 Discovering database tables...');
     
-    // Get all user tables (excluding system tables and migrations table)
+    // Get all user tables (excluding system tables, migrations table, and questions table)
     const tablesResult = await client.query(`
       SELECT tablename 
       FROM pg_tables 
       WHERE schemaname = 'public'
         AND tablename != 'schema_migrations'
+        AND tablename != 'questions'
       ORDER BY tablename;
     `);
     

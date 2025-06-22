@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
-import PageTracking from '../components/PageTracking';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useTracking } from '../contexts/TrackingContext';
@@ -76,10 +75,7 @@ export default function StartPage(): JSX.Element {
       showHeader={true}
       onMenuAction={handleMenuAction}
     >
-      <PageTracking 
-        pageName="start_page"
-        pageData={{}}
-      />
+      
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Logo */}
         <div className="mb-8">

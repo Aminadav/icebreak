@@ -11,8 +11,6 @@ const handleVerify2FACode = require('./verify2FACode');
 const handlePing = require('./ping');
 const handleTrackEvent = require('./trackEvent');
 const handleSaveEmail = require('./saveEmail');
-const handleResetJourneyState = require('./resetJourneyState');
-const handleUpdateJourneyState = require('./updateJourneyState');
 const handleSaveUserName = require('./saveUserName');
 const handleSaveUserGender = require('./saveUserGender');
 const handleUploadPendingImage = require('./uploadPendingImage');
@@ -37,8 +35,6 @@ module.exports = {
   handlePing,
   handleTrackEvent,
   handleSaveEmail,
-  handleResetJourneyState,
-  handleUpdateJourneyState,
   handleSaveUserName,
   handleSaveUserGender,
   handleUploadPendingImage,

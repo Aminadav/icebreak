@@ -56,8 +56,6 @@ async function handleUploadPendingImage(socket, data) {
       throw new Error('User not found');
     }
     
-    // Update journey state to IMAGE_GALLERY (instead of PICTURE_ENHANCEMENT)
-    await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
     
     socket.emit('upload_pending_image_response', {
       success: true,

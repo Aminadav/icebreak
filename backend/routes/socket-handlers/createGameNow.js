@@ -1,6 +1,8 @@
+const pool = require('../../config/database');
 const Game = require('../../models/Game');
+const { generateGameId } = require('../../utils/idGenerator');
 const { sendToMixpanel } = require('../../utils/mixpanelService');
-const { validateUserVerification } = require('./utils');
+const { validateUserVerification, getUserIdFromDevice } = require('./utils');
 
 async function handleCreateGameNow(socket) {
   try {
@@ -14,20 +16,15 @@ async function handleCreateGameNow(socket) {
       throw new Error('No game name found. Please set a game name first.');
     }
     
-    const game = await Game.createGame(socket.pendingGameName, socket.userId);
+    var userId= await getUserIdFromDevice(socket.deviceId);
+    const game = await Game.createGame(socket.pendingGameName, );
+    const gameId = generateGameId();
     
-    // Track game creation
-    await sendToMixpanel({
-      trackingId: 'game_created',
-      userId: socket.userId,
-      deviceId: socket.deviceId,
-      timestamp: new Date().toISOString(),
-      game_id: game.game_id,
-      game_name: game.name,
-      socketId: socket.id
-    });
+    const result = await pool.query(
+      'INSERT INTO games (game_id, name, creator_user_id) VALUES ($1, $2, $3) RETURNING *',
+      [gameId, socket.pendingGameName, userId]
+    );
     
-    // הצטרפות לחדר המשחק
     socket.join(game.game_id);
     
     socket.emit('game_created', {

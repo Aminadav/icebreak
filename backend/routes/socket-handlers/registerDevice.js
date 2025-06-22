@@ -16,9 +16,6 @@ async function handleRegisterDevice(socket, data) {
     socket.deviceId = result.deviceId;
     socket.userId = result.userId; // May be null if device not yet verified
     
-    // Get current journey state
-    const journeyData = await Device.getJourneyState(result.deviceId);
-    
     // Get user details if userId exists
     const userDetails = await getUserDetails(result.userId);
     
@@ -27,9 +24,6 @@ async function handleRegisterDevice(socket, data) {
       userId: result.userId,
       success: true,
       isVerified: !!result.userId,
-      journeyState: journeyData.journeyState,
-      pendingGameName: journeyData.pendingGameName,
-      phoneNumber: journeyData.pendingPhoneNumber,
       ...userDetails
     });
 

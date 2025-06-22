@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     "checkJs": true,
-    "noEmit": true
+    "noEmit": true,
+    "target": "esnext",
+    "moduleResolution": "nodenext",
   },
   "include": [
     "../shared/**/*",

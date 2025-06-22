@@ -103,9 +103,6 @@ async function handleDownloadWhatsappImage(socket, data) {
       throw new Error('User not found');
     }
     
-    // Update journey state to IMAGE_GALLERY
-    await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
-    
     moveUserToGameState(socket, data.gameId, targetUserId, {
       screenName: 'GALLERY',
     });

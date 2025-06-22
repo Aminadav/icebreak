@@ -33,22 +33,8 @@ export default function AdminPage(): JSX.Element {
 
     const handleDeviceRegistered = (data: any) => {
       console.log('🔍 Admin: Device registered response:', data);
-      setCurrentState(data.journeyState || 'INITIAL');
-      setSelectedState(data.journeyState || 'INITIAL');
       setDeviceInfo(data);
       setIsLoading(false); // Reset loading state when device registration completes
-    };
-
-    const handleJourneyStateUpdated = (data: { journeyState: string; success: boolean; message: string }) => {
-      console.log('✅ Admin: Journey state updated:', data);
-      setIsLoading(false);
-      if (data.success) {
-        setCurrentState(data.journeyState);
-        setSelectedState(data.journeyState);
-        setMessage(`✅ Success: ${data.message}`);
-        // Clear success message after 3 seconds
-        setTimeout(() => setMessage(''), 4000);
-      }
     };
 
     const handleError = (data: { message: string }) => {
@@ -76,7 +62,6 @@ export default function AdminPage(): JSX.Element {
     };
 
     socket.on('device_registered', handleDeviceRegistered);
-    socket.on('journey_state_updated', handleJourneyStateUpdated);
     socket.on('admin_game_states_deleted', handleGameStatesDeleted);
     socket.on('admin_page_set', handlePageSet);
     socket.on('error', handleError);
@@ -84,7 +69,6 @@ export default function AdminPage(): JSX.Element {
 
     return () => {
       socket.off('device_registered', handleDeviceRegistered);
-      socket.off('journey_state_updated', handleJourneyStateUpdated);
       socket.off('admin_game_states_deleted', handleGameStatesDeleted);
       socket.off('admin_page_set', handlePageSet);
       socket.off('error', handleError);
@@ -108,7 +92,6 @@ export default function AdminPage(): JSX.Element {
     setIsLoading(true);
     setMessage('');
     
-    console.log('🎯 Admin: Updating journey state to:', stateToUpdate);
   };
 
 
@@ -327,7 +310,7 @@ export default function AdminPage(): JSX.Element {
   return (
     <div className="min-h-screen p-8 text-white bg-gray-900">
       <div className="max-w-4xl mx-auto">
-        <h1 className="mb-8 text-3xl font-bold text-center">🔧 Admin - Journey State Manager</h1>
+        <h1 className="mb-8 text-3xl font-bold text-center">🔧 Admin - State Manager</h1>
         
         {/* State Selector */}
         <div className="p-6 mb-6 bg-gray-800 rounded-lg">

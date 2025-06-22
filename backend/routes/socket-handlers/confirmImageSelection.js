@@ -28,9 +28,6 @@ async function handleConfirmImageSelection(socket, data) {
     
     console.log(`📸 User image updated successfully for user ${targetUserId}: ${selectedImageHash}`);
     
-    // Update journey state to CREATOR_GAME_READY
-    await Device.updateJourneyState(socket.deviceId, 'CREATOR_GAME_READY');
-    
     socket.emit('image_selection_confirmed', {
       success: true,
       message: 'Image selection confirmed successfully',

@@ -33,7 +33,6 @@ async function handleSaveEmail(socket, data) {
     const result = await User.updateUserEmail(targetUserId, normalizedEmail);
     
     if (result.success) {
-      // Update journey state to EMAIL_SAVED
       moveUserToGameState(socket, gameId, targetUserId, {
         screenName: 'ASK_PLAYER_NAME',
       })

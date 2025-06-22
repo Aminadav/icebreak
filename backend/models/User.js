@@ -63,6 +63,27 @@ async function createUser(phoneNumber) {
 }
 
 /**
+ * Create a temporary user (without phone number)
+ * @returns {Object} - Created temporary user object
+ */
+async function createTemporaryUser() {
+  try {
+    const userId = generateUserId();
+    
+    const result = await pool.query(
+      'INSERT INTO users (user_id) VALUES ($1) RETURNING *',
+      [userId]
+    );
+    
+    console.log(`🕐 Created temporary user: ${userId}`);
+    return result.rows[0];
+  } catch (error) {
+    console.error('Error creating temporary user:', error);
+    throw error;
+  }
+}
+
+/**
  * Find existing user by phone or create new one (only after verification)
  * @param {string} phoneNumber - Phone number in any format
  * @returns {Object} - User object (existing or newly created)
@@ -285,6 +306,7 @@ async function updateUserImage(userId, imageHash) {
 module.exports = {
   findUserByPhone,
   createUser,
+  createTemporaryUser,
   findOrCreateUser,
   associateDeviceWithUser,
   getUserDevices,

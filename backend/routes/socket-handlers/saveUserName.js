@@ -35,7 +35,6 @@ async function handleSaveUserName(socket, data) {
     const result = await User.updateUserName(targetUserId, trimmedName);
     
     if (result.success) {
-      // Update journey state to NAME_SAVED
       
       socket.emit('name_saved', {
         success: true,

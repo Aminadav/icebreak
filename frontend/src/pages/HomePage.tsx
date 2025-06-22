@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
-import PageTracking from '../components/PageTracking';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useTracking } from '../contexts/TrackingContext';
@@ -21,7 +20,6 @@ export default function HomePage(): JSX.Element {
       source_page: 'homepage'
     });
     
-    // Emit socket event to set journey state to GAME_NAME_ENTRY
     if (socket) {
       // Set up one-time listeners for the response
       const successHandler = (data: any) => {
@@ -67,12 +65,7 @@ export default function HomePage(): JSX.Element {
       showHeader={true}
       onMenuAction={handleMenuNavigation}
     >
-      <PageTracking 
-        pageName="homepage"
-        pageData={{ 
-          has_connection: isConnected
-        }}
-      />
+    
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Logo */}
         <div className="mb-8">

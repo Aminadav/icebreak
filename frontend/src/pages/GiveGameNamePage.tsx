@@ -4,7 +4,6 @@ import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
-import PageTracking from '../components/PageTracking';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
@@ -54,13 +53,7 @@ export default function GiveGameNamePage(): JSX.Element {
   if (!isConnected) {
     return (
       <PageLayout showHeader={true} onMenuAction={handleMenuAction}>
-        <PageTracking 
-          pageName="give_game_name"
-          pageData={{ 
-            has_connection: isConnected,
-            game_id: gameId
-          }}
-        />
+        
         <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
           <div className="text-center">
             <h1 className="mb-4 text-3xl font-bold text-white">מתחבר לשרת...</h1>
@@ -76,14 +69,7 @@ export default function GiveGameNamePage(): JSX.Element {
       showHeader={true} 
       onMenuAction={handleMenuAction}
     >
-      <PageTracking 
-        pageName="give_game_name"
-        pageData={{ 
-          has_connection: isConnected,
-          game_id: gameId,
-          game_name_length: gameName.length
-        }}
-      />
+    
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Friends illustration */}
         <AnimatedImage

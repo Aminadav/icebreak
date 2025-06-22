@@ -43,8 +43,6 @@ async function handleSaveUserGender(socket, data) {
     }
     
     if (result.success) {
-      // Update journey state to PICTURE_UPLOAD instead of COMPLETED
-      await Device.updateJourneyState(socket.deviceId, 'PICTURE_UPLOAD');
       
       moveUserToGameState(socket, gameId, targetUserId, {
         screenName: 'ASK_FOR_PICTURE',

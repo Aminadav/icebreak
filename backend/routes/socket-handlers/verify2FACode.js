@@ -1,88 +1,64 @@
 const Device = require('../../models/Device');
 const User = require('../../models/User');
 const Game = require('../../models/Game');
-const { verifyCode } = require('../../utils/smsService');
+const pool = require('../../config/database');
+const { verifyCode, formatPhoneNumber } = require('../../utils/smsService');
 const { sendToMixpanel, setUserProfile, trackLogin, trackRegistration } = require('../../utils/mixpanelService');
-const { validateDeviceRegistration } = require('./utils');
+const { updateUserIdAcrossAllTables } = require('../../utils/updateUserIdAcrossAllTables');
+const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 const moveUserToGameState = require('./moveUserToGameState');
+const Socket = require('socket.io').Socket;
 
+/**
+ * Handles the verification of a 2FA code sent to the user's phone.
+ * @param {Socket} socket - The socket connection of the user.
+ * @param {Object} data - The data containing the verification code and game ID.
+ */
 async function handleVerify2FACode(socket, data) {
   try {
     const { code,gameId } = data;
+    var userId= await getUserIdFromDevice(socket.deviceId);
     
-    validateDeviceRegistration(socket);
-    
-    if (!socket.phoneNumber) {
-      // Try to get phone number from database if not in socket memory
-      const journeyData = await Device.getJourneyState(socket.deviceId);
-      if (journeyData.pendingPhoneNumber) {
-        socket.phoneNumber = journeyData.pendingPhoneNumber;
-      } else {
-        throw new Error('Phone number not found. Please submit phone number first.');
-      }
+    var rows=await pool.query('SELECT phone_number FROM users WHERE user_id = $1', [userId]);
+    var phoneNumber = rows.rows[0]?.phone_number;
+    if(!phoneNumber) {
+      throw new Error('Phone number not found for user');
     }
-    
     if (!code || code.trim().length === 0) {
       throw new Error('Verification code is required');
     }
     
-    console.log(`🔐 Verifying 2FA code: ${code} for phone: ${socket.phoneNumber}`);
+    console.log(`🔐 Verifying 2FA code: ${code} for phone: ${phoneNumber}`);
     
     // אימות הקוד
-    const isValid = verifyCode(socket.phoneNumber, code.trim());
+    const isValid = verifyCode(phoneNumber, code.trim());
     
-    if (isValid) {
-      // הקוד נכון - יצירת או איתור משתמש
-      console.log(`✅ 2FA verification successful for: ${socket.phoneNumber}`);
+      console.log(`✅ 2FA verification successful for: ${phoneNumber}`);
       
-      // Find or create user with verified phone
-      const user = await User.findOrCreateUser(socket.phoneNumber);
-      
-      // Associate the current device with this user
-      await User.associateDeviceWithUser(socket.deviceId, user.user_id);
-      
-      // Update socket with user information
-      socket.userId = user.user_id;
-      socket.isPhoneVerified = true;
-      
-      // Get user stats for response
-      const userStats = await User.getUserStats(user.user_id);
-      
-      // Track user authentication (registration or login)
-      const isNewUser = user.created_at && (Date.now() - new Date(user.created_at).getTime()) < 5000; // Created in last 5 seconds
-      if (isNewUser) {
-        await trackRegistration(user.user_id, socket.deviceId, socket.phoneNumber, {
-          device_count: userStats.deviceCount,
-          games_created: userStats.gamesCreated
-        });
-        await setUserProfile(user.user_id, {
-          phoneNumber: socket.phoneNumber,
-          createdAt: user.created_at,
-          deviceCount: userStats.deviceCount,
-          gamesCreated: userStats.gamesCreated
-        });
+      // check if user already exists
+      const tempUserId=await getUserIdFromDevice(socket.deviceId);
+      var realUserId=await pool.query('SELECT * FROM users WHERE phone_number = $1 and phone_verified=true and user_id<> $2 and is_temp_user=false', [formatPhoneNumber(phoneNumber), tempUserId]);
+
+      if (realUserId.rows.length > 0) {
+        // user already exists, transfer temp user to real user
+        // then we can delete the temp user
+        var theRealUser_id= realUserId.rows[0].user_id;
+        
+        await updateUserIdAcrossAllTables(tempUserId,theRealUser_id);
+        await pool.query('DELETE FROM users WHERE user_id = $1', [tempUserId]);
       } else {
-        await trackLogin(user.user_id, socket.deviceId, {
-          device_count: userStats.deviceCount,
-          games_created: userStats.gamesCreated,
-          phone_number: socket.phoneNumber
-        });
+        // user does not exist, the temp user will be the real user
+        const result = await pool.query(
+          'UPDATE users SET phone_verified = true, updated_at = CURRENT_TIMESTAMP,is_temp_user=false WHERE user_id = $1 RETURNING *',
+          [tempUserId]
+        );
+        theRealUser_id=tempUserId 
       }
       
-      
-      moveUserToGameState(socket, gameId, user.user_id, {
+      moveUserToGameState(socket, gameId, theRealUser_id, {
         screenName: 'ASK_FOR_EMAIL',
-      })
-
-      console.log(`🎉 User logged in successfully: ${user.user_id} with ${userStats.deviceCount} devices`);
-    } else {
-      socket.emit('2fa_verification_failed', {
-        success: false,
-        message: 'Invalid verification code'
       });
-      
-      console.log(`❌ 2FA verification failed for: ${socket.phoneNumber}, code: ${code}`);
-    }
+
     
   } catch (error) {
     console.error('Error verifying 2FA code:', error);

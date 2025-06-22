@@ -23,8 +23,6 @@ backend/routes/socket-handlers/
 ├── ping.js                        # Keep-alive ping
 ├── trackEvent.js                  # Analytics tracking
 ├── saveEmail.js                   # Email saving
-├── resetJourneyState.js           # Journey state reset
-├── updateJourneyState.js          # Journey state update
 ├── saveUserName.js                # User name saving
 ├── saveUserGender.js              # User gender saving
 ├── uploadPendingImage.js          # Image upload

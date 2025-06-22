@@ -1,13 +1,17 @@
+//@ts-check
+const pool = require('../../config/database');
 const Device = require('../../models/Device');
-const { sendVerificationCode } = require('../../utils/smsService');
+const { sendVerificationCode, formatPhoneNumber } = require('../../utils/smsService');
 const moveUserToGameState = require('./moveUserToGameState');
-const { validateDeviceRegistration } = require('./utils');
+const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 
 async function handleSubmitPhoneNumber(socket, data) {
   try {
-    const { phoneNumber,gameId } = data;
+    var { phoneNumber,gameId } = data;
     
-    validateDeviceRegistration(socket);
+    phoneNumber=formatPhoneNumber(phoneNumber);
+    var userId=await getUserIdFromDevice(socket.deviceId);
+    // validateDeviceRegistration(socket);
     
     if (!phoneNumber || phoneNumber.trim().length === 0) {
       throw new Error('Phone number is required');
@@ -20,13 +24,9 @@ async function handleSubmitPhoneNumber(socket, data) {
     if (smsResult.success) {
       // שמירת מספר הטלפון ב-socket לשימוש באימות
       socket.phoneNumber = smsResult.phoneNumber;
+      await pool.query(`update users set phone_number = $1 where user_id = $2`, [phoneNumber, userId]);
       
-      // Update journey state to PHONE_SUBMITTED and store phone number in database
-      await Device.updateJourneyState(socket.deviceId, 'PHONE_SUBMITTED', {
-        pendingPhoneNumber: smsResult.phoneNumber
-      });
-      
-      moveUserToGameState(socket, gameId, socket.userId, {
+      moveUserToGameState(socket, gameId, userId, {
         screenName: 'ASK_USER_VERIFICATION_CODE',
       })
       

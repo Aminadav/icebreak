@@ -12,8 +12,6 @@ const handleVerify2FACode = require('./socket-handlers/verify2FACode');
 const handlePing = require('./socket-handlers/ping');
 const handleTrackEvent = require('./socket-handlers/trackEvent');
 const handleSaveEmail = require('./socket-handlers/saveEmail');
-const handleResetJourneyState = require('./socket-handlers/resetJourneyState');
-const handleUpdateJourneyState = require('./socket-handlers/updateJourneyState');
 const handleSaveUserName = require('./socket-handlers/saveUserName');
 const handleSaveUserGender = require('./socket-handlers/saveUserGender');
 const handleUploadPendingImage = require('./socket-handlers/uploadPendingImage');
@@ -28,6 +26,7 @@ const handleSaveOrUpdateQuestion = require('./socket-handlers/updateQuestion');
 const handleGetQuestions = require('./socket-handlers/getQuestions');
 const handleDeleteQuestion = require('./socket-handlers/deleteQuestion');
 const { getUserIdFromDevice } = require('./socket-handlers/utils');
+//@ts-ignore
 const colors=require('colors');
 const moveUserToGameState = require('./socket-handlers/moveUserToGameState');
 /**
@@ -82,7 +81,6 @@ function setupSocketHandlers(io) {
     on('ping', () => handlePing(socket));
     on('trackEvent', (data) => handleTrackEvent(socket, data));
     on('save_email', (data) => handleSaveEmail(socket, data));
-    on('reset_journey_state', () => handleResetJourneyState(socket));
     on('save_user_name', (data) => handleSaveUserName(socket, data));
     on('save_user_gender', (data) => handleSaveUserGender(socket, data));
     on('upload_pending_image', (data) => handleUploadPendingImage(socket, data));

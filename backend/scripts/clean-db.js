@@ -1,9 +1,8 @@
 const pool = require('../config/database');
 require('dotenv').config({path: __dirname + '/../.env'});
-
 async function cleanDatabase() {
   // Check if cleaning is allowed
-  if (process.env.ALLOW_EMPTY_DATABAWSE !== 'true') {
+  if (process.env.ALLOW_EMPTY_DATABASE !== 'true') {
     console.log('❌ Database cleaning is not allowed. Set ALLOW_EMPTY_DATABAWSE=true in .env to enable.');
     process.exit(1);
   }

@@ -38,10 +38,10 @@ export default function Input({
   
   const handleFocus = () => {
     if (trackingId) {
-      trackEvent(`${trackingId}_input_focused`, {
-        input_type: type,
-        placeholder: placeholder
-      });
+      // trackEvent(`${trackingId}_input_focused`, {
+      //   input_type: type,
+      //   placeholder: placeholder
+      // });
     }
   };
 

@@ -136,8 +136,6 @@ async function handleGenerateImageGallery(socket) {
       throw new Error(`Original image not found: ${originalImagePath}`);
     }
     
-    // Update journey state to IMAGE_GALLERY
-    await Device.updateJourneyState(socket.deviceId, 'IMAGE_GALLERY');
     
     // Prepare output configurations
     const outputs = [];

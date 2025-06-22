@@ -9,18 +9,8 @@ import { useModal } from '../contexts/ModalContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
 import { useGameId } from '../utils/useGameId';
 
-interface CreatorGameReadyPageProps {
-  phoneNumber: string;
-  userId: string;
-  email: string;
-  name: string;
-  gender: string;
-  selectedImageHash: string;
-  gameId?: string; // Add gameId for React Router support
-}
 
-export default function CreatorGameReadyPage({ 
-}: CreatorGameReadyPageProps): JSX.Element {
+export default function CreatorGameReadyPage(): JSX.Element {
   const { socket } = useSocket();
   const { openModal } = useModal();
   const { handleMenuAction } = useMenuNavigation();

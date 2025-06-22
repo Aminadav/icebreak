@@ -33,7 +33,7 @@ module.exports.registerConfirmImageSelectionHandler = async function(socket) {
       console.log(`📸 User image updated successfully for user ${targetUserId}: ${selectedImageHash}`);
       
       moveUserToGameState(socket,gameId,userId,{
-        screenName:'BEFORE_START_ABOUT_YOU',
+        screenName:'CREATOR_GAME_READY',
       })
       
       console.log(`🎉 Image selection confirmed for user ${targetUserId}: ${selectedImageHash}`);

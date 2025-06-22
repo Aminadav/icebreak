@@ -89,6 +89,7 @@ declare global {
               | 'ASK_PLAYER_GENDER'
               | 'ASK_FOR_PICTURE'
               | 'CAMERA'
+              | "CREATOR_GAME_READY"
   }
 
   export type GAME_STATES= 

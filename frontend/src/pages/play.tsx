@@ -24,6 +24,7 @@ import EnterNamePage from './EnterNamePage';
 import SelectGenderPage from './SelectGenderPage';
 import PictureUploadPage from './PictureUploadPage';
 import CameraPage from './CameraPage';
+import CreatorGameReadyPage from './CreatorGameReadyPage';
 
 export default function Play(): JSX.Element {
   const gameId = useGameId();
@@ -71,6 +72,11 @@ export default function Play(): JSX.Element {
       {gameState.screenName=="GALLERY" && 
         <ImageGalleryPage/>
       }
+      
+      {gameState.screenName=="CREATOR_GAME_READY" && 
+        <CreatorGameReadyPage/>
+      }
+      
       {gameState.screenName=="BEFORE_START_ABOUT_YOU" && 
         <BeforeStartAskAboutYou gameState={gameState}/>
       }

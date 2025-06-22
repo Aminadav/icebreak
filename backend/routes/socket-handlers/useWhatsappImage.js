@@ -95,4 +95,11 @@ async function handleUseWhatsappImage(socket, data) {
   }
 }
 
-module.exports = handleUseWhatsappImage;
+function registerUseWhatsappImageHandler(socket) {
+  socket.on('use_whatsapp_image', (data) => handleUseWhatsappImage(socket, data));
+}
+
+module.exports = {
+  registerUseWhatsappImageHandler,
+  handleUseWhatsappImage // Keep for backward compatibility if needed
+};

@@ -191,4 +191,11 @@ async function handleBackgroundWhatsappDownload(socket, data) {
   }
 }
 
-module.exports = handleBackgroundWhatsappDownload;
+function registerBackgroundWhatsappDownloadHandler(socket) {
+  socket.on('background_whatsapp_download', (data) => handleBackgroundWhatsappDownload(socket, data));
+}
+
+module.exports = {
+  registerBackgroundWhatsappDownloadHandler,
+  handleBackgroundWhatsappDownload // Keep for backward compatibility if needed
+};

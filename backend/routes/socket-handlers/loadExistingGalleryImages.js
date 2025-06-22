@@ -56,4 +56,11 @@ async function handleLoadExistingGalleryImages(socket, data) {
   }
 }
 
-module.exports = handleLoadExistingGalleryImages;
+function registerLoadExistingGalleryImagesHandler(socket) {
+  socket.on('load_existing_gallery_images', (data) => handleLoadExistingGalleryImages(socket, data));
+}
+
+module.exports = {
+  registerLoadExistingGalleryImagesHandler,
+  handleLoadExistingGalleryImages // Keep for backward compatibility if needed
+};

@@ -295,7 +295,7 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(captureButton).toBeVisible();
     
     // Wait 5 seconds for camera to fully initialize and face detection
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(500);
     
     
     // Click capture button to take photo
@@ -308,7 +308,7 @@ test.describe('Icebreak App E2E Flow', () => {
     await page.goto(pageURL.replace(/camera/, 'gallery'));
     
     // Wait for navigation to image gallery and processing modal
-    await page.waitForTimeout(5000);
+    await page.waitForTimeout(500);
     await step(page,'Image gallery page with processing modal');
     
     // Step 13: Click on first image to preview it

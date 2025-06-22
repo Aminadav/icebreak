@@ -4,6 +4,7 @@
     "noEmit": true,
     "target": "esnext",
     "moduleResolution": "nodenext",
+    "module": "nodenext"
   },
   "include": [
     "../shared/**/*",

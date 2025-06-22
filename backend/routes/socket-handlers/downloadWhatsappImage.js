@@ -132,4 +132,11 @@ async function handleDownloadWhatsappImage(socket, data) {
   }
 }
 
-module.exports = handleDownloadWhatsappImage;
+function registerDownloadWhatsappImageHandler(socket) {
+  socket.on('download_whatsapp_image', (data) => handleDownloadWhatsappImage(socket, data));
+}
+
+module.exports = {
+  registerDownloadWhatsappImageHandler,
+  handleDownloadWhatsappImage // Keep for backward compatibility if needed
+};

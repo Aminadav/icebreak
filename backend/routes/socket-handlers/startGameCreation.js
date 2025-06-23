@@ -3,6 +3,9 @@ const User = require('../../models/User');
 const Game = require('../../models/Game');
 const { validateDeviceRegistration } = require('./utils');
 
+/**
+ * @param {import('socket.io').Socket} socket - The Socket.IO socket instance.
+ */
 module.exports.registerStartGameCreationHandler = async function(socket) {
   socket.on('start_game_creation', async () => {
     try {

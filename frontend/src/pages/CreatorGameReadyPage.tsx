@@ -8,20 +8,19 @@ import { useSocket } from '../contexts/SocketContext';
 import { useModal } from '../contexts/ModalContext';
 import { useMenuNavigation } from '../hooks/useMenuNavigation';
 import { useGameId } from '../utils/useGameId';
+import { useGame } from '../contexts/GameContext';
 
 
 export default function CreatorGameReadyPage(): JSX.Element {
   const { socket } = useSocket();
   const { openModal } = useModal();
   const { handleMenuAction } = useMenuNavigation();
-  const navigate = useNavigate();
+  const {emitMoveToNextPage} = useGame();
 
   var gameId=useGameId()
 
   const handleStartGame = () => {
-    console.log('🎮 Starting game...');
-    // Navigate to BeforeStartAskAboutYou page
-    navigate(`/game/${gameId}/play`);
+    emitMoveToNextPage();
   };
 
   const handleShareGame = () => {
@@ -29,9 +28,7 @@ export default function CreatorGameReadyPage(): JSX.Element {
     openModal(
       <ShareGameModal
         onStartPlay={() => {
-          console.log('🎮 Starting game from modal...');
-          // Navigate to BeforeStartAskAboutYou page
-          navigate(`game/${gameId}/play`);
+          handleStartGame()
         }}
         onShareGame={() => {
           console.log('📤 Sharing game from modal...');

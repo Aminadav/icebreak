@@ -101,7 +101,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     socket,
     isConnected,
     error,
-    deviceId
+    deviceId,
   };
 
   return (

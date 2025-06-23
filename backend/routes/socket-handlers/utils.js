@@ -32,18 +32,6 @@ function validateDeviceRegistration(socket) {
 }
 
 /**
- * Validate that a socket has a verified user
- * @param {Object} socket - The socket instance
- * @throws {Error} - If user is not verified
- */
-function validateUserVerification(socket) {
-  validateDeviceRegistration(socket);
-  if (!socket.userId) {
-    throw new Error('User not authenticated. Please complete phone verification first.');
-  }
-}
-
-/**
  * Get user details by ID
  * @param {string} userId - The user ID
  * @returns {Promise<Object>} - User details object
@@ -74,6 +62,5 @@ async function getUserDetails(userId) {
 module.exports = {
   getUserIdFromDevice,
   validateDeviceRegistration,
-  validateUserVerification,
   getUserDetails
 };

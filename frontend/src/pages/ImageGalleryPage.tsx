@@ -247,7 +247,6 @@ export default function ImageGalleryPage(): JSX.Element {
         });
         
         // Navigate to game ready page immediately
-        // navigate(`/game/${gameId}/ready`);
       }
     }
   };

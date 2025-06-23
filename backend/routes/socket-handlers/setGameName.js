@@ -2,6 +2,9 @@ const Device = require('../../models/Device');
 const moveUserToGameState = require('./moveUserToGameState');
 const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 
+/**
+ * @param {import('socket.io').Socket} socket - The Socket.IO socket instance.
+ */
 module.exports.registerSetGameNameHandler = async function(socket) {
   socket.on('set_game_name', async (data) => {
     try {

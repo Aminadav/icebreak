@@ -111,36 +111,6 @@ export default function SelectGenderPage(): JSX.Element {
 
         {/* Gender Selection Cards */}
         <div className="flex flex-row justify-center gap-4 mb-8 sm:gap-8">
-          {/* Female Option */}
-          <div 
-            className={`flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-300 cursor-pointer ${
-              selectedGender === 'female' ? 'bg-white/20 scale-105' : 'hover:bg-white/10'
-            } ${isLoading ? 'pointer-events-none opacity-60' : ''}`}
-            onClick={() => handleGenderSelect('female')}
-          >
-            <div className="relative mb-3 sm:mb-4">
-              <AnimatedImage
-                src="/images/game-assets/female.png"
-                alt="Female character"
-                size="custom"
-                className="object-contain w-24 h-32 border-4 shadow-lg sm:w-32 sm:h-40 rounded-xl border-white/30"
-              />
-              {selectedGender === 'female' && isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-8 h-8 border-b-2 border-white rounded-full animate-spin"></div>
-                </div>
-              )}
-            </div>
-            <div className="text-center">
-              <p className="mb-1 text-base font-semibold text-white sm:text-lg">
-                {texts.selectGender.femalePrefer}
-              </p>
-              <p className="text-base text-white sm:text-lg">
-                {texts.selectGender.femaleLanguage}
-              </p>
-            </div>
-          </div>
-
           {/* Male Option */}
           <div 
             className={`flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-300 cursor-pointer ${
@@ -167,6 +137,36 @@ export default function SelectGenderPage(): JSX.Element {
               </p>
               <p className="text-base text-white sm:text-lg">
                 {texts.selectGender.maleLanguage}
+              </p>
+            </div>
+          </div>
+
+          {/* Female Option */}
+          <div 
+            className={`flex flex-col items-center p-3 sm:p-4 rounded-2xl transition-all duration-300 cursor-pointer ${
+              selectedGender === 'female' ? 'bg-white/20 scale-105' : 'hover:bg-white/10'
+            } ${isLoading ? 'pointer-events-none opacity-60' : ''}`}
+            onClick={() => handleGenderSelect('female')}
+          >
+            <div className="relative mb-3 sm:mb-4">
+              <AnimatedImage
+                src="/images/game-assets/female.png"
+                alt="Female character"
+                size="custom"
+                className="object-contain w-24 h-32 border-4 shadow-lg sm:w-32 sm:h-40 rounded-xl border-white/30"
+              />
+              {selectedGender === 'female' && isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-8 h-8 border-b-2 border-white rounded-full animate-spin"></div>
+                </div>
+              )}
+            </div>
+            <div className="text-center">
+              <p className="mb-1 text-base font-semibold text-white sm:text-lg">
+                {texts.selectGender.femalePrefer}
+              </p>
+              <p className="text-base text-white sm:text-lg">
+                {texts.selectGender.femaleLanguage}
               </p>
             </div>
           </div>

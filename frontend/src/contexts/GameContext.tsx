@@ -27,6 +27,8 @@ interface GameContextType {
   isLoading: boolean;
   error: string | null;
   refreshPoints: () => void;
+  gameEmitter:(eventName:string,data:Object,callback?:Function)=>void
+  emitMoveToNextPage: () => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -224,6 +226,16 @@ export function GameProvider({ children }: GameProviderProps) {
     }
   }, [socket, gameId, userData.userId, userData.points]);
 
+  function gameEmitter(eventName:string,data:any={},callback:Function | undefined = undefined) {
+    data.gameId= gameId;
+    socket.emit(eventName,data,callback);
+  }
+  function emitMoveToNextPage(){
+    gameEmitter('get_next_screen')
+  }
+
+
+
   const value: GameContextType = {
     gameId: gameId || null,
     gameData,
@@ -231,7 +243,9 @@ export function GameProvider({ children }: GameProviderProps) {
     points: userData.points || 0,
     isLoading,
     error,
-    refreshPoints
+    refreshPoints,
+    gameEmitter,
+    emitMoveToNextPage
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

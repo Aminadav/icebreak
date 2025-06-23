@@ -1,24 +1,14 @@
 // Import all socket event handlers
-const pool = require('../config/database');
 const registerDeviceHandler = require('./socket-handlers/registerDevice');
-const getMyPointsHandler = require('./socket-handlers/getMyPoints');
 const { registerDownloadWhatsappImageHandler } = require('./socket-handlers/downloadWhatsappImage');
 const { registerBackgroundWhatsappDownloadHandler } = require('./socket-handlers/backgroundWhatsappDownload');
 const { registerUseWhatsappImageHandler } = require('./socket-handlers/useWhatsappImage');
 const { registerLoadExistingGalleryImagesHandler } = require('./socket-handlers/loadExistingGalleryImages');
-const generateImageGalleryHandler = require('./socket-handlers/generateImageGallery');
-const confirmImageSelectionHandler = require('./socket-handlers/confirmImageSelection');
-const saveOrUpdateQuestionHandler = require('./socket-handlers/updateQuestion');
-const getQuestionsHandler = require('./socket-handlers/getQuestions');
-const deleteQuestionHandler = require('./socket-handlers/deleteQuestion');
-const { getUserIdFromDevice } = require('./socket-handlers/utils');
 //@ts-ignore
 const colors=require('colors');
-const moveUserToGameState = require('./socket-handlers/moveUserToGameState');
 const { registerRegisterDeviceHandler } = require('./socket-handlers/registerDevice');
 const { registerStartGameCreationHandler } = require('./socket-handlers/startGameCreation');
 const { registerSetGameNameHandler } = require('./socket-handlers/setGameName');
-const { registerCreateGameNowHandler } = require('./socket-handlers/createGameNow');
 const { registerCreateGameImmediatelyHandler } = require('./socket-handlers/createGameImmediately');
 const { registerGetGameDataHandler } = require('./socket-handlers/getGameData');
 const { registerUpdateGameNameHandler } = require('./socket-handlers/updateGameName');
@@ -38,6 +28,13 @@ const { registerAdminSetQuestionHandler } = require('./socket-handlers/adminSetQ
 const { registerAdminDeleteMyGameStatesHandler } = require('./socket-handlers/adminDeleteMyGameStates');
 const { registerAdminSetPageHandler } = require('./socket-handlers/adminSetPage');
 const { registerDevice } = require('../models/Device');
+const { registerGenerateImageGalleryHandler } = require('./socket-handlers/generateImageGallery');
+const { registerConfirmImageSelectionHandler } = require('./socket-handlers/confirmImageSelection');
+const { registerGetMyPointsHandler } = require('./socket-handlers/getMyPoints');
+const { registerSaveOrUpdateQuestionHandler } = require('./socket-handlers/updateQuestion');
+const { registerGetQuestionsHandler } = require('./socket-handlers/getQuestions');
+const { registerDeleteQuestionHandler } = require('./socket-handlers/deleteQuestion');
+const { registerGetNextScreenHandler } = require('./socket-handlers/get-next-screen');
 /**
  * Setup socket event handlers for the application.
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
@@ -45,10 +42,7 @@ const { registerDevice } = require('../models/Device');
 function setupSocketHandlers(io) {
   // Add middleware to extract device ID and attach to socket
   io.use((socket, next) => {
-
-    // Extract device ID from query parameters
     const deviceId = socket.handshake.query.deviceId;
-    console.log('!!!!!!',deviceId)
     if (deviceId && typeof deviceId === 'string') {
       registerDevice(deviceId);
       socket.deviceId = deviceId;
@@ -87,7 +81,6 @@ function setupSocketHandlers(io) {
     registerRegisterDeviceHandler(socket);
     registerSetGameNameHandler(socket);
     registerStartGameCreationHandler(socket);
-    registerCreateGameNowHandler(socket);
     registerCreateGameImmediatelyHandler(socket);
     registerGetGameDataHandler(socket);
     registerUpdateGameNameHandler(socket);
@@ -95,7 +88,6 @@ function setupSocketHandlers(io) {
     registerVerify2FACodeHandler(socket);
     registerPingHandler(socket);
     registerTrackEventHandler(socket);
-    // Register saveEmail handler
     registerSaveEmailHandler(socket);
     registerSaveUserNameHandler(socket);
     registerSaveUserGenderHandler(socket);
@@ -107,23 +99,17 @@ function setupSocketHandlers(io) {
     registerAdminSetQuestionHandler(socket);
     registerAdminDeleteMyGameStatesHandler(socket);
     registerAdminSetPageHandler(socket);
-    
     registerDownloadWhatsappImageHandler(socket);
     registerBackgroundWhatsappDownloadHandler(socket);
     registerUseWhatsappImageHandler(socket);
     registerLoadExistingGalleryImagesHandler(socket);
-    generateImageGalleryHandler.registerGenerateImageGalleryHandler(socket);
-    confirmImageSelectionHandler.registerConfirmImageSelectionHandler(socket);
-    getMyPointsHandler.registerGetMyPointsHandler(socket);
-    saveOrUpdateQuestionHandler.registerSaveOrUpdateQuestionHandler(socket);
-    getQuestionsHandler.registerGetQuestionsHandler(socket);
-    deleteQuestionHandler.registerDeleteQuestionHandler(socket);
-
-    // התנתקות
-    socket.on('disconnect', () => {
-      // console.log(`❌ Socket.io client disconnected: ${socket.id}, Reason: ${reason}`);
-      // console.log(`📱 Client disconnected: ${socket.id}`);
-    });
+    registerGenerateImageGalleryHandler(socket);
+    registerConfirmImageSelectionHandler(socket);
+    registerGetMyPointsHandler(socket);
+    registerSaveOrUpdateQuestionHandler(socket);
+    registerGetQuestionsHandler(socket);
+    registerDeleteQuestionHandler(socket);
+    registerGetNextScreenHandler(socket);
   });
 }
 

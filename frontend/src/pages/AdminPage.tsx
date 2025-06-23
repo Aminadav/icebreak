@@ -201,6 +201,12 @@ export default function AdminPage(): JSX.Element {
 
   var sampleGameStates:GAME_STATES[]=
     [
+      {
+        screenName:'CREATOR_GAME_READY'
+      },
+      {
+        screenName:'BEFORE_START_ABOUT_YOU'
+      },
       {screenName:'GOT_POINTS',
             points: 10,
             text: 'כל הכבוד!'
@@ -345,22 +351,23 @@ export default function AdminPage(): JSX.Element {
                 socket.emit('admin-delete-my-game-states');
               }}
               className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700"
-              disabled={!deviceInfo?.userId}
             >
               🗑️ Delete All Game States
             </button>
+            <br/>
             {sampleGameStates.map((q, idx) => (
-              <button
-                key={idx}
-                onClick={() => {
-                  setMessage(`Done`);
-                  socket.emit('admin-set-page', q);
-                }}
-                className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                disabled={!deviceInfo?.userId}
-              >
-                {JSON.stringify(q)}
-              </button>
+              <div>
+                <button
+                  key={idx}
+                  onClick={() => {
+                    setMessage(`Done`);
+                    socket.emit('admin-set-page', q);
+                  }}
+                  className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                >
+                  {JSON.stringify(q)}
+                </button>
+              </div>
             ))}
           </div>
         </div>

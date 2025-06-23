@@ -6,16 +6,17 @@ import AnimatedImage from '../components/AnimatedImage';
 import MyPoints from '../components/MyPoints';
 import { useSocket } from '../contexts/SocketContext';
 import { useGameId } from '../utils/useGameId';
-import { usePoints } from '../contexts/GameContext';
+import { useGame, usePoints } from '../contexts/GameContext';
 
 export default function BeforeStartAskAboutYou(props:{gameState:GAME_STATES}): JSX.Element {
   const navigate = useNavigate();
   const gameId = useGameId();
   const { points } = usePoints();
   const {socket} = useSocket();
+  const {emitMoveToNextPage} = useGame();
 
   const handleStartQuestions = () => {
-    socket.emit('start-intro-questions',{gameId})
+    emitMoveToNextPage()
   };
 
   return (
@@ -24,7 +25,7 @@ export default function BeforeStartAskAboutYou(props:{gameState:GAME_STATES}): J
     >
       <main className="relative z-10 flex flex-col min-h-[calc(100vh-88px)] px-4">
         
-        <MyPoints points={points} />
+        <MyPoints/>
 
         {/* Main content centered */}
         <div className="flex flex-col items-center justify-center flex-1">

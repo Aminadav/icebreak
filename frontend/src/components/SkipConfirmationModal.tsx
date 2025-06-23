@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import Modal from './Modal';
 import Button from './Button';
 import { useGameId } from '../utils/useGameId';
+import { useSocket } from '../contexts/SocketContext';
 
 interface SkipConfirmationModalProps {
   onTakePhoto: () => void;
@@ -15,12 +16,11 @@ interface SkipConfirmationModalProps {
 }
 
 
-export default function SkipConfirmationModal({ onTakePhoto, phoneNumber, userId, email, name, gender }: SkipConfirmationModalProps): JSX.Element {
+export default function SkipConfirmationModal({ onTakePhoto }: SkipConfirmationModalProps): JSX.Element {
   const { texts } = useLanguage();
   const { closeModal } = useModal();
-  const navigate = useNavigate();
+  var {socket} = useSocket();
   var gameId=useGameId();
-  console.log({gameId})
 
   const handleTakePhoto = () => {
     closeModal();
@@ -31,16 +31,7 @@ export default function SkipConfirmationModal({ onTakePhoto, phoneNumber, userId
     closeModal();
     
     // Navigate directly to Creator Game Ready page
-    navigate(`/game/${gameId}/ready`, {
-      state: {
-        phoneNumber: phoneNumber || '',
-        userId: userId || '',
-        email: email || '',
-        name: name || '',
-        gender: gender || '',
-        selectedImageHash: "no-image"
-      }
-    });
+    socket.emit('skip_picture')
   };
 
   const handleClose = () => {

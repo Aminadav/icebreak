@@ -33,3 +33,5 @@ If you want to check for errors, ask the user to copy errors from the logs. Do n
 # For saving time - before doing searches, ask the user if they have that information already.
 
 # Every time before creating new file - ask the user to confirm.
+
+# Do not wrap things in try/catch blocks.

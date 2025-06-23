@@ -10,27 +10,28 @@ module.exports.registerGetNextScreenHandler = async function (socket) {
 
     /**
      * @type {{
-     *    IS_CREATOR:boolean,
-     *    SEEN_BEFORE_ASK_ABOUT_YOU:boolean
-     *    onScreen:()=>GAME_STATES
+     *    IS_CREATOR?:boolean,
+     *    SEEN_GAME_READY?:boolean
+     *    SEEN_BEFORE_ASK_ABOUT_YOU?:boolean
+     *    onScreen:()=>Promise<GAME_STATES>
      * }[]}
      */
     var rules = [
+      {
+        IS_CREATOR: true,
+        onScreen: async  () => {
+          await updateMetadata('IS_CREATOR', true);
+          return {
+            screenName: 'CREATOR_GAME_READY',
+          };
+        }
+      },
       {
         IS_CREATOR: true,
         SEEN_BEFORE_ASK_ABOUT_YOU: false,
         onScreen: () => {
           return {
             screenName: 'BEFORE_START_ABOUT_YOU',
-          };
-        }
-      },
-      {
-        IS_CREATOR: true,
-        SEEN_BEFORE_ASK_ABOUT_YOU: true,
-        onScreen: () => {
-          return {
-            screenName: 'CREATOR_GAME_READY',
           };
         }
       },
@@ -67,7 +68,31 @@ module.exports.registerGetNextScreenHandler = async function (socket) {
     }
 
     console.log('Chosen rule:', choosenRule);
-    var nextScreen=choosenRule.onScreen();
-    moveUserToGameState(socket, gameId, userId, nextScreen)
+    var nextScreen=await choosenRule.onScreen();
+    await moveUserToGameState(socket, gameId, userId, nextScreen)
   });
+  /**
+   * A function that two prameters, metadata key, and metadata value.
+   * The function will update this metadata in the database for the current user and game. 
+   * @param {string} key - The metadata key to update.
+   * @param {any} value - The metadata value to set.
+   * @returns {Promise<void>}
+   */
+  function updateMetadata(key, value) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        var userId = await getUserIdFromDevice(socket.deviceId);
+        const gameId = socket.gameId; // Assuming gameId is stored in socket
+        const metadataQuery = `
+          UPDATE game_user_state 
+          SET metadata = jsonb_set(metadata, '{${key}}', $1::jsonb)
+          WHERE user_id = $2 AND game_id = $3
+        `;
+        await pool.query(metadataQuery, [JSON.stringify(value), userId, gameId]);
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
 }

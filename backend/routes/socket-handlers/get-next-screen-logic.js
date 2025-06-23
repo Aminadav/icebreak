@@ -114,6 +114,18 @@ async function get_next_screen(gameId, userId) {
 }
 
 /**
+ * Move user to a specific screen
+ * @param {Socket} socket - The socket instance
+ * @param {string} gameId - The game ID
+ * @param {string} userId - The user ID
+ * @param {string} screenName - The screen name to move to
+ */
+async function moveUserToScreen(socket, gameId, userId, screenName) {
+  const gameState = { screenName };
+  await moveUserToGameState(socket, gameId, userId, gameState);
+}
+
+/**
  * Push user to the next screen by getting the next screen and updating their state
  * @param {Socket} socket - The socket instance
  * @param {string} gameId - The game ID
@@ -126,5 +138,6 @@ async function push_user_to_next_screen(socket, gameId, userId) {
 
 module.exports = {
   get_next_screen,
-  push_user_to_next_screen
+  push_user_to_next_screen,
+  moveUserToScreen
 };

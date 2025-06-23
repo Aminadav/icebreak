@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useGame } from '../contexts/GameContext';
 
 export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}): JSX.Element {
   let gameState = props.gameState
+  const { emitMoveToNextPage } = useGame();
   const [displayPoints, setDisplayPoints] = useState(0);
   const [animationComplete, setAnimationComplete] = useState(false);
 
@@ -27,8 +29,8 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
   }, [gameState.points]);
 
   const handleContinue = () => {
-    // Just a placeholder - no socket emit as requested
-    console.log('Continue clicked');
+    console.log('Continue clicked - moving to next screen');
+    emitMoveToNextPage();
   };
 
   return (

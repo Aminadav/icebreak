@@ -24,20 +24,11 @@ module.exports.registerGetMyPointsHandler = async function(socket) {
       }
       
       const result = await pool.query(
-        'SELECT points FROM user_points WHERE user_id = $1 AND game_id = $2',
+        'SELECT COALESCE(SUM(points), 0) as total_points FROM user_points WHERE user_id = $1 AND game_id = $2',
         [targetUserId, gameId]
       );
       
-      let points = 0;
-      if (result.rows.length > 0) {
-        points = result.rows[0].points;
-      } else {
-        // If no record exists, create one with 0 points
-        await pool.query(
-          'INSERT INTO user_points (user_id, game_id, points) VALUES ($1, $2, $3) ON CONFLICT (user_id, game_id) DO NOTHING',
-          [targetUserId, gameId, 0]
-        );
-      }
+      const points = parseInt(result.rows[0].total_points);
       
       const response = {
         success: true,

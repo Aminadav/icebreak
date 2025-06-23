@@ -1,7 +1,8 @@
 const { getUserIdFromDevice } = require("./utils");
 const pool = require('../../config/database');
-const { push_user_to_next_screen } = require("./get-next-screen-logic");
+const { moveUserToScreen } = require("./get-next-screen-logic");
 const { updateMetaDataBinder } = require("../../utils/update-meta-data");
+const { addPointsAndEmit } = require("../../utils/points-helper");
 
 /**
  * Handles the 'submit-answer-myself' event for submitting answers about oneself
@@ -37,7 +38,10 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
     const answerCount = parseInt(currentAnswersResult.rows[0].count);
     await updateMetadata('ANSWER_ABOUT_MYSELF', answerCount);
     
-    // Push user to next screen
-    await push_user_to_next_screen(socket, gameId, userId);
+    // Add 10 points for answering about myself
+    await addPointsAndEmit(userId, gameId, 10, socket);
+    
+    // Move user to GOT_POINTS screen
+    await moveUserToScreen(socket, gameId, userId, 'GOT_POINTS');
   });
 };

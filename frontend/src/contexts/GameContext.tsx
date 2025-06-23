@@ -228,6 +228,7 @@ export function GameProvider({ children }: GameProviderProps) {
 
   function gameEmitter(eventName:string,data:any={},callback:Function | undefined = undefined) {
     data.gameId= gameId;
+    console.log(`🎮 GameContext: Emitting event ${eventName} with data`, data);
     socket.emit(eventName,data,callback);
   }
   function emitMoveToNextPage(){

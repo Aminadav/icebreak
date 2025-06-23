@@ -12,7 +12,7 @@ import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import TextMessageToUserPage from './TextMessageToUserPage';
 import AnswerFeedbackPage from './AnswerFeedbackPage';
 import PleaseTakeAPicturePage from './PleaseTakeAPicturePage';
-import QuestionPage from './QuestionPage';
+import QuestionAboutYourSelfPage from './QuestionPageAboutMyself';
 import GotPointsPage from './GotPointsPage';
 import GotBadgePage from './GotBadgePage';
 import ImageGalleryPage from './ImageGalleryPage';
@@ -25,6 +25,7 @@ import SelectGenderPage from './SelectGenderPage';
 import PictureUploadPage from './PictureUploadPage';
 import CameraPage from './CameraPage';
 import CreatorGameReadyPage from './CreatorGameReadyPage';
+import QuestionAboutOtherPage from './QuestionPageAboutOther';
 
 export default function Play(): JSX.Element {
   const gameId = useGameId();
@@ -89,8 +90,11 @@ export default function Play(): JSX.Element {
       {gameState.screenName=="PLEASE_TAKE_A_PICTURE" && 
         <PleaseTakeAPicturePage gameState={gameState}/>
       }
-      {gameState.screenName=="QUESTION" && 
-        <QuestionPage gameState={gameState} />
+      {gameState.screenName=="QUESTION_ABOUT_MYSELF" && 
+        <QuestionAboutYourSelfPage gameState={gameState} />
+      }
+      {gameState.screenName=="QUESTION_ABOUT_OTHER" && 
+        <QuestionAboutOtherPage gameState={gameState} />
       }
       {gameState.screenName=="GOT_POINTS" && 
         <GotPointsPage gameState={gameState} />

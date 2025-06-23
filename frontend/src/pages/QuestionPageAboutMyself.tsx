@@ -5,12 +5,13 @@ import ProgressCircles from '../components/ProgressCircles';
 import AnswerContainer from '../components/AnswerContainer';
 import Button from '../components/Button';
 import Footer from '../components/Footer';
+import { useGame } from '../contexts/GameContext';
 
 interface QuestionPageProps {
-  gameState: GAME_STATE_QUESTION;
+  gameState: GAME_STATE_QUESTION_ABOUT_MYSELF;
 }
 
-export default function QuestionPage({ 
+export default function QuestionAboutYourSelfPage({ 
   gameState, 
 }: QuestionPageProps): JSX.Element {
   var question=gameState.question;
@@ -18,6 +19,7 @@ export default function QuestionPage({
   const [selectedAnswerId, setSelectedAnswerId] = useState<string>('');
   const [freeformAnswer, setFreeformAnswer] = useState<string>('');
   const [otherAnswer, setOtherAnswer] = useState<string>('');
+  const {gameEmitter} = useGame();
 
   const handleAnswerClick = (answerId: string, value?: string) => {
     setSelectedAnswerId(answerId);
@@ -46,6 +48,10 @@ export default function QuestionPage({
     
     if (result) {
       alert(`User answer: ${result}`);
+      gameEmitter('submit-answer-myself', {
+        questionId: question.question_id,
+        answer: result
+      })
     }
   };
 
@@ -70,10 +76,11 @@ export default function QuestionPage({
       
       {/* Progress Circles */}
        <div className="pt-14">
+        {gameState.introCurrentQuestion !== undefined && gameState.introTotalQuestions!==undefined &&
         <ProgressCircles 
           current={gameState.introCurrentQuestion} 
           total={gameState.introTotalQuestions} 
-        />
+        />}
       </div>
 
       {/* Question Content */}

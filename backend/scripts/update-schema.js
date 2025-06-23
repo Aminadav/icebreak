@@ -18,6 +18,8 @@ async function updateSchema() {
         c.character_maximum_length,
         c.is_nullable,
         c.column_default,
+        c.is_generated,
+        c.generation_expression,
         tc.constraint_type,
         kcu.constraint_name,
         ccu.table_name AS foreign_table_name,
@@ -63,14 +65,19 @@ async function updateSchema() {
           columnDef += `(${row.character_maximum_length})`;
         }
         
-        // Add NOT NULL constraint
-        if (row.is_nullable === 'NO') {
-          columnDef += ' NOT NULL';
-        }
-        
-        // Add default value
-        if (row.column_default) {
-          columnDef += ` DEFAULT ${row.column_default}`;
+        // Handle generated columns
+        if (row.is_generated === 'ALWAYS') {
+          columnDef += ` GENERATED ALWAYS AS (${row.generation_expression}) STORED`;
+        } else {
+          // Add NOT NULL constraint for non-generated columns
+          if (row.is_nullable === 'NO') {
+            columnDef += ' NOT NULL';
+          }
+          
+          // Add default value for non-generated columns
+          if (row.column_default) {
+            columnDef += ` DEFAULT ${row.column_default}`;
+          }
         }
         
         tables[row.table_name].push({
@@ -149,13 +156,72 @@ async function updateSchema() {
       });
       schemaSQL += `\n`;
     }
+
+    // Get and add triggers
+    console.log('🔍 Extracting triggers...');
+    const triggerQuery = `
+      SELECT 
+        trigger_name,
+        event_manipulation,
+        event_object_table,
+        action_statement,
+        action_timing
+      FROM 
+        information_schema.triggers
+      WHERE 
+        trigger_schema = 'public'
+      ORDER BY 
+        event_object_table, trigger_name;
+    `;
+    
+    const triggerResult = await client.query(triggerQuery);
+    
+    if (triggerResult.rows.length > 0) {
+      schemaSQL += `-- Triggers\n`;
+      triggerResult.rows.forEach(row => {
+        schemaSQL += `-- Trigger: ${row.trigger_name} on ${row.event_object_table}\n`;
+        schemaSQL += `CREATE TRIGGER ${row.trigger_name}\n`;
+        schemaSQL += `  ${row.action_timing} ${row.event_manipulation}\n`;
+        schemaSQL += `  ON ${row.event_object_table}\n`;
+        schemaSQL += `  ${row.action_statement};\n\n`;
+      });
+    }
+
+    // Get and add functions
+    console.log('🔍 Extracting functions...');
+    const functionQuery = `
+      SELECT 
+        routine_name,
+        routine_definition,
+        data_type,
+        routine_type
+      FROM 
+        information_schema.routines
+      WHERE 
+        routine_schema = 'public'
+        AND routine_type = 'FUNCTION'
+      ORDER BY 
+        routine_name;
+    `;
+    
+    const functionResult = await client.query(functionQuery);
+    
+    if (functionResult.rows.length > 0) {
+      schemaSQL += `-- Functions\n`;
+      functionResult.rows.forEach(row => {
+        if (row.routine_definition) {
+          schemaSQL += `-- Function: ${row.routine_name}\n`;
+          schemaSQL += `${row.routine_definition}\n\n`;
+        }
+      });
+    }
     
     // Write to schema.sql file
     const schemaPath = path.join(__dirname, 'schema.sql');
     fs.writeFileSync(schemaPath, schemaSQL);
     
     console.log(`✅ Schema successfully exported to: ${schemaPath}`);
-    console.log(`📊 Exported ${Object.keys(tables).length} tables and ${indexResult.rows.length} indexes`);
+    console.log(`📊 Exported ${Object.keys(tables).length} tables, ${indexResult.rows.length} indexes, ${triggerResult.rows.length} triggers, and ${functionResult.rows.length} functions`);
     
   } catch (error) {
     console.error('❌ Error updating schema:', error.message);

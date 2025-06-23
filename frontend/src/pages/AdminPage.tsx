@@ -220,14 +220,14 @@ export default function AdminPage(): JSX.Element {
         screenName:'PLEASE_TAKE_A_PICTURE'
       },
      {
-      screenName:'QUESTION',
+      screenName:'QUESTION_ABOUT_MYSELF',
       question:{
         question_type:'free_form',
         question_text:'מה דעתך?',
       }
     },
     {
-       screenName:'QUESTION',
+       screenName:'QUESTION_ABOUT_MYSELF',
        question:{
          question_type:'choose_one',
          question_text:'כן או לא?',
@@ -236,7 +236,7 @@ export default function AdminPage(): JSX.Element {
         }
       },
       {
-       screenName:'QUESTION',
+       screenName:'QUESTION_ABOUT_MYSELF',
       question:{
        question_type:'choose_one',
        question_text:'כן או לא או משהו אחר?',

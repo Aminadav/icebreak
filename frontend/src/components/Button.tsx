@@ -131,11 +131,11 @@ export default function Button({
   const handleClick = () => {
     // Track the button click if trackingId is provided
     if (trackingId) {
-      trackEvent(trackingId, {
-        variant,
-        buttonText: typeof children === 'string' ? children : 'non-text-content',
-        hasIcon: !!icon
-      });
+      // trackEvent(trackingId, {
+      //   variant,
+      //   buttonText: typeof children === 'string' ? children : 'non-text-content',
+      //   hasIcon: !!icon
+      // });
     }
     
     // Call the original onClick handler

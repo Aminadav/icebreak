@@ -35,6 +35,7 @@ const { registerSaveOrUpdateQuestionHandler } = require('./socket-handlers/updat
 const { registerGetQuestionsHandler } = require('./socket-handlers/getQuestions');
 const { registerDeleteQuestionHandler } = require('./socket-handlers/deleteQuestion');
 const { registerGetNextScreenHandler } = require('./socket-handlers/get-next-screen');
+const { registerSubmitAnswerMyselfHandler } = require('./socket-handlers/submit-answer-myself');
 /**
  * Setup socket event handlers for the application.
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
@@ -60,22 +61,20 @@ function setupSocketHandlers(io) {
       socket.emit('register_device_internal', { deviceId: socket.deviceId });
     }
 
-    let _emit= socket.emit;
-    //@ts-ignore
-    socket.emit=function(eventName, ...args) {
+    // let _emit= socket.emit;
+    // //@ts-ignore
+    // socket.emit=function(eventName, ...args) {
+    //   console.log(colors.green('>> ' + eventName + ': ' + JSON.stringify(args)));
+    //   _emit.call(socket, eventName, ...args);
+    // }
+
+    socket.prependAnyOutgoing((eventName, ...args) => {
       console.log(colors.green('>> ' + eventName + ': ' + JSON.stringify(args)));
-      _emit.call(socket, eventName, ...args);
-    }
+    })
     
-    let _on=socket.on;
-    //@ts-ignore
-    socket.on=function(eventName,callback) {
-      _on.call(socket,eventName,(...args)=>{
-        console.log(colors.cyan('<< ' + eventName + ': ' +  JSON.stringify(args)));
-        //@ts-ignore
-        callback(...args);
-      })
-    }
+    socket.prependAny((eventName, ...args) => {
+      console.log(colors.cyan('<< ' + eventName + ': ' +  JSON.stringify(args)));
+    })
 
     // Register all socket event handlers
     registerRegisterDeviceHandler(socket);
@@ -110,6 +109,7 @@ function setupSocketHandlers(io) {
     registerGetQuestionsHandler(socket);
     registerDeleteQuestionHandler(socket);
     registerGetNextScreenHandler(socket);
+    registerSubmitAnswerMyselfHandler(socket);
   });
 }
 

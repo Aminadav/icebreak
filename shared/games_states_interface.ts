@@ -48,8 +48,13 @@ declare global {
     screenName:'PLEASE_TAKE_A_PICTURE',
   }
 
-  type GAME_STATE_QUESTION ={
-    screenName:'QUESTION',
+  type GAME_STATE_QUESTION_ABOUT_OTHER ={
+    screenName:'QUESTION_ABOUT_OTHER',
+    question:QUESTION,
+  }
+
+  type GAME_STATE_QUESTION_ABOUT_MYSELF ={
+    screenName:'QUESTION_ABOUT_MYSELF',
     isIntro?:boolean
     introCurrentQuestion?:number,
     introTotalQuestions?:number,
@@ -99,7 +104,8 @@ declare global {
             | gameStateTextMessageToUser
             | gameStateAnswerFeedback
             | gameStatePleaseTakeAPicture
-            | GAME_STATE_QUESTION
+            | GAME_STATE_QUESTION_ABOUT_MYSELF
+            | GAME_STATE_QUESTION_ABOUT_OTHER
             | GAME_STATE_GOT_POINTS
             | GAME_STATE_GOT_BADGE;
 

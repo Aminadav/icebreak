@@ -17,13 +17,17 @@ Don't do big changes, or things that no requested. The minimum changes to implem
 
 # Schema
 If needed access to the databse schema. Use Docker. the container name is icebreak_postgres, the databasename icebreak_db.  The username is: icebreak_user.
+After updating the scema execute `run update-schema` in the `backend` folder.
 
-# No  testing
+# Unit  testing
 When you have new task to implement something, do not create test files.
 Dont run tsx to check compilation errors. Or create test files.
-
-# Backend testing
-If you have implemented something on the backend, you can create a test file and execute it. (If needed)
+If you want to test, you can add to the same file the unit testing, and then run it with the CLI.
+Such as: `node loader/my-new-file.js`
+```javascript
+if(!module.parent ){
+  // Here is the unit testing
+}
 
 # Checking for compilation errors.
 If you want to check for errors, ask the user to copy errors from the logs. Do not create test file for that.

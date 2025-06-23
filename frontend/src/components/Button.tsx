@@ -155,6 +155,7 @@ export default function Button({
         disabled={isDisabled}
         data-testid={testId}
         className={`
+          cursor-pointer
           ${buttonVariants[variant]}
           ${className}
           select-none

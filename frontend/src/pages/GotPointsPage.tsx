@@ -9,7 +9,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
 
   // Count-up animation effect
   useEffect(() => {
-    const duration = 1000; // 1.5 seconds
+    const duration = 500; 
     const steps = 30;
     const increment = gameState.points / steps;
     let currentStep = 0;

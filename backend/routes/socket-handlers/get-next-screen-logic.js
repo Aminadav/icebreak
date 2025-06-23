@@ -31,6 +31,7 @@ async function get_next_screen(gameId, userId) {
 
   /**
    * @type {{
+   *    ruleName?:string,
    *    IS_CREATOR?:any,
    *    SEEN_GAME_READY?:any
    *    SEEN_BEFORE_ASK_ABOUT_YOU?:any
@@ -50,6 +51,7 @@ async function get_next_screen(gameId, userId) {
       }
     },
     {
+      ruleName:'THE DEFAULT RULE',
       IS_CREATOR: true,
       SEEN_BEFORE_ASK_ABOUT_YOU: false,
       onScreen: async () => {
@@ -64,24 +66,29 @@ async function get_next_screen(gameId, userId) {
       ANSWER_ABOUT_MYSELF: lessThanOrEqualTo(5),
       onScreen: async () => {
         var nextQuestionAboutMySelf = await getNextQuestionAboutYou(gameId, userId)
+        var answeredCount = metadata.ANSWER_ABOUT_MYSELF || 0
         /** @type {GAME_STATES} */
         var nextScreen = {
           screenName: "QUESTION_ABOUT_MYSELF",
           question: nextQuestionAboutMySelf,
+          introTotalQuestions: 5,
+          introCurrentQuestion: answeredCount + 1,
+          isIntro: true
         }
         return nextScreen
       }
     },
   ]
 
-  const metadata = await getUserAllMetaData(userId, gameId);
+  const metadata = await getUserAllMetaData(gameId, userId);
 
   // Choose rule based on metadata - dynamic matching
   var choosenRule = rules.find(rule => {
     console.log('Checking rule:', rule);
     // Check if all rule conditions match the metadata
     for (let key in rule) {
-      if (key === 'onScreen') continue; // Skip the onScreen function
+      if (key === 'onScreen') continue 
+      if (key === 'ruleName') continue
       const metadataValue = metadata[key] !== undefined ? metadata[key] : false;
       const ruleValue = rule[key];
       

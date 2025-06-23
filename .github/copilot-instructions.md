@@ -39,3 +39,6 @@ If you want to check for errors, ask the user to copy errors from the logs. Do n
 # Every time before creating new file - ask the user to confirm.
 
 # Do not wrap things in try/catch blocks.
+
+# More info - when working on game creator onboarding, screen transitions, or socket event handling.
+Use the file [GAME_CREATOR_FLOW.md](../GAME_CREATOR_FLOW.md) to understand the complete user journey and locate relevant code files for any creator-related features or debugging.

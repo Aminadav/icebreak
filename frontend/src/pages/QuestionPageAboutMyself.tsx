@@ -47,7 +47,6 @@ export default function QuestionAboutYourSelfPage({
     }
     
     if (result) {
-      alert(`User answer: ${result}`);
       gameEmitter('submit-answer-myself', {
         questionId: question.question_id,
         answer: result

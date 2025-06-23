@@ -1,8 +1,10 @@
 const { getUserIdFromDevice } = require("./utils");
 const pool = require('../../config/database');
 const { moveUserToScreen } = require("./get-next-screen-logic");
-const { updateMetaDataBinder } = require("../../utils/update-meta-data");
+const { updateMetaDataBinder, updateMetadata } = require("../../utils/update-meta-data");
 const { addPointsAndEmit } = require("../../utils/points-helper");
+const moveUserToGameState = require("./moveUserToGameState");
+const getUserAllMetaData = require("../../utils/getUserAllMetaData");
 
 /**
  * Handles the 'submit-answer-myself' event for submitting answers about oneself
@@ -24,8 +26,6 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
       ) VALUES ($1, $2, $3, $4, $5)
     `, [gameId, questionId, answer, userId, userId]);
     
-    // Update metadata to track number of answers about myself
-    const updateMetadata = updateMetaDataBinder(gameId, userId);
     
     // Get current count of answers about myself
     const currentAnswersResult = await pool.query(`
@@ -35,13 +35,30 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
       -- gameId=$1, userId=$2
     `, [gameId, userId]);
     
-    const answerCount = parseInt(currentAnswersResult.rows[0].count);
-    await updateMetadata('ANSWER_ABOUT_MYSELF', answerCount);
+    // const answerCount = parseInt(currentAnswersResult.rows[0].count);
+    var metadata=await getUserAllMetaData(gameId, userId);
+    console.log('Current metadata:', metadata);
+    await updateMetadata(gameId,userId, 'ANSWER_ABOUT_MYSELF', (metadata.ANSWER_ABOUT_MYSELF||0) + 1);
+    
+    // Fetch updated metadata to verify the change
+    var updatedMetadata = await getUserAllMetaData(gameId, userId);
+    console.log('After update metadata:', updatedMetadata);
     
     // Add 10 points for answering about myself
     await addPointsAndEmit(userId, gameId, 10, socket);
     
-    // Move user to GOT_POINTS screen
-    await moveUserToScreen(socket, gameId, userId, 'GOT_POINTS');
+    var textArray=[
+      'כל הכבוד!',
+      'מצויין!',
+      'אליפות!',
+      'תודה רבה!',
+      'אין עליך!',
+    ]
+    var text=textArray.sort(()=>Math.random() - 0.5)[0]
+    await moveUserToGameState(socket, gameId, userId, {
+      screenName: 'GOT_POINTS',
+      points: 10,
+      text
+    });
   });
 };

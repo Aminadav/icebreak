@@ -91,7 +91,7 @@ export default function AdminPage(): JSX.Element {
 
     setIsLoading(true);
     setMessage('');
-    
+
   };
 
 
@@ -199,179 +199,237 @@ export default function AdminPage(): JSX.Element {
     setQuestionForm({ questionText: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
   };
 
-  var sampleGameStates:GAME_STATES[]=
-    [
-      {
-        screenName:'CREATOR_GAME_READY'
+  var sampleGameStates: Array<{ state: GAME_STATES, metadata?: any }> = [
+    {
+      state: {
+        screenName: 'CREATOR_GAME_READY'
       },
-      {
-        screenName:'BEFORE_START_ABOUT_YOU'
-      },
-      {screenName:'GOT_POINTS',
-            points: 10,
-            text: 'כל הכבוד!'
-          },
-      {
-        screenName:'TEXT_MESSAGE_TO_USER',
-        text: 'נשארו רק עוד 2 שאלות',
-        messageId: 'TWO_MORE_QUESTIONS_ABOUT_YOU'
-      },
-      {
-        screenName:'PLEASE_TAKE_A_PICTURE'
-      },
-     {
-      screenName:'QUESTION_ABOUT_MYSELF',
-      question:{
-        question_type:'free_form',
-        question_text:'מה דעתך?',
+      metadata: {
+        IS_CREATOR: true,
+        SEEN_GAME_READY:true,
       }
     },
     {
-       screenName:'QUESTION_ABOUT_MYSELF',
-       question:{
-         question_type:'choose_one',
-         question_text:'כן או לא?',
-         allow_other:false,
-         answers:['כן', 'לא'],
+      state: {
+        screenName: 'BEFORE_START_ABOUT_YOU'
+      },
+      metadata: {
+        IS_CREATOR: true,
+        SEEN_GAME_READY:true,
+        SEEN_BEFORE_ASK_ABOUT_YOU: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'GOT_POINTS',
+        points: 10,
+        text: 'כל הכבוד!'
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'TEXT_MESSAGE_TO_USER',
+        text: 'נשארו רק עוד 2 שאלות',
+        messageId: 'TWO_MORE_QUESTIONS_ABOUT_YOU'
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'PLEASE_TAKE_A_PICTURE'
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'QUESTION_ABOUT_MYSELF',
+        question: {
+          question_type: 'free_form',
+          question_text: 'מה דעתך?',
         }
       },
-      {
-       screenName:'QUESTION_ABOUT_MYSELF',
-      question:{
-       question_type:'choose_one',
-       question_text:'כן או לא או משהו אחר?',
-       allow_other:true,
-       answers:['כן', 'לא'],
+      metadata: {
+        IS_CREATOR: true,
       }
-     },
-      {
-       screenName:'GOT_BADGE',
-       badgeId:'badge1',
-       friendsInLevel:[]
-     },
-     {
-       screenName:'ANSWER_FEEDBACK',
-       mainMessage: 'יפה מאוד',
-       question: 'מה החג שלדעתך עמינדב הכי אוהב?',
-       pointsReceived: 10,
-       correctStatus: "YOU_CORRECT" as const,
-       answers: [
-         {
-           text: 'פסח',
-           isCorrect: true,
-           howManyUsers: 1
-         },
-         {
-           text: 'שבועות',
-           isCorrect: false,
-           howManyUsers: 8
-         },
-         {
-           text: 'סוכות',
-           isCorrect: false,
-           howManyUsers: 13
-         },
-         {
-           text: 'פורים',
-           isCorrect: false,
-           howManyUsers: 25
-         }
-       ]
-     },
-     {
-      screenName:'GALLERY',
-     },
-     {
-       screenName:'ANSWER_FEEDBACK',
-       mainMessage: 'טעות',
-       question: 'מה החג שלדעתך עמינדב הכי אוהב?',
-       pointsReceived: 1,
-       correctStatus: "YOU_INCORRECT" as const,
-       answers: [
-         {
-           text: 'פסח',
-           isCorrect: true,
-           howManyUsers: 1
-         },
-         {
-           text: 'שבועות',
-           isCorrect: false,
-           howManyUsers: 8
-         },
-         {
-           text: 'סוכות',
-           isCorrect: false,
-           howManyUsers: 13
-         },
-         {
-           text: 'פורים',
-           isCorrect: false,
-           howManyUsers: 25
-         }
-       ]
-     }
-   ]
-  
+    },
+    {
+      state: {
+        screenName: 'QUESTION_ABOUT_MYSELF',
+        question: {
+          question_type: 'choose_one',
+          question_text: 'כן או לא?',
+          allow_other: false,
+          answers: ['כן', 'לא'],
+        }
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'QUESTION_ABOUT_MYSELF',
+        question: {
+          question_type: 'choose_one',
+          question_text: 'כן או לא או משהו אחר?',
+          allow_other: true,
+          answers: ['כן', 'לא'],
+        }
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'GOT_BADGE',
+        badgeId: 'badge1',
+        friendsInLevel: []
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'ANSWER_FEEDBACK',
+        mainMessage: 'יפה מאוד',
+        question: 'מה החג שלדעתך עמינדב הכי אוהב?',
+        pointsReceived: 10,
+        correctStatus: "YOU_CORRECT" as const,
+        answers: [
+          {
+            text: 'פסח',
+            isCorrect: true,
+            howManyUsers: 1
+          },
+          {
+            text: 'שבועות',
+            isCorrect: false,
+            howManyUsers: 8
+          },
+          {
+            text: 'סוכות',
+            isCorrect: false,
+            howManyUsers: 13
+          },
+          {
+            text: 'פורים',
+            isCorrect: false,
+            howManyUsers: 25
+          }
+        ]
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    },
+    {
+      state: {
+        screenName: 'GALLERY',
+      }
+    },
+    {
+      state: {
+        screenName: 'ANSWER_FEEDBACK',
+        mainMessage: 'טעות',
+        question: 'מה החג שלדעתך עמינדב הכי אוהב?',
+        pointsReceived: 1,
+        correctStatus: "YOU_INCORRECT" as const,
+        answers: [
+          {
+            text: 'פסח',
+            isCorrect: true,
+            howManyUsers: 1
+          },
+          {
+            text: 'שבועות',
+            isCorrect: false,
+            howManyUsers: 8
+          },
+          {
+            text: 'סוכות',
+            isCorrect: false,
+            howManyUsers: 13
+          },
+          {
+            text: 'פורים',
+            isCorrect: false,
+            howManyUsers: 25
+          }
+        ]
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
+    }
+  ]
+
 
   return (
     <div className="min-h-screen p-8 text-white bg-gray-900">
       <div className="max-w-4xl mx-auto">
         <h1 className="mb-8 text-3xl font-bold text-center">🔧 Admin - State Manager</h1>
-        
+
         {/* State Selector */}
         <div className="p-6 mb-6 bg-gray-800 rounded-lg">
 
-        {/* Status Message */}
-        <div className={`${message ? '' : 'invisible'} rounded-lg p-4 mb-6 ${
-          message.includes('Error') ? 'bg-red-900 border border-red-600' : 'bg-green-900 border border-green-600'
-        }`}>
-          <div className="font-medium">{message}&nbsp;</div>
-        </div>
+          {/* Status Message */}
+          <div className={`${message ? '' : 'invisible'} rounded-lg p-4 mb-6 ${message.includes('Error') ? 'bg-red-900 border border-red-600' : 'bg-green-900 border border-green-600'
+            }`}>
+            <div className="font-medium">{message}&nbsp;</div>
+          </div>
 
 
-        {/* Device Info */}
-        <div className="p-6 mb-6 bg-gray-800 rounded-lg">
-          <h2 className="mb-4 text-xl font-semibold">📱 Device Information</h2>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div><strong>Device ID:</strong> Auto-managed</div>
-            <div><strong>User ID:</strong> {deviceInfo?.userId || 'None'}</div>
-            <div><strong>Verified:</strong> {deviceInfo?.isVerified ? 'Yes' : 'No'}</div>
-            <div><strong>Phone:</strong> {deviceInfo?.phoneNumber || 'Not set'}</div>
-            <div><strong>Email:</strong> {deviceInfo?.email || 'Not set'}</div>
-            <div><strong>Name:</strong> {deviceInfo?.name || 'Not set'}</div>
-            <div><strong>Gender:</strong> {deviceInfo?.gender || 'Not set'}</div>
-          </div>
-          
-          {/* Admin Actions */}
-          <div className="pt-4 mt-4 border-t border-gray-700">
-            <h3 className="mb-2 text-lg font-semibold">🔧 Admin Actions</h3>
-            <button
-              onClick={() => {
-                setMessage('🗑️ Deleting all game states...');
-                socket.emit('admin-delete-my-game-states');
-              }}
-              className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700"
-            >
-              🗑️ Delete All Game States
-            </button>
-            <br/>
-            {sampleGameStates.map((q, idx) => (
-              <div>
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setMessage(`Done`);
-                    socket.emit('admin-set-page', q);
-                  }}
-                  className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                >
-                  {JSON.stringify(q)}
-                </button>
-              </div>
-            ))}
+          {/* Device Info */}
+          <div className="p-6 mb-6 bg-gray-800 rounded-lg">
+            <h2 className="mb-4 text-xl font-semibold">📱 Device Information</h2>
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div><strong>Device ID:</strong> Auto-managed</div>
+              <div><strong>User ID:</strong> {deviceInfo?.userId || 'None'}</div>
+              <div><strong>Verified:</strong> {deviceInfo?.isVerified ? 'Yes' : 'No'}</div>
+              <div><strong>Phone:</strong> {deviceInfo?.phoneNumber || 'Not set'}</div>
+              <div><strong>Email:</strong> {deviceInfo?.email || 'Not set'}</div>
+              <div><strong>Name:</strong> {deviceInfo?.name || 'Not set'}</div>
+              <div><strong>Gender:</strong> {deviceInfo?.gender || 'Not set'}</div>
+            </div>
+
+            {/* Admin Actions */}
+            <div className="pt-4 mt-4 border-t border-gray-700">
+              <h3 className="mb-2 text-lg font-semibold">🔧 Admin Actions</h3>
+              <button
+                onClick={() => {
+                  setMessage('🗑️ Deleting all game states...');
+                  socket.emit('admin-delete-my-game-states');
+                }}
+                className="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700"
+              >
+                🗑️ Delete All Game States
+              </button>
+              <br />
+              {sampleGameStates.map((item, idx) => (
+                <div key={idx}>
+                  <button
+                    onClick={() => {
+                      setMessage(`Done`);
+                      socket.emit('admin-set-page', item);
+                    }}
+                    className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    {JSON.stringify(item.state)} {item.metadata && `+ metadata: ${JSON.stringify(item.metadata)}`}
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      </div>
 
         {/* Questions Management */}
         <div className="p-6 mb-6 bg-gray-800 rounded-lg">

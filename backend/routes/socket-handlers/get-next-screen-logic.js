@@ -8,7 +8,7 @@ const {  getScreenRules } = require("./screens_rules");
 const { Socket } = require("socket.io");
 
 
-
+var DEBUG=false
 /**
  * Get the next screen for a user based on their metadata and game rules
  * @param {string} gameId - The game ID
@@ -21,7 +21,7 @@ async function get_next_screen(gameId, userId) {
 
   // Choose rule based on metadata - dynamic matching
   var choosenRule = screenRules.find(rule => {
-    console.log('Checking rule:', rule);
+    if(DEBUG) console.log('Checking rule:', rule);
     // Check if all rule conditions match the metadata
     for (let key in rule) {
       if (key === 'onScreen') continue 
@@ -32,18 +32,18 @@ async function get_next_screen(gameId, userId) {
       // Handle function comparators
       if (typeof ruleValue === 'function') {
         if (!ruleValue(metadata[key])) {
-          console.log(`Rule rejected because ${key} function comparison failed`);
+          if(DEBUG) console.log(`Rule rejected because ${key} function comparison failed`);
           return false;
         }
       } else {
-        console.log(`Comparing metadata[${key}] (${metadataValue}) !== rule[${key}] (${ruleValue})`);
+        if(DEBUG) console.log(`Comparing metadata[${key}] (${metadataValue}) !== rule[${key}] (${ruleValue})`);
         if (metadataValue !== ruleValue) {
-          console.log(`Rule rejected because ${key} doesn't match`);
+          if(DEBUG) console.log(`Rule rejected because ${key} doesn't match`);
           return false; // This rule doesn't match
         }
       }
     }
-    console.log('Rule matches all conditions');
+    if(DEBUG) console.log('Rule matches all conditions');
     return true; // All conditions match
   });
 
@@ -52,7 +52,7 @@ async function get_next_screen(gameId, userId) {
     choosenRule = screenRules[0];
   }
 
-  console.log('Chosen rule:', choosenRule);
+  if(DEBUG) console.log('Chosen rule:', choosenRule);
   var nextScreen = await choosenRule.onScreen();
   return nextScreen;
 }

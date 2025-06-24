@@ -3,7 +3,8 @@ import { get2FACode } from './test-utils';
 //@ts-ignore
 import fs from 'fs'
 
-var DEFAULT_DELAY=300
+var DEFAULT_DELAY=150
+var LONG_DELAY=1000
 
 /**
  * Enable testing mode on backend (sets MOCK_SMS and MOCK_GENERATE to true)
@@ -307,18 +308,18 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(captureButton).toBeVisible();
     
     // Wait 5 seconds for camera to fully initialize and face detection
-    await page.waitForTimeout(500);
+    await delay(DEFAULT_DELAY);
     
     
     // Click capture button to take photo
     await captureButton.click();
-    await delay(1000); // Wait for capture processing
+    await delay(DEFAULT_DELAY); // Wait for capture processing
     
     // Step 12: Should navigate to Image Gallery page automatically
     await step(page,'After capture, wait for navigation to gallery');
     
     // Wait for navigation to image gallery and processing modal
-    await page.waitForTimeout(500);
+    await delay(LONG_DELAY);
     await step(page,'Image gallery page with processing modal');
     
     // Step 13: Click on first image to preview it
@@ -328,7 +329,7 @@ test.describe('Icebreak App E2E Flow', () => {
     const firstImageContainer = page.locator('div[class*="cursor-pointer"][class*="aspect-square"]').first();
     await firstImageContainer.waitFor({ state: 'visible' });
     await firstImageContainer.click();
-    await delay(500);
+    await delay(DEFAULT_DELAY);
     
     
     
@@ -347,7 +348,7 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(page.locator('h1').filter({ hasText: 'המשחק מוכן!' })).toBeVisible();
     
     // Step 18: Click "התחל לשחק" to start the question flow
-    await step(page,'Click start game button');
+    await step(page,'before click start game button');
     const startGameButton = page.getByTestId('creator-start-game-button');
     await expect(startGameButton).toBeVisible();
     await expect(startGameButton).toBeEnabled();
@@ -355,7 +356,7 @@ test.describe('Icebreak App E2E Flow', () => {
     await delay(DEFAULT_DELAY);
     
     // Step 19: Should be on "Before Start Ask About You" page
-    await step(page,'Before Start Ask About You page');
+    await step(page,'See Before Start Ask About You page');
     await expect(page.locator('h1').filter({ hasText: 'לפני שנתחיל עם החידון נשאל אותך 5 שאלות להיכרות' })).toBeVisible();
     
     // Verify initial points are displayed (should be 0)
@@ -439,6 +440,11 @@ test.describe('Icebreak App E2E Flow', () => {
 
 fs.rmSync('screenshots', { recursive: true, force: true });
 let index=0
+/**
+ * Takes a screenshot and logs the step name with an index.
+ * @param {import('@playwright/test').Page} page - The Playwright page object
+ * @param {string} name - The name of the step to log
+ */
 async function step(page,name) {
   index++
   console.log(index + '. ' + name)

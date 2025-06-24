@@ -27,6 +27,7 @@ import CameraPage from './CameraPage';
 import CreatorGameReadyPage from './CreatorGameReadyPage';
 import QuestionAboutOtherPage from './QuestionPageAboutOther';
 
+const DEBUG_DIV=false
 export default function Play(): JSX.Element {
   const gameId = useGameId();
   const {socket}=useSocket();
@@ -104,7 +105,7 @@ export default function Play(): JSX.Element {
       {gameState.screenName=="GOT_BADGE" && 
         <GotBadgePage gameState={gameState} />
       }
-        <div dir="ltr"style={{
+        {DEBUG_DIV && <div dir="ltr"style={{
         position: 'fixed',
         bottom: 0,
         left: 0,
@@ -116,7 +117,7 @@ export default function Play(): JSX.Element {
         zIndex: 10,
       }}>
         {JSON.stringify(gameState,null,2)}
-        </div>
+        </div>}
     </div>
   );
 }

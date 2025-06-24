@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import MainHeader from './MainHeader';
+import { useGame } from '../contexts/GameContext';
 
 interface PageLayoutProps {
   children: React.ReactNode;
@@ -8,12 +9,12 @@ interface PageLayoutProps {
   title?: string;
   showHeader?: boolean;
   onMenuAction?: (action: string) => void;
+  hidePoints?: boolean;
 }
 
-export default function PageLayout({ children, onBack, title, showHeader, onMenuAction }: PageLayoutProps): JSX.Element {
+export default function PageLayout({ children, onBack, title, showHeader, onMenuAction,hidePoints=false }: PageLayoutProps): JSX.Element {
   const { texts } = useLanguage();
-  const isRTL = texts.direction === 'rtl';
-
+  const isRTL = texts.direction === 'rtl';  
   return (
     <div 
       className="relative min-h-screen bg-cover bg-center bg-no-repeat"
@@ -23,7 +24,7 @@ export default function PageLayout({ children, onBack, title, showHeader, onMenu
     >
       {/* Header */}
       {showHeader && (
-        <MainHeader onMenuAction={onMenuAction} />
+        <MainHeader onMenuAction={onMenuAction} hidePoints={hidePoints} />
       )}
       
       {/* Content */}

@@ -7,7 +7,7 @@ export default function MyPoints(): JSX.Element {
   const { currentBadge } = useGame();
   
   return (
-    <div className={`text-white absolute end-5 align-middle top-5`} data-testid="my-points-display">
+    <div className={`text-white end-5 align-middle top-5`} data-testid="my-points-display">
       <div className="flex items-center gap-2">
         {currentBadge && (
           <div className="flex items-center gap-1">

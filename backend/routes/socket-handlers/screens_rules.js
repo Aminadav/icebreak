@@ -4,7 +4,7 @@ const { increaseUserStateMetadata } = require("../../utils/incrementUserStateMet
 const { lessThanOrEqualTo } = require("../../utils/screen_logic_utils");
 const { updateMetaDataBinder } = require("../../utils/update-meta-data");
 
-function getScreenRules(gameId,userId) {
+module.exports.getScreenRules=function getScreenRules(gameId,userId) {
   const updateMetadata = updateMetaDataBinder(gameId, userId);
 
   /**
@@ -23,11 +23,10 @@ function getScreenRules(gameId,userId) {
       ruleName: 'Check for missing badges',
       condition: async () => {
         const { checkForMissingBadge } = require('./badgeHelpers');
-        const { getUserTotalPoints } = require('../../utils/points-helper');
-        const metadata = await getUserAllMetaData(gameId, userId);
         
         const missingBadge = await checkForMissingBadge(userId, gameId);
-        return missingBadge !== null;
+        console.log({missingBadge})
+        return !!missingBadge
       },
       onScreen: async () => {
         const { checkForMissingBadge, awardBadge } = require('./badgeHelpers');
@@ -101,5 +100,3 @@ function getScreenRules(gameId,userId) {
   ]
   return screenRules;
 }
-
-  module.exports.getScreenRules= getScreenRules;

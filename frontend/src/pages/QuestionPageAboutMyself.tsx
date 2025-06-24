@@ -70,9 +70,6 @@ export default function QuestionAboutYourSelfPage({
     <PageLayout 
       showHeader={true}
     >
-      {/* Points Display */}
-      <MyPoints  />
-      
       {/* Progress Circles */}
        <div className="pt-14">
         {gameState.introCurrentQuestion !== undefined && gameState.introTotalQuestions!==undefined &&

@@ -52,8 +52,6 @@ export default function TextMessageToUserPage(props: {gameState: gameStateTextMe
     <PageLayout showHeader={true}>
       <main className="relative z-10 flex flex-col min-h-[calc(100vh-88px)] px-4">
         
-        <MyPoints />
-
         {/* Main content centered */}
         <div className="flex flex-col items-center justify-center flex-1">
           

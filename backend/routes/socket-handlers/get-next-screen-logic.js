@@ -1,14 +1,11 @@
 const { getUserIdFromDevice } = require("./utils");
-const pool = require('../../config/database');
 const moveUserToGameState = require("./moveUserToGameState");
-const { updateMetaDataBinder } = require("../../utils/update-meta-data");
-const { getNextQuestionAboutYou } = require("../../utils/getNextQuestionAboutYou");
 const getUserAllMetaData = require("../../utils/getUserAllMetaData");
-const {  getScreenRules } = require("./screens_rules");
+const { getScreenRules } = require("./screens_rules");
 const { Socket } = require("socket.io");
 
 
-var DEBUG=false
+var DEBUG = true
 /**
  * Get the next screen for a user based on their metadata and game rules
  * @param {string} gameId - The game ID
@@ -17,54 +14,49 @@ var DEBUG=false
  */
 async function get_next_screen(gameId, userId) {
   const metadata = await getUserAllMetaData(gameId, userId);
-  var screenRules= getScreenRules(gameId, userId);
+  var screenRules = getScreenRules(gameId, userId);
 
   // Choose rule based on metadata - dynamic matching
   var choosenRule = null;
-  
-  // First check rules with async conditions
-  for (const rule of screenRules) {
-    if (rule.condition && typeof rule.condition === 'function') {
-      if(DEBUG) console.log('Checking async condition for rule:', rule.ruleName);
+
+  if (DEBUG) console.log('Metadata for user:', metadata)
+  ruleFor:
+  for (let rule of screenRules) {
+    if (DEBUG) console.log('Checking rule:', rule);
+    if (rule.condition) {
+      if (DEBUG) console.log('Checking async condition for rule:', rule.ruleName);
       const conditionResult = await rule.condition();
-      if (conditionResult) {
-        if(DEBUG) console.log('Async condition passed for rule:', rule.ruleName);
-        choosenRule = rule;
-        break;
+      console.log({conditionResult})
+      if (!conditionResult) {
+        if (DEBUG) console.log('Async condition failed for rule:', rule.ruleName);
+        continue
       }
     }
-  }
-  
-  // If no async condition rule matched, check metadata-based rules
-  if (!choosenRule) {
-    choosenRule = screenRules.find(rule => {
-      if (rule.condition) return false; // Skip condition-based rules in this pass
-      if(DEBUG) console.log('Checking rule:', rule);
-      // Check if all rule conditions match the metadata
-      for (let key in rule) {
-        if (key === 'onScreen') continue 
-        if (key === 'ruleName') continue
-        if (key === 'condition') continue
-        const metadataValue = metadata[key] !== undefined ? metadata[key] : false;
-        const ruleValue = rule[key];
-        
-        // Handle function comparators
-        if (typeof ruleValue === 'function') {
-          if (!ruleValue(metadata[key])) {
-            if(DEBUG) console.log(`Rule rejected because ${key} function comparison failed`);
-            return false;
-          }
-        } else {
-          if(DEBUG) console.log(`Comparing metadata[${key}] (${metadataValue}) !== rule[${key}] (${ruleValue})`);
-          if (metadataValue !== ruleValue) {
-            if(DEBUG) console.log(`Rule rejected because ${key} doesn't match`);
-            return false; // This rule doesn't match
-          }
+    // Check if all rule conditions match the metadata
+    for (let key in rule) {
+      if (key === 'onScreen') continue
+      if (key === 'ruleName') continue
+      if (key === 'condition') continue
+      const metadataValue = metadata[key] !== undefined ? metadata[key] : false;
+      const ruleValue = rule[key];
+
+      // Handle function comparators
+      if (typeof ruleValue === 'function') {
+        if (!ruleValue(metadata[key])) {
+          if (DEBUG) console.log(`Rule rejected because ${key} function comparison failed`);
+          continue ruleFor
+        }
+      } else {
+        if (DEBUG) console.log(`Comparing metadata[${key}] (${metadataValue}) !== rule[${key}] (${ruleValue})`);
+        if (metadataValue !== ruleValue) {
+          if (DEBUG) console.log(`Rule rejected because ${key} doesn't match`);
+          continue ruleFor
         }
       }
-      if(DEBUG) console.log('Rule matches all conditions');
-      return true; // All conditions match
-    });
+    }
+    if (DEBUG) console.log('Rule matches all conditions');
+    choosenRule = rule;
+    break
   }
 
   // If no rule matches, use the first rule as default
@@ -72,7 +64,7 @@ async function get_next_screen(gameId, userId) {
     choosenRule = screenRules[0];
   }
 
-  if(DEBUG) console.log('Chosen rule:', choosenRule);
+  if (DEBUG) console.log('Chosen rule:', choosenRule);
   var nextScreen = await choosenRule.onScreen();
   return nextScreen;
 }

@@ -76,11 +76,9 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
   };
 
   return (
-    <PageLayout showHeader={true}>
+    <PageLayout showHeader={true} hidePoints>
       <main className="relative z-10 flex flex-col min-h-[calc(100vh-88px)] px-4">
         
-        <MyPoints />
-
         {/* Layout differs based on correct/incorrect */}
         {hasCorrectAnswer ? (
           /* Correct Answer Layout - centered */

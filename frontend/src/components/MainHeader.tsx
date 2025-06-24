@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import TopMenu from './TopMenu';
+import { useGame } from '../contexts/GameContext';
+import MyPoints from './MyPoints';
 
 interface IceBreakProps {
   onClick?: () => void;
@@ -28,13 +30,17 @@ function IceBreak({ onClick }: IceBreakProps): JSX.Element {
 
 interface MainHeaderProps {
   onMenuAction?: (action: string) => void;
+  hidePoints?: boolean;
 }
 
-export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Element {
+export default function MainHeader({ onMenuAction,hidePoints=false }: MainHeaderProps): JSX.Element {
   const { texts } = useLanguage();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isRTL = texts.direction === 'rtl';
+  var game= useGame()
+  var {userData}=useSocket()
+  var isInsideGame=!!game
 
   const handleLogoClick = () => {
     console.log('🏠 Logo clicked - navigating to homepage');
@@ -72,10 +78,15 @@ export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Eleme
             </svg>
           </div>
         </button>
-        
+{/*         
         <button className={`absolute ${isRTL ? 'left-[9px]' : 'right-[9px]'} top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white text-xl opacity-80 p-0`}>
           <div className="w-[21.5px] h-[23px] flex items-center justify-center">→</div>
         </button>
+         */}
+
+        {isInsideGame && userData?.name && <button className={`absolute ${isRTL ? 'left-[9px]' : 'right-[9px]'} bg-transparent border-none cursor-pointer text-white text-xl opacity-80 p-0`}>
+          {!hidePoints && <MyPoints/>}
+        </button>}
         
         <div
         onClick={handleLogoClick}

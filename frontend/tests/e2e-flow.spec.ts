@@ -3,7 +3,7 @@ import { get2FACode } from './test-utils';
 //@ts-ignore
 import fs from 'fs'
 
-var DEFAULT_DELAY=150
+var DEFAULT_DELAY=250
 var LONG_DELAY=1000
 
 /**
@@ -167,7 +167,7 @@ test.describe('Icebreak App E2E Flow', () => {
     await expect(nameInput).toBeVisible();
     
     // Enter user name
-    await nameInput.fill('Gender Test User');
+    await nameInput.fill('משה כהן');
     
     // Click continue button
     await step(page,'after fill name, before click CONTINUE button');

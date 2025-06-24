@@ -1,6 +1,6 @@
 //@ts-check
 const pool = require('../../config/database');
-const Device = require('../../models/Device');
+
 const { sendVerificationCode, formatPhoneNumber } = require('../../utils/smsService');
 const moveUserToGameState = require('./moveUserToGameState');
 const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');

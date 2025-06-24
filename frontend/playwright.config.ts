@@ -52,7 +52,7 @@ export default defineConfig({
       use: { 
         ...devices['Pixel 5'],
         /* Override user agent to include Headless identifier */
-        userAgent: 'Mozilla/5.0 (Linux; Android 9; Pixel 5 Build/QD1A.190821.014.C2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/130.0.6723.107 Mobile Safari/537.36 Headless',
+        userAgent: 'Mozilla/5.0 (Linux; Android 9; Pixel 5 Build/QD1A.190821.014.C2; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/130.0.6723.107 Mobile Safari/537.36 Headless Playwright',
       },
     },
   ],

@@ -50,8 +50,6 @@ export function GameProvider({ children }: GameProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log({userData})
-
   const refreshPoints = () => {
     if (socket && gameId && userData.userId) {
       console.log('🎯 GameContext: Refreshing points for user', userData.userId, 'in game', gameId);
@@ -81,15 +79,11 @@ export function GameProvider({ children }: GameProviderProps) {
   };
 
   // Validate game and load data
-  console.log('@@',{gameId,socket})
-  console.log('##',socket?.connected)
   useEffect(() => {
-    console.log('InEffect1')
     if (!gameId || !socket) {
       setIsLoading(false);
       return;
     }
-    console.log('InEffect2')
 
     // Set a timeout to show error if socket doesn't connect within reasonable time
     const socketTimeout = setTimeout(() => {
@@ -103,7 +97,6 @@ export function GameProvider({ children }: GameProviderProps) {
     clearTimeout(socketTimeout);
 
     const loadGameData = () => {
-      console.log('####')
       // Set up listeners for game data
       const gameDataHandler = (data: any) => {
         if (data.success && data.gameId === gameId) {
@@ -128,18 +121,15 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.on('game_data', gameDataHandler);
       socket.on('error', errorHandler);
 
-      console.log('THE BIG EMIT')
       socket.emit('get_game_data', { gameId });
       
       // Request complete user data on page load
-      console.log('🎮 GameContext: Requesting complete user data on page load');
       socket.emit('get_user_game_data', { gameId });
     };
 
     // Listen for user data updates (complete user data from server)
     const userDataUpdatedHandler = (data: any) => {
       if (data.success) {
-        console.log('🎮 GameContext: User data updated:', data);
         setUserData({
           phoneNumber: data.phoneNumber,
           userId: data.userId,
@@ -163,7 +153,6 @@ export function GameProvider({ children }: GameProviderProps) {
     // Also listen for device registration to get user data (backward compatibility)
     const deviceRegisteredHandler = (data: any) => {
       if (data.success) {
-        console.log('🎮 GameContext: Device registered, requesting complete user data');
         // Request complete user data instead of setting partial data
         if (gameId) {
           socket.emit('get_user_game_data', { gameId });
@@ -174,7 +163,6 @@ export function GameProvider({ children }: GameProviderProps) {
     // Listen for successful 2FA verification which creates/finds the user
     const twoFAVerifiedHandler = (data: any) => {
       if (data.success && data.user) {
-        console.log('🎮 GameContext: 2FA verified, requesting complete user data');
         // Request complete user data instead of setting partial data
         if (gameId) {
           socket.emit('get_user_game_data', { gameId });
@@ -185,7 +173,6 @@ export function GameProvider({ children }: GameProviderProps) {
     // Listen for user data updates (name saved, gender saved, etc.)
     const nameUpdatedHandler = (data: any) => {
       if (data.success && data.name) {
-        console.log('🎮 GameContext: Name updated, requesting complete user data');
         if (gameId) {
           socket.emit('get_user_game_data', { gameId });
         }
@@ -194,7 +181,6 @@ export function GameProvider({ children }: GameProviderProps) {
 
     const emailUpdatedHandler = (data: any) => {
       if (data.success && data.email) {
-        console.log('🎮 GameContext: Email updated, requesting complete user data');
         if (gameId) {
           socket.emit('get_user_game_data', { gameId });
         }
@@ -203,7 +189,6 @@ export function GameProvider({ children }: GameProviderProps) {
 
     const genderUpdatedHandler = (data: any) => {
       if (data.success && data.gender) {
-        console.log('🎮 GameContext: Gender updated, requesting complete user data');
         if (gameId) {
           socket.emit('get_user_game_data', { gameId });
         }
@@ -212,7 +197,6 @@ export function GameProvider({ children }: GameProviderProps) {
 
     const smsSentHandler = (data: any) => {
       if (data.success && data.phoneNumber) {
-        console.log('🎮 GameContext: SMS sent, requesting complete user data');
         if (gameId) {
           socket.emit('get_user_game_data', { gameId });
         }
@@ -222,7 +206,6 @@ export function GameProvider({ children }: GameProviderProps) {
     // Listen for points updates
     const pointsUpdatedHandler = (data: any) => {
       if (data.success && typeof data.points === 'number') {
-        console.log('🎯 GameContext: Points updated:', data.points);
         setUserData(prev => ({
           ...prev,
           points: data.points

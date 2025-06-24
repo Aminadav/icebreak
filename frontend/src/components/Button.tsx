@@ -19,6 +19,7 @@ interface ButtonProps {
   disabled?: boolean;
   className?: string;
   icon?: React.ReactNode;
+  loading?: boolean;
   trackingId?: string;
   clickOnEnter?: boolean;
   'data-testid'?: string;
@@ -26,16 +27,20 @@ interface ButtonProps {
 
 const buttonVariants = {
   primary: `
-    bg-gradient-to-r from-orange-400 to-orange-500 
+    bg-[#2B045B]
+    rounded-[20px] shadow-[3px_4px_4px_0px_rgba(0,0,0,0.41)]
     text-white font-semibold py-3 px-8 rounded-2xl
     hover:from-orange-500 hover:to-orange-600 
     hover:scale-105
+    hover:border
+    hover:border-white
     active:scale-95
     transition-all duration-200 ease-in-out
     border-2 border-orange-300
   `,
   ['primary-small']: `
-    bg-gradient-to-r from-orange-400 to-orange-500 
+    bg-[#2B045B]
+    rounded-[20px] shadow-[3px_4px_4px_0px_rgba(0,0,0,0.41)]
     text-white font-semibold py-2 px-8 rounded-2xl
     hover:from-orange-500 hover:to-orange-600 
     hover:scale-105
@@ -65,10 +70,13 @@ const buttonVariants = {
     border-2 border-gray-200
   `,
   'primary-large': `
-    bg-gradient-to-r from-orange-400 to-orange-500 
+    bg-[#2B045B]
+    rounded-[20px] shadow-[3px_4px_4px_0px_rgba(0,0,0,0.41)]
     text-white font-semibold py-4 px-8 rounded-3xl
     hover:from-orange-500 hover:to-orange-600 
     hover:scale-105
+    hover:border
+    hover:border-white
     active:scale-95
     transition-all duration-200 ease-in-out
     border-6 border-white
@@ -109,6 +117,7 @@ export default function Button({
   variant, 
   children, 
   onClick, 
+  loading = false,
   disabled = false, 
   className = '',
   icon,

@@ -1,4 +1,4 @@
-const Device = require('../../models/Device');
+
 const moveUserToGameState = require('./moveUserToGameState');
 const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 

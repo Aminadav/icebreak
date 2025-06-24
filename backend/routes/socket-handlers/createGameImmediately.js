@@ -4,6 +4,8 @@ const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 var moveUserToGameState=require( './moveUserToGameState');
 const { generateGameId } = require('../../utils/idGenerator');
 const pool = require('../../config/database');
+const { awardBadge } = require('./badgeHelpers');
+const { BADGES } = require('../../../shared/badge-list');
 
 /**
  * @typedef {import('../../GAME_METADATA_INTERFACE').GameMetadata} GameMetadata
@@ -44,6 +46,8 @@ module.exports.registerCreateGameImmediatelyHandler = async function(socket) {
       'INSERT INTO game_user_state (user_id, game_id, metadata) VALUES ($1, $2, $3)',
       [userId, gameId, JSON.stringify(creatorMetadata)]
     );
+
+    await awardBadge(userId, gameId, BADGES[0].id);
     
     
     
@@ -59,6 +63,6 @@ module.exports.registerCreateGameImmediatelyHandler = async function(socket) {
     var userId = await getUserIdFromDevice(socket.deviceId);
     await moveUserToGameState(socket, gameId, userId, { screenName: 'GIVE_GAME_NAME' });
 
-    console.log(`🎮 Game created immediately: ${gameName} (${gameId}) for device: ${socket.deviceId}`);
+    // console.log(`🎮 Game created immediately: ${gameName} (${gameId}) for device: ${socket.deviceId}`);
   });
 };

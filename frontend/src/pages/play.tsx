@@ -29,9 +29,7 @@ export default function Play(): JSX.Element {
   const [gameState, setGameState] = useState<GAME_STATES>(EMPTY_GAME_STATE);
 
   useEffect(() => {
-    console.log('!!')
     if(!socket) return console.error('socket not found')
-    console.log('@@')
     function onUpdateGameState(gameState:GAME_STATES) {
       setGameState(gameState);
     }

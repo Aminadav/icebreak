@@ -28,7 +28,7 @@ export function TrackingProvider({ children }: TrackingProviderProps) {
       // ...eventData
     };
 
-    console.log('📊 Tracking event:', eventPayload);
+    // console.log('📊 Tracking event:', eventPayload);
     
     // שליחת האירוע לשרת
     socket.emit('trackEvent', eventPayload);

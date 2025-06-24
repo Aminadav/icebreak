@@ -1,4 +1,4 @@
-const Device = require('../../models/Device');
+
 const { sendToMixpanel } = require('../../utils/mixpanelService');
 const { getUserIdFromDevice } = require('./utils');
 
@@ -8,7 +8,7 @@ module.exports.registerTrackEventHandler = async function(socket) {
       const { trackingId, deviceId, timestamp, ...eventData } = data;
       
       if (!trackingId) {
-        console.warn('⚠️ Tracking event missing trackingId');
+        // console.warn('⚠️ Tracking event missing trackingId');
         return;
       }
 

@@ -6,6 +6,8 @@ import TopMenu from './TopMenu';
 import { useGame } from '../contexts/GameContext';
 import MyPoints from './MyPoints';
 
+const DEBUG_SHOW_POINTS=true
+
 interface IceBreakProps {
   onClick?: () => void;
 }
@@ -43,8 +45,6 @@ export default function MainHeader({ onMenuAction,hidePoints=false }: MainHeader
   var isInsideGame=!!game
 
   const handleLogoClick = () => {
-    console.log('🏠 Logo clicked - navigating to homepage');
-    
     // Navigate to homepage using React Router
     navigate('/');
   };
@@ -84,9 +84,9 @@ export default function MainHeader({ onMenuAction,hidePoints=false }: MainHeader
         </button>
          */}
 
-        {isInsideGame && userData?.name && <button className={`absolute ${isRTL ? 'left-[9px]' : 'right-[9px]'} bg-transparent border-none cursor-pointer text-white text-xl opacity-80 p-0`}>
-          {!hidePoints && <MyPoints/>}
-        </button>}
+        {isInsideGame && (userData?.name || DEBUG_SHOW_POINTS) && <div className={`absolute ${isRTL ? 'left-[9px]' : 'right-[9px]'} bg-transparent border-none text-white text-xl  p-0 top-[15px]`}>
+          {(!hidePoints || DEBUG_SHOW_POINTS) && <MyPoints/>}
+        </div>}
         
         <div
         onClick={handleLogoClick}

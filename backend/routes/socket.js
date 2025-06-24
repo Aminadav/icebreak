@@ -5,14 +5,12 @@ const { registerUseWhatsappImageHandler } = require('./socket-handlers/useWhatsa
 const { registerLoadExistingGalleryImagesHandler } = require('./socket-handlers/loadExistingGalleryImages');
 //@ts-ignore
 const colors=require('colors');
-const { registerStartGameCreationHandler } = require('./socket-handlers/startGameCreation');
 const { registerSetGameNameHandler } = require('./socket-handlers/setGameName');
 const { registerCreateGameImmediatelyHandler } = require('./socket-handlers/createGameImmediately');
 const { registerGetGameDataHandler } = require('./socket-handlers/getGameData');
 const { registerUpdateGameNameHandler } = require('./socket-handlers/updateGameName');
 const { registerSubmitPhoneNumberHandler } = require('./socket-handlers/submitPhoneNumber');
 const { registerVerify2FACodeHandler } = require('./socket-handlers/verify2FACode');
-const { registerPingHandler } = require('./socket-handlers/ping');
 const { registerTrackEventHandler } = require('./socket-handlers/trackEvent');
 const { registerSaveEmailHandler } = require('./socket-handlers/saveEmail');
 const { registerSaveUserNameHandler } = require('./socket-handlers/saveUserName');
@@ -25,7 +23,6 @@ const { registerStartIntroQuestionsHandler } = require('./socket-handlers/startI
 const { registerAdminSetQuestionHandler } = require('./socket-handlers/adminSetQuestion');
 const { registerAdminDeleteMyGameStatesHandler } = require('./socket-handlers/adminDeleteMyGameStates');
 const { registerAdminSetPageHandler } = require('./socket-handlers/adminSetPage');
-const { registerDevice } = require('../models/Device');
 const { registerGenerateImageGalleryHandler } = require('./socket-handlers/generateImageGallery');
 const { registerConfirmImageSelectionHandler } = require('./socket-handlers/confirmImageSelection');
 const { registerGetMyPointsHandler } = require('./socket-handlers/getMyPoints');
@@ -49,12 +46,10 @@ function setupSocketHandlers(io) {
   io.use((socket, next) => {
     const deviceId = socket.handshake.query.deviceId;
     if (deviceId && typeof deviceId === 'string') {
-      registerDevice(deviceId);
       socket.deviceId = deviceId;
     } else {
       console.warn('⚠️ No device ID found in connection query parameters');
     }
-
     next();
   });
 
@@ -69,13 +64,11 @@ function setupSocketHandlers(io) {
 
     // Register all socket event handlers
     registerSetGameNameHandler(socket);
-    registerStartGameCreationHandler(socket);
     registerCreateGameImmediatelyHandler(socket);
     registerGetGameDataHandler(socket);
     registerUpdateGameNameHandler(socket);
     registerSubmitPhoneNumberHandler(socket);
     registerVerify2FACodeHandler(socket);
-    registerPingHandler(socket);
     registerTrackEventHandler(socket);
     registerSaveEmailHandler(socket);
     registerSaveUserNameHandler(socket);

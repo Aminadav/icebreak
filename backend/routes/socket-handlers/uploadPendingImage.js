@@ -1,6 +1,6 @@
 
 const moveUserToGameState =require( './moveUserToGameState');
-const Device = require('../../models/Device');
+
 const pool = require('../../config/database');
 const fs = require('fs');
 const path = require('path');

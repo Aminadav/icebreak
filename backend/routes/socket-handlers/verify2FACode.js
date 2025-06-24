@@ -1,4 +1,4 @@
-const Device = require('../../models/Device');
+
 const User = require('../../models/User');
 const Game = require('../../models/Game');
 const pool = require('../../config/database');

@@ -1,7 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getDeviceId, setDeviceId, generateUUID } from '../utils/deviceManager';
-
 interface SocketContextType {
   socket: Socket;
   isConnected: boolean;
@@ -50,6 +49,17 @@ export function SocketProvider({ children }: SocketProviderProps) {
         deviceId: currentDeviceId
       }
     });
+
+    newSocket.prependAny((eventName, ...args) => {
+      console.groupCollapsed(`%c<< ${eventName}`,'color:lightgreen')
+      console.log(...args)
+      console.groupEnd()
+    })
+    newSocket.prependAnyOutgoing((eventName, ...args) => {
+      console.groupCollapsed(`%c>> ${eventName}`,'color:skyblue')
+      console.log(...args)
+      console.groupEnd()
+    })
 
     // Handle connection
     newSocket.on('connect', () => {

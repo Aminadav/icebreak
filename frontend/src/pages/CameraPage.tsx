@@ -34,8 +34,8 @@ export default function CameraPage(): JSX.Element {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showSmileText, setShowSmileText] = useState(false);
-  const [faceDetected, setFaceDetected] = useState(false);
-  const [faceDetectionReady, setFaceDetectionReady] = useState(false);
+  const [faceDetected, setFaceDetected] = useState(isTesting);
+  const [faceDetectionReady, setFaceDetectionReady] = useState(isTesting);
   const [facePosition, setFacePosition] = useState<{
     x: number;
     y: number;
@@ -460,8 +460,7 @@ export default function CameraPage(): JSX.Element {
         reader.onload = () => {
           const base64Data = reader.result as string;
           const base64WithoutPrefix = base64Data.split(',')[1]; // Remove data:image/jpeg;base64, prefix
-          console.log('!!!!')
-          console.log('📤 Emitting image upload...');
+          // console.log('📤 Emitting image upload...');
           socket.emit('upload_pending_image', {
             imageData: base64WithoutPrefix,
             gameId,

@@ -1,5 +1,5 @@
 
-const Device = require('../../models/Device');
+
 const User = require('../../models/User');
 const { push_user_to_next_screen } = require('./get-next-screen-logic');
 const moveUserToGameState = require('./moveUserToGameState');

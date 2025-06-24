@@ -1,7 +1,21 @@
 const pool = require('../../config/database');
-const Device = require('../../models/Device');
+
 const User = require('../../models/User');
 const { generateUserId } = require('../../utils/idGenerator');
+
+/**
+ * Creates a temporary user and returns the user ID
+ * @returns {Promise<string>} - The newly created user ID
+ */
+async function createTemporaryUser() {
+  const userId = generateUserId();
+  await pool.query(
+    'INSERT INTO users (user_id, is_temp_user) VALUES ($1, $2)',
+    [userId, true]
+  );
+  console.log(`Created temporary user ${userId}`);
+  return userId;
+}
 
 /**
  * Securely get userId from deviceId
@@ -21,15 +35,8 @@ async function getUserIdFromDevice(deviceId) {
     
     // If no device row exists, create one with a temporary user
     if (deviceResult.rows.length === 0) {
-      const userId = generateUserId();
+      const userId = await createTemporaryUser();
       
-      // Create temporary user
-      await pool.query(
-        'INSERT INTO users (user_id, is_temp_user) VALUES ($1, $2)',
-        [userId, true]
-      );
-      
-      // Create device row
       await pool.query(
         'INSERT INTO devices (device_id, user_id) VALUES ($1, $2)',
         [deviceId, userId]
@@ -43,21 +50,14 @@ async function getUserIdFromDevice(deviceId) {
     
     // If device exists but no userId, create temporary user
     if (!device.user_id) {
-      const userId = generateUserId();
+      const userId = await createTemporaryUser();
       
-      // Create temporary user
-      await pool.query(
-        'INSERT INTO users (user_id, is_temp_user) VALUES ($1, $2)',
-        [userId, true]
-      );
-      
-      // Update device with userId
       await pool.query(
         'UPDATE devices SET user_id = $1 WHERE device_id = $2',
         [userId, deviceId]
       );
       
-      console.log(`Created temporary user ${userId} for existing device ${deviceId}`);
+      console.log(`Linked temporary user ${userId} to existing device ${deviceId}`);
       return userId;
     }
     
@@ -136,6 +136,7 @@ async function sendUserDataToClient(socket, userId) {
 }
 
 module.exports = {
+  createTemporaryUser,
   getUserIdFromDevice,
   validateDeviceRegistration,
   getUserDetails,

@@ -1,4 +1,4 @@
-const Device = require('../../models/Device');
+
 const User = require('../../models/User');
 const pool = require('../../config/database');
 const { getUserIdFromDevice, sendUserDataToClient } = require('./utils');

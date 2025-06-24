@@ -34,7 +34,7 @@ export default function StartPage(): JSX.Element {
 
     // Set up one-time listeners for the response
     const successHandler = (data: any) => {
-      console.log('🎮 Game created immediately:', data);
+      // console.log('🎮 Game created immediately:', data);
       setIsCreating(false);
       
       // // Navigate to the game name step with the gameId
@@ -98,8 +98,9 @@ export default function StartPage(): JSX.Element {
           <Button
             variant="primary-large"
             onClick={handleCreateGame}
+            loading={isCreating}
             disabled={isCreating}
-            className="text-xl px-12 py-5 min-w-[300px] border-6 border-white bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 rounded-3xl shadow-xl"
+
             trackingId="start_page_create_game_clicked"
             data-testid="create-game-button"
           >

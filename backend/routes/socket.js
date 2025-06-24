@@ -1,12 +1,10 @@
 // Import all socket event handlers
-const registerDeviceHandler = require('./socket-handlers/registerDevice');
 const { registerDownloadWhatsappImageHandler } = require('./socket-handlers/downloadWhatsappImage');
 const { registerBackgroundWhatsappDownloadHandler } = require('./socket-handlers/backgroundWhatsappDownload');
 const { registerUseWhatsappImageHandler } = require('./socket-handlers/useWhatsappImage');
 const { registerLoadExistingGalleryImagesHandler } = require('./socket-handlers/loadExistingGalleryImages');
 //@ts-ignore
 const colors=require('colors');
-const { registerRegisterDeviceHandler } = require('./socket-handlers/registerDevice');
 const { registerStartGameCreationHandler } = require('./socket-handlers/startGameCreation');
 const { registerSetGameNameHandler } = require('./socket-handlers/setGameName');
 const { registerCreateGameImmediatelyHandler } = require('./socket-handlers/createGameImmediately');
@@ -58,29 +56,6 @@ function setupSocketHandlers(io) {
   });
 
   io.on('connection', async (socket) => {
-    // Auto-send user data if we have a device ID
-    if (socket.deviceId) {
-      try {
-        const userId = await getUserIdFromDevice(socket.deviceId);
-        if (userId) {
-          await sendUserDataToClient(socket, userId);
-        }
-      } catch (error) {
-        console.error('Error auto-sending user data on connection:', error);
-      }
-      
-      // Keep the register device handler for backward compatibility
-      registerDeviceHandler.registerRegisterDeviceHandler(socket);
-      socket.emit('register_device_internal', { deviceId: socket.deviceId });
-    }
-
-    // let _emit= socket.emit;
-    // //@ts-ignore
-    // socket.emit=function(eventName, ...args) {
-    //   console.log(colors.green('>> ' + eventName + ': ' + JSON.stringify(args)));
-    //   _emit.call(socket, eventName, ...args);
-    // }
-
     socket.prependAnyOutgoing((eventName, ...args) => {
       console.log(colors.green('>> ' + eventName + ': ' + JSON.stringify(args)));
     })
@@ -90,7 +65,6 @@ function setupSocketHandlers(io) {
     })
 
     // Register all socket event handlers
-    registerRegisterDeviceHandler(socket);
     registerSetGameNameHandler(socket);
     registerStartGameCreationHandler(socket);
     registerCreateGameImmediatelyHandler(socket);

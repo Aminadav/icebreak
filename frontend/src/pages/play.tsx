@@ -6,7 +6,7 @@ import AnimatedImage from '../components/AnimatedImage';
 import MyPoints from '../components/MyPoints';
 import { useSocket } from '../contexts/SocketContext';
 import { useGameId } from '../utils/useGameId';
-import { usePoints } from '../contexts/GameContext';
+import { useGame, usePoints } from '../contexts/GameContext';
 import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import TextMessageToUserPage from './TextMessageToUserPage';
@@ -33,7 +33,9 @@ export default function Play(): JSX.Element {
   const [gameState, setGameState] = useState<GAME_STATES>(EMPTY_GAME_STATE);
 
   useEffect(() => {
+    console.log('!!')
     if(!socket) return console.error('socket not found')
+    console.log('@@')
     function onUpdateGameState(gameState:GAME_STATES) {
       setGameState(gameState);
     }

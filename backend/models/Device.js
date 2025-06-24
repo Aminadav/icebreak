@@ -31,7 +31,7 @@ async function registerDevice(existingDeviceId = null) {
     );
     
     const device = result.rows[0];
-    console.log(`📱 Device registered: ${device.device_id} (User: ${device.user_id})`);
+    // console.log(`📱 Device registered: ${device.device_id} (User: ${device.user_id})`);
     
     return {
       deviceId: device.device_id,

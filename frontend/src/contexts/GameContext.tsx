@@ -61,11 +61,15 @@ export function GameProvider({ children }: GameProviderProps) {
   };
 
   // Validate game and load data
+  console.log('@@',{gameId,socket})
+  console.log('##',socket?.connected)
   useEffect(() => {
+    console.log('InEffect1')
     if (!gameId || !socket) {
       setIsLoading(false);
       return;
     }
+    console.log('InEffect2')
 
     // Set a timeout to show error if socket doesn't connect within reasonable time
     const socketTimeout = setTimeout(() => {
@@ -79,6 +83,7 @@ export function GameProvider({ children }: GameProviderProps) {
     clearTimeout(socketTimeout);
 
     const loadGameData = () => {
+      console.log('####')
       // Set up listeners for game data
       const gameDataHandler = (data: any) => {
         if (data.success && data.gameId === gameId) {
@@ -103,12 +108,11 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.on('game_data', gameDataHandler);
       socket.on('error', errorHandler);
 
-      // Request game data
+      console.log('THE BIG EMIT')
       socket.emit('get_game_data', { gameId });
       
       // Also request current device registration to get latest user data
-      console.log('🎮 GameContext: Requesting device registration to get latest user data');
-      socket.emit('register_device', {});
+      // console.log('🎮 GameContext: Requesting device registration to get latest user data');
     };
 
     // Listen for user data updates (auto-sent on connection and after changes)
@@ -224,15 +228,15 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.off('my_points', pointsUpdatedHandler);
       socket.off('points_updated', pointsUpdatedHandler);
     };
-  }, [gameId, socket]);
+  }, [gameId, socket,socket?.connected]);
 
   // Load user points when both gameId and userId are available
   useEffect(() => {
     if (socket && gameId && userData.userId && userData.points === undefined) {
-      console.log('🎯 GameContext: Loading points for user', userData.userId, 'in game', gameId);
+      // console.log('🎯 GameContext: Loading points for user', userData.userId, 'in game', gameId);
       socket.emit('my_points', { gameId }, (response: any) => {
         if (response?.success && typeof response.points === 'number') {
-          console.log('🎯 GameContext: Points loaded:', response.points);
+          // console.log('🎯 GameContext: Points loaded:', response.points);
           setUserData(prev => ({
             ...prev,
             points: response.points
@@ -244,7 +248,7 @@ export function GameProvider({ children }: GameProviderProps) {
 
   function gameEmitter(eventName:string,data:any={},callback:Function | undefined = undefined) {
     data.gameId= gameId;
-    console.log(`🎮 GameContext: Emitting event ${eventName} with data`, data);
+    // console.log(`🎮 GameContext: Emitting event ${eventName} with data`, data);
     socket.emit(eventName,data,callback);
   }
   function emitMoveToNextPage(){

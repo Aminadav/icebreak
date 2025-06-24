@@ -22,16 +22,16 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const [deviceId, setDeviceIdState] = useState<string | null>(null);
 
   useEffect(() => {
-    console.log('🚀 SocketProvider: Initializing socket connection...');
+    // console.log('🚀 SocketProvider: Initializing socket connection...');
     
     // Get or create device ID immediately
     let currentDeviceId = getDeviceId();
     if (!currentDeviceId) {
       currentDeviceId = generateUUID();
       setDeviceId(currentDeviceId);
-      console.log('🆔 Generated new device ID:', currentDeviceId);
+      // console.log('🆔 Generated new device ID:', currentDeviceId);
     } else {
-      console.log('🆔 Using existing device ID from localStorage:', currentDeviceId);
+      // console.log('🆔 Using existing device ID from localStorage:', currentDeviceId);
     }
 
     // Set device ID in state
@@ -49,13 +49,13 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
     // Handle connection
     newSocket.on('connect', () => {
-      console.log('✅ Socket connected! ID:', newSocket.id, 'Device ID:', currentDeviceId);
+      // console.log('✅ Socket connected! ID:', newSocket.id, 'Device ID:', currentDeviceId);
       setSocket(newSocket);
       setIsConnected(true);
       setError(null);
       
       // Device registration happens automatically on backend
-      console.log('🔄 Device registration handled automatically by backend');
+      // console.log('🔄 Device registration handled automatically by backend');
     });
 
     // Handle connection errors
@@ -73,11 +73,11 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
     // Handle device registration response
     newSocket.on('device_registered', (data) => {
-      console.log('✅ Device registered successfully:', data);
+      // console.log('✅ Device registered successfully:', data);
       
       if (data.success) {
         // Device ID is already managed, just log confirmation
-        console.log('✅ Device registration confirmed. User ID:', data.userId || 'None (not verified)');
+        // console.log('✅ Device registration confirmed. User ID:', data.userId || 'None (not verified)');
       } else {
         console.error('❌ Device registration failed:', data);
       }

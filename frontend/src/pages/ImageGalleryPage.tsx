@@ -53,6 +53,33 @@ export default function ImageGalleryPage(): JSX.Element {
   const [showImagePreview, setShowImagePreview] = useState(false);
   const [previewImageHash, setPreviewImageHash] = useState<string | null>(null);
 
+  // Handle Enter key press for gallery navigation
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        
+        if (showImagePreview) {
+          // If preview is open, choose the current image
+          handleChooseImage();
+        } else {
+          // If gallery is visible, open the first ready image
+          const firstReadyImage = galleryImages.find(img => img.isReady && img.imageHash);
+          if (firstReadyImage) {
+            handleImageSelect(firstReadyImage.id);
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [showImagePreview, galleryImages]);
+
   // Start image generation function
   const startImageGeneration = () => {
       console.log('🎨 Starting image generation process...');

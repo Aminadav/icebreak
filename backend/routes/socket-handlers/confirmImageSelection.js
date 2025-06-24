@@ -1,6 +1,7 @@
 
 const Device = require('../../models/Device');
 const User = require('../../models/User');
+const { push_user_to_next_screen } = require('./get-next-screen-logic');
 const moveUserToGameState = require('./moveUserToGameState');
 const { getUserIdFromDevice } = require('./utils');
 
@@ -32,9 +33,10 @@ module.exports.registerConfirmImageSelectionHandler = async function(socket) {
       
       console.log(`📸 User image updated successfully for user ${targetUserId}: ${selectedImageHash}`);
       
-      moveUserToGameState(socket,gameId,userId,{
-        screenName:'CREATOR_GAME_READY',
-      })
+      // moveUserToGameState(socket,gameId,userId,{
+      //   screenName:'CREATOR_GAME_READY',
+      // })
+      push_user_to_next_screen(socket, gameId, targetUserId);
       
       console.log(`🎉 Image selection confirmed for user ${targetUserId}: ${selectedImageHash}`);
       

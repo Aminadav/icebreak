@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModal } from '../contexts/ModalContext';
 import Modal from './Modal';
@@ -13,6 +14,23 @@ interface NameConfirmationModalProps {
 export default function NameConfirmationModal({ name, onYes, onNo }: NameConfirmationModalProps): JSX.Element {
   const { texts } = useLanguage();
   const { closeModal } = useModal();
+
+  // Handle Enter key press to trigger "Yes" action
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        handleYes();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, []);
 
   const handleYes = () => {
     closeModal();

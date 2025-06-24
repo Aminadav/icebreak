@@ -86,7 +86,7 @@ export default function QuestionAboutYourSelfPage({
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
         <div className="w-full max-w-2xl">
           {/* Question Text */}
-          <h1 className="mb-8 text-4xl font-bold leading-tight text-center text-white md:text-5xl">
+          <h1 className="mb-8 text-4xl font-bold leading-tight text-center text-white md:text-5xl" data-testid="question-text">
             {question.question_text}
           </h1>
 
@@ -107,11 +107,14 @@ export default function QuestionAboutYourSelfPage({
                 <div className="relative">
                   <input
                     type="text"
+                    autoFocus
+                    autoComplete="off"
                     value={freeformAnswer}
                     onChange={(e) => setFreeformAnswer(e.target.value)}
                     placeholder="הקלד כאן ..."
                     className="w-full h-16 px-6 text-lg text-white transition-all duration-300 bg-transparent border-2 border-white rounded-2xl placeholder-white/70 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-400/30"
                     style={{ direction: 'rtl' }}
+                    data-testid="question-freeform-input"
                   />
                 </div>
               </div>
@@ -123,9 +126,11 @@ export default function QuestionAboutYourSelfPage({
             <div className="w-full max-w-xs">
               <Button
                 variant={canSubmit ? "primary-large" : "disabled"}
+                clickOnEnter
                 onClick={handleSubmit}
                 disabled={!canSubmit}
                 trackingId="question-submit"
+                data-testid="question-submit-button"
               >
                 שלח
               </Button>

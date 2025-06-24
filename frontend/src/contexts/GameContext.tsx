@@ -111,7 +111,21 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.emit('register_device', {});
     };
 
-    // Also listen for device registration to get user data
+    // Listen for user data updates (auto-sent on connection and after changes)
+    const userDataUpdatedHandler = (data: any) => {
+      if (data.success) {
+        console.log('🎮 GameContext: User data updated:', data);
+        setUserData({
+          phoneNumber: data.phoneNumber,
+          userId: data.userId,
+          email: data.email,
+          name: data.name,
+          gender: data.gender
+        });
+      }
+    };
+
+    // Also listen for device registration to get user data (backward compatibility)
     const deviceRegisteredHandler = (data: any) => {
       if (data.success) {
         console.log('🎮 GameContext: Device registered with user data:', data);
@@ -189,6 +203,7 @@ export function GameProvider({ children }: GameProviderProps) {
       }
     };
 
+    socket.on('user_data_updated', userDataUpdatedHandler);
     socket.on('device_registered', deviceRegisteredHandler);
     socket.on('2fa_verified', twoFAVerifiedHandler);
     socket.on('sms_sent', smsSentHandler);
@@ -200,6 +215,7 @@ export function GameProvider({ children }: GameProviderProps) {
     loadGameData();
 
     return () => {
+      socket.off('user_data_updated', userDataUpdatedHandler);
       socket.off('device_registered', deviceRegisteredHandler);
       socket.off('2fa_verified', twoFAVerifiedHandler);
       socket.off('sms_sent', smsSentHandler);

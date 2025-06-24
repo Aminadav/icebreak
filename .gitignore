@@ -6,3 +6,5 @@ frontend/screenshots
 backend/uploads
 frontend/playwright-report
 frontend/test-results
+**/user-data-dir
+**/test-videos

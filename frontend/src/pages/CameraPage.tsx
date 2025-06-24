@@ -50,6 +50,26 @@ export default function CameraPage(): JSX.Element {
   const detectionIntervalRef = useRef<number | null>(null);
   const cropCanvasRef = useRef<HTMLCanvasElement>(null);
 
+  // Handle Enter key press to take a picture
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && hasPermission && !error && !isCapturing && !isUploading) {
+        // Only capture if face is detected (except in testing mode)
+        if (isTesting || faceDetected) {
+          event.preventDefault();
+          capturePhoto();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [hasPermission, error, isCapturing, isUploading, isTesting, faceDetected]);
+
   useEffect(() => {
     // Initialize face detection with fallback approach
     const initFaceDetection = async () => {

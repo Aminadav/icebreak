@@ -3,7 +3,7 @@ import { get2FACode } from './test-utils';
 //@ts-ignore
 import fs from 'fs'
 
-var DEFAULT_DELAY=200
+var DEFAULT_DELAY=300
 
 /**
  * Enable testing mode on backend (sets MOCK_SMS and MOCK_GENERATE to true)
@@ -44,23 +44,33 @@ async function disableTestingMode() {
 const TEST_PHONE_NUMBER = '972523737233';
 
 test.describe('Icebreak App E2E Flow', () => {
-  test('Complete user registration flow from homepage to creator game ready', async ({ page }) => {
+  test('Complete user registration flow from homepage to creator game ready', async ({page}) => {
     // Set longer timeout for this comprehensive test
-    test.setTimeout(180000); // 3 minutes
+    test.setTimeout(1000*60); // 1 minute
     
     console.log('🚀 Starting comprehensive E2E test - Complete user registration flow');
     
-    // Enable testing mode before starting the test
-    const testingEnabled = await enableTestingMode();
-    if (!testingEnabled) {
-      throw new Error('Failed to enable testing mode. Make sure backend is running.');
-    }
+    await page.setViewportSize({ width: 500, height: 800 });
     
-    try {
-      // Step 1: Navigate to homepage
+      // Enable testing mode before starting the test
+      const testingEnabled = await enableTestingMode();
+      if (!testingEnabled) {
+        throw new Error('Failed to enable testing mode. Make sure backend is running.');
+      }
+      
+      try {
+      // Step 1: Navigate to homepage and clear localStorage
       step(page,'before main navigation');
-      await page.goto('/');
+      await page.goto('http://localhost:4000/');
       await page.waitForLoadState('networkidle');
+      
+      // // Clear localStorage to ensure clean state
+      // await page.evaluate(() => {
+      //   localStorage.removeItem('icebreak_device_id');
+      //   localStorage.clear();
+      //   sessionStorage.clear();
+      // });
+      // console.log('🧹 Cleared localStorage and sessionStorage');
     
     // Verify we're on the homepage by checking for the logo and create game button
     await expect(page.locator('img[alt="IceBreak Logo"]')).toBeVisible();
@@ -306,8 +316,6 @@ test.describe('Icebreak App E2E Flow', () => {
     
     // Step 12: Should navigate to Image Gallery page automatically
     await step(page,'After capture, wait for navigation to gallery');
-    var pageURL= page.url();
-    await page.goto(pageURL.replace(/camera/, 'gallery'));
     
     // Wait for navigation to image gallery and processing modal
     await page.waitForTimeout(500);
@@ -338,13 +346,93 @@ test.describe('Icebreak App E2E Flow', () => {
     await step(page,'Creator Game Ready page');
     await expect(page.locator('h1').filter({ hasText: 'המשחק מוכן!' })).toBeVisible();
     
+    // Step 18: Click "התחל לשחק" to start the question flow
+    await step(page,'Click start game button');
+    const startGameButton = page.getByTestId('creator-start-game-button');
+    await expect(startGameButton).toBeVisible();
+    await expect(startGameButton).toBeEnabled();
+    await startGameButton.click();
+    await delay(DEFAULT_DELAY);
+    
+    // Step 19: Should be on "Before Start Ask About You" page
+    await step(page,'Before Start Ask About You page');
+    await expect(page.locator('h1').filter({ hasText: 'לפני שנתחיל עם החידון נשאל אותך 5 שאלות להיכרות' })).toBeVisible();
+    
+    // Verify initial points are displayed (should be 0)
+    await expect(page.getByTestId('my-points-value')).toHaveText('0');
+    
+    // Click "יאללה, לשאלות" button
+    const startQuestionsButton = page.getByTestId('before-start-questions-button');
+    await expect(startQuestionsButton).toBeVisible();
+    await expect(startQuestionsButton).toBeEnabled();
+    await startQuestionsButton.click();
+    await delay(DEFAULT_DELAY);
+    
+    // Steps 20-29: Answer 5 questions and verify points
+    for (let questionNumber = 1; questionNumber <= 5; questionNumber++) {
+      await step(page, `Question ${questionNumber} - Waiting for question page`);
+      
+      // Verify we're on a question page
+      await expect(page.getByTestId('question-text')).toBeVisible();
+      
+      // Try to interact with the question - could be freeform or multiple choice
+      const freeformInput = page.getByTestId('question-freeform-input');
+      const submitButton = page.getByTestId('question-submit-button');
+      
+      if (await freeformInput.isVisible()) {
+        // It's a freeform question
+        await step(page, `Question ${questionNumber} - Filling freeform answer`);
+        await freeformInput.fill(`Test answer for question ${questionNumber}`);
+      } else {
+        // It's a multiple choice question - click first available answer
+        await step(page, `Question ${questionNumber} - Looking for answer options`);
+        
+        // Find any answer option (they have dynamic test IDs based on text)
+        const answerOptions = page.locator('[data-testid^="answer-option-"]');
+        await expect(answerOptions.first()).toBeVisible();
+        await answerOptions.first().click();
+        await delay(DEFAULT_DELAY);
+      }
+      
+      // Submit the answer
+      await step(page, `Question ${questionNumber} - Submitting answer`);
+      await expect(submitButton).toBeEnabled();
+      await submitButton.click({ force: true });
+      await delay(DEFAULT_DELAY);
+      
+      // Should navigate to GOT_POINTS page
+      await step(page, `Question ${questionNumber} - Got points page`);
+      await expect(page.getByTestId('got-points-title')).toBeVisible();
+      await expect(page.getByTestId('got-points-display')).toBeVisible();
+      
+      // Check points display shows +10
+      await expect(page.getByTestId('got-points-display')).toHaveText('+ 10');
+      
+      // Click continue to next question
+      const continueButton = page.getByTestId('got-points-continue-button');
+      await expect(continueButton).toBeVisible();
+      await expect(continueButton).toBeEnabled();
+      await continueButton.click();
+      await delay(DEFAULT_DELAY);
+      
+      // Verify points in top corner have increased
+      const expectedPoints = questionNumber * 10;
+      await step(page, `Question ${questionNumber} - Verifying total points: ${expectedPoints}`);
+      await expect(page.getByTestId('my-points-value')).toHaveText(expectedPoints.toString());
+    }
+    
+    await step(page,'All 5 questions completed successfully! Final points should be 50.');
+    
+    // Final verification: total points should be 50
+    await expect(page.getByTestId('my-points-value')).toHaveText('50');
+    
     await step(page,'Test completed successfully!');
     
-    } finally {
-      // Always disable testing mode after the test, regardless of success or failure
-      console.log('🔄 Disabling testing mode...');
-      await disableTestingMode();
-    }
+      } finally {
+        // Always disable testing mode after the test, regardless of success or failure
+        console.log('🔄 Disabling testing mode...');
+        await disableTestingMode();
+      }
   });
 });
 

@@ -10,44 +10,33 @@ async function registerDevice(existingDeviceId = null) {
     
     // אם לא נשלח device_id, ניצור חדש
     if (!deviceId) {
-      deviceId = generateDeviceId();
+      throw new Error('Every request must have deviceID')
     }
     
-    // בדיקה אם המכשיר כבר קיים
-    const existingDevice = await pool.query(
-      'SELECT * FROM devices WHERE device_id = $1',
-      [deviceId]
+    // Try to insert device first with ON CONFLICT to handle race conditions
+    const user_id = generateUserId();
+    
+    // First, try to create the user (with ON CONFLICT in case it exists)
+    await pool.query(
+      'INSERT INTO users (user_id, is_temp_user) VALUES ($1, $2) ON CONFLICT (user_id) DO NOTHING',
+      [user_id, true]
     );
     
-    if (existingDevice.rows.length > 0) {
-      // עדכון המכשיר הקיים עם זמן ביקור חדש
-      await pool.query(
-        'UPDATE devices SET last_seen = CURRENT_TIMESTAMP WHERE device_id = $1',
-        [deviceId]
-      );
-      
-      const device = existingDevice.rows[0];
-      // console.log(`📱 Device reconnected: ${deviceId}${device.user_id ? ` (User: ${device.user_id})` : ' (No user yet)'}`);
-      
-      return {
-        deviceId,
-        userId: device.user_id // May be null if not verified yet
-      };
-    } else {
-      const user_id=generateUserId()
-      await pool.query('INSERT INTO users (user_id,is_temp_user) VALUES ($1,$2)', [user_id,true]);
-      await pool.query(
-        'INSERT INTO devices (device_id, user_id) VALUES ($1, $2)',
-        [deviceId, user_id]
-      );
-      
-      console.log(`📱 New device created: ${deviceId} ${user_id})`);
-      
-      return {
-        deviceId,
-        userId: null // Will be set after 2FA verification
-      };
-    }
+    // Now try to insert device with ON CONFLICT to handle existing devices
+    const result = await pool.query(
+      `INSERT INTO devices (device_id, user_id) VALUES ($1, $2) 
+       ON CONFLICT (device_id) DO UPDATE SET last_seen = CURRENT_TIMESTAMP 
+       RETURNING device_id, user_id`,
+      [deviceId, user_id]
+    );
+    
+    const device = result.rows[0];
+    console.log(`📱 Device registered: ${device.device_id} (User: ${device.user_id})`);
+    
+    return {
+      deviceId: device.device_id,
+      userId: device.user_id
+    };
   } catch (error) {
     console.error('Error registering device:', error);
     throw error;

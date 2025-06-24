@@ -5,6 +5,7 @@ const { updateMetaDataBinder, updateMetadata } = require("../../utils/update-met
 const { addPointsAndEmit } = require("../../utils/points-helper");
 const moveUserToGameState = require("./moveUserToGameState");
 const getUserAllMetaData = require("../../utils/getUserAllMetaData");
+const { increaseUserStateMetadata } = require("../../utils/incrementUserStateMetadata");
 
 /**
  * Handles the 'submit-answer-myself' event for submitting answers about oneself
@@ -35,10 +36,7 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
       -- gameId=$1, userId=$2
     `, [gameId, userId]);
     
-    // const answerCount = parseInt(currentAnswersResult.rows[0].count);
-    var metadata=await getUserAllMetaData(gameId, userId);
-    console.log('Current metadata:', metadata);
-    await updateMetadata(gameId,userId, 'ANSWER_ABOUT_MYSELF', (metadata.ANSWER_ABOUT_MYSELF||0) + 1);
+    await increaseUserStateMetadata(gameId, userId, 'ANSWER_ABOUT_MYSELF', 1);
     
     // Fetch updated metadata to verify the change
     var updatedMetadata = await getUserAllMetaData(gameId, userId);

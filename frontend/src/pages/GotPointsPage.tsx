@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
 import { useGame } from '../contexts/GameContext';
+import { useOnEnter } from '../hooks/useOnEnter';
 
 export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}): JSX.Element {
   let gameState = props.gameState
   const { emitMoveToNextPage } = useGame();
   const [displayPoints, setDisplayPoints] = useState(0);
   const [animationComplete, setAnimationComplete] = useState(false);
+
+  const handleContinue = () => {
+    console.log('Continue clicked - moving to next screen');
+    emitMoveToNextPage();
+  };
+
+  // Enable Enter key to continue
+  useOnEnter(handleContinue);
 
   // Count-up animation effect
   useEffect(() => {
@@ -27,11 +36,6 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
 
     return () => clearInterval(timer);
   }, [gameState.points]);
-
-  const handleContinue = () => {
-    console.log('Continue clicked - moving to next screen');
-    emitMoveToNextPage();
-  };
 
   return (
       <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden bg-gradient-to-b from-purple-900 to-black">
@@ -119,7 +123,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
         </div>
 
         {/* Hebrew text "כל הכבוד" */}
-        <h1 className="z-10 mb-8 text-4xl font-bold text-center text-white md:text-5xl">
+        <h1 className="z-10 mb-8 text-4xl font-bold text-center text-white md:text-5xl" data-testid="got-points-title">
           {gameState.text}
         </h1>
 
@@ -130,6 +134,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
             className={`text-6xl md:text-8xl font-bold text-white transition-all duration-500 ${
               animationComplete ? 'scale-110' : 'scale-100'
             }`}
+            data-testid="got-points-display"
           >
             + {displayPoints}
           </div>
@@ -140,6 +145,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
           <button
             onClick={handleContinue}
             className="relative w-full px-8 py-4 overflow-hidden text-xl font-bold text-white transition-all duration-300 transform shadow-2xl bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-2xl hover:scale-110 group animate-pulse hover:animate-none"
+            data-testid="got-points-continue-button"
           >
             {/* Button sparkles */}
             <div className="absolute inset-0 pointer-events-none">

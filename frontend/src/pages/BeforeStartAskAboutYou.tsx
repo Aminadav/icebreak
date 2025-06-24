@@ -51,8 +51,10 @@ export default function BeforeStartAskAboutYou(props:{gameState:GAME_STATES}): J
           <div className="flex justify-center w-full max-w-md">
             <Button
               variant="primary"
+              clickOnEnter
               onClick={handleStartQuestions}
               className="w-full px-8 py-4 text-xl"
+              data-testid="before-start-questions-button"
             >
               יאללה, לשאלות &gt;&gt;
             </Button>

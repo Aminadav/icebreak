@@ -31,6 +31,23 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   const [whatsappError, setWhatsappError] = useState<string | null>(null);
   const [whatsappAvailable, setWhatsappAvailable] = useState(false);
 
+  // Handle Enter key press to take a picture
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !isLoading) {
+        event.preventDefault();
+        handleCameraUpload();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [isLoading]);
+
   // Background WhatsApp download when component mounts
   useEffect(() => {
     if (!socket) return;

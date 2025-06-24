@@ -111,7 +111,7 @@ export default function Play(): JSX.Element {
         backgroundColor: 'white',
         padding: '10px',
         textAlign: 'center',
-        zIndex: 1000,
+        zIndex: 10,
       }}>
         {JSON.stringify(gameState,null,2)}
         </div>

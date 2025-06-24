@@ -34,6 +34,23 @@ export default function SelectGenderPage(): JSX.Element {
     console.log('🎭 SelectGenderPage mounted - state managed by React Router');
   }, []);
 
+  // Handle Enter key press to select male by default
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !isLoading) {
+        event.preventDefault();
+        handleGenderSelect('male');
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [isLoading]);
+
   const handleGenderSelect = async (gender: Gender) => {
     if (isLoading) return;
     

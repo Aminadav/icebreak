@@ -36,6 +36,9 @@ const { registerGetQuestionsHandler } = require('./socket-handlers/getQuestions'
 const { registerDeleteQuestionHandler } = require('./socket-handlers/deleteQuestion');
 const { registerGetNextScreenHandler } = require('./socket-handlers/get-next-screen');
 const { registerSubmitAnswerMyselfHandler } = require('./socket-handlers/submit-answer-myself');
+const { registerLogoutHandler } = require('./socket-handlers/logout');
+// Import utilities
+const { getUserIdFromDevice, sendUserDataToClient } = require('./socket-handlers/utils');
 /**
  * Setup socket event handlers for the application.
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
@@ -54,9 +57,19 @@ function setupSocketHandlers(io) {
     next();
   });
 
-  io.on('connection', (socket) => {
-    // Auto-register device if we have a device ID
+  io.on('connection', async (socket) => {
+    // Auto-send user data if we have a device ID
     if (socket.deviceId) {
+      try {
+        const userId = await getUserIdFromDevice(socket.deviceId);
+        if (userId) {
+          await sendUserDataToClient(socket, userId);
+        }
+      } catch (error) {
+        console.error('Error auto-sending user data on connection:', error);
+      }
+      
+      // Keep the register device handler for backward compatibility
       registerDeviceHandler.registerRegisterDeviceHandler(socket);
       socket.emit('register_device_internal', { deviceId: socket.deviceId });
     }
@@ -110,6 +123,7 @@ function setupSocketHandlers(io) {
     registerDeleteQuestionHandler(socket);
     registerGetNextScreenHandler(socket);
     registerSubmitAnswerMyselfHandler(socket);
+    registerLogoutHandler(socket);
   });
 }
 

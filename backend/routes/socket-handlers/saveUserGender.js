@@ -1,7 +1,7 @@
 const Device = require('../../models/Device');
 const User = require('../../models/User');
 const pool = require('../../config/database');
-const { getUserIdFromDevice } = require('./utils');
+const { getUserIdFromDevice, sendUserDataToClient } = require('./utils');
 const moveUserToGameState = require('./moveUserToGameState');
 
 module.exports.registerSaveUserGenderHandler = async function(socket) {
@@ -44,6 +44,9 @@ module.exports.registerSaveUserGenderHandler = async function(socket) {
       }
       
       if (result.success) {
+        
+        // Send updated user data to client
+        await sendUserDataToClient(socket, targetUserId);
         
         moveUserToGameState(socket, gameId, targetUserId, {
           screenName: 'ASK_FOR_PICTURE',

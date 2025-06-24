@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { getIsTesting } from '../utils/isTesting';
 
 interface ProcessingModalProps {
   isVisible: boolean;
@@ -21,10 +22,21 @@ export default function ProcessingModal({ isVisible, imageUrl, onComplete }: Pro
   useEffect(() => {
     if (!isVisible) return;
 
+    // Handle Enter key press to close modal
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        console.log('🎬 ProcessingModal: Enter key pressed, calling onComplete');
+        onComplete();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+
     console.log('🎬 ProcessingModal: Starting 5-second timer');
 
     // Simulate progress over 5 seconds
-    const totalDuration = 5000; // 5 seconds
+    const totalDuration =getIsTesting() ? 500 : 5000; // 5 seconds
     const updateInterval = 100; // Update every 100ms
     const totalUpdates = totalDuration / updateInterval;
     const progressIncrement = 100 / totalUpdates;
@@ -59,6 +71,7 @@ export default function ProcessingModal({ isVisible, imageUrl, onComplete }: Pro
     return () => {
       console.log('🎬 ProcessingModal: Cleanup - clearing interval');
       clearInterval(interval);
+      document.removeEventListener('keydown', handleKeyPress);
     };
   }, [isVisible, onComplete]);
 
@@ -66,7 +79,7 @@ export default function ProcessingModal({ isVisible, imageUrl, onComplete }: Pro
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-      <div className="relative w-full max-w-md mx-4 overflow-hidden bg-gray-900 rounded-3xl shadow-2xl">
+      <div className="relative w-full max-w-md mx-4 overflow-hidden bg-gray-900 shadow-2xl rounded-3xl">
         
         {/* Background Image */}
         {imageUrl && (
@@ -99,6 +112,7 @@ export default function ProcessingModal({ isVisible, imageUrl, onComplete }: Pro
             <div className="mt-2 text-xl text-white">
               להיות מטורף
             </div>
+            {JSON.stringify({isTesting: getIsTesting()})}
           </div>
 
           {/* Scanning Animation */}
@@ -115,7 +129,7 @@ export default function ProcessingModal({ isVisible, imageUrl, onComplete }: Pro
             <div className="mb-2 text-sm font-medium text-white/90">
               {steps[currentStep]}
             </div>
-            <div className="w-full bg-gray-700 rounded-full h-2">
+            <div className="w-full h-2 bg-gray-700 rounded-full">
               <div 
                 className="h-2 transition-all duration-300 ease-out bg-orange-500 rounded-full"
                 style={{ width: `${progress}%` }}

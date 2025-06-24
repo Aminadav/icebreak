@@ -20,6 +20,7 @@ interface ButtonProps {
   className?: string;
   icon?: React.ReactNode;
   trackingId?: string;
+  clickOnEnter?: boolean;
   'data-testid'?: string;
 }
 
@@ -112,6 +113,7 @@ export default function Button({
   className = '',
   icon,
   trackingId,
+  clickOnEnter = false,
   'data-testid': testId
 }: ButtonProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -127,6 +129,25 @@ export default function Button({
   }, []);
   
   const isDisabled = disabled || variant === 'disabled';
+
+  // Handle Enter key press if clickOnEnter is enabled
+  useEffect(() => {
+    if (!clickOnEnter) return;
+
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && !isDisabled && onClick) {
+        event.preventDefault();
+        onClick();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    
+    // Cleanup function to remove event listener
+    return () => {
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [clickOnEnter, isDisabled, onClick]);
   
   const handleClick = () => {
     // Track the button click if trackingId is provided

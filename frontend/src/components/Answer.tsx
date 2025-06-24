@@ -65,6 +65,7 @@ export default function Answer({ text, onClick, onChange, disabled = false, sele
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       disabled={disabled}
+      data-testid={`answer-option-${text.substring(0, 10).replace(/\s+/g, '-')}`}
       style={{
         direction: isRTL ? 'rtl' : 'ltr',
       }}

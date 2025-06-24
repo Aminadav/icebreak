@@ -8,10 +8,13 @@ export default defineConfig({
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
+  //@ts-ignore
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
+  //@ts-ignore
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
+  //@ts-ignore
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html', { open: 'never' }]],
@@ -19,6 +22,12 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:4000',
+    
+    /* Default timeout for actions (click, fill, etc.) - default is 30s */
+    actionTimeout: 4000, // 60 seconds
+    
+    /* Default timeout for navigation (goto, reload, etc.) - default is 30s */
+    navigationTimeout: 4000, // 60 seconds
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',

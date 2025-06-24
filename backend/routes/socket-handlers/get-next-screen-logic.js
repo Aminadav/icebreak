@@ -4,21 +4,10 @@ const moveUserToGameState = require("./moveUserToGameState");
 const { updateMetaDataBinder } = require("../../utils/update-meta-data");
 const { getNextQuestionAboutYou } = require("../../utils/getNextQuestionAboutYou");
 const getUserAllMetaData = require("../../utils/getUserAllMetaData");
+const {  getScreenRules } = require("./screens_rules");
+const { Socket } = require("socket.io");
 
-// Helper functions for metadata comparison
-function lessThanOrEqualTo(threshold) {
-  return (value) => {
-    if (value === undefined) return true;
-    return value <= threshold;
-  };
-}
 
-function moreThanOrEqualTo(threshold) {
-  return (value) => {
-    if (value === undefined) return true;
-    return value >= threshold;
-  };
-}
 
 /**
  * Get the next screen for a user based on their metadata and game rules
@@ -27,63 +16,11 @@ function moreThanOrEqualTo(threshold) {
  * @returns {Promise<GAME_STATES>} The next screen state
  */
 async function get_next_screen(gameId, userId) {
-  const updateMetadata = updateMetaDataBinder(gameId, userId);
-
-  /**
-   * @type {{
-   *    ruleName?:string,
-   *    IS_CREATOR?:any,
-   *    SEEN_GAME_READY?:any
-   *    SEEN_BEFORE_ASK_ABOUT_YOU?:any
-   *    ANSWER_ABOUT_MYSELF?:any,
-   *    onScreen:()=>Promise<GAME_STATES>
-   * }[]}
-   */
-  var rules = [
-    {
-      IS_CREATOR: true,
-      SEEN_GAME_READY: false,
-      onScreen: async () => {
-        await updateMetadata('SEEN_GAME_READY', true);
-        return {
-          screenName: 'CREATOR_GAME_READY',
-        };
-      }
-    },
-    {
-      ruleName:'THE DEFAULT RULE',
-      IS_CREATOR: true,
-      SEEN_BEFORE_ASK_ABOUT_YOU: false,
-      onScreen: async () => {
-        await updateMetadata('SEEN_BEFORE_ASK_ABOUT_YOU', true);
-        return {
-          screenName: 'BEFORE_START_ABOUT_YOU',
-        };
-      }
-    },
-    {
-      /** Show a question */
-      ANSWER_ABOUT_MYSELF: lessThanOrEqualTo(5),
-      onScreen: async () => {
-        var nextQuestionAboutMySelf = await getNextQuestionAboutYou(gameId, userId)
-        var answeredCount = metadata.ANSWER_ABOUT_MYSELF || 0
-        /** @type {GAME_STATES} */
-        var nextScreen = {
-          screenName: "QUESTION_ABOUT_MYSELF",
-          question: nextQuestionAboutMySelf,
-          introTotalQuestions: 5,
-          introCurrentQuestion: answeredCount + 1,
-          isIntro: true
-        }
-        return nextScreen
-      }
-    },
-  ]
-
   const metadata = await getUserAllMetaData(gameId, userId);
+  var screenRules= getScreenRules(gameId, userId);
 
   // Choose rule based on metadata - dynamic matching
-  var choosenRule = rules.find(rule => {
+  var choosenRule = screenRules.find(rule => {
     console.log('Checking rule:', rule);
     // Check if all rule conditions match the metadata
     for (let key in rule) {
@@ -112,7 +49,7 @@ async function get_next_screen(gameId, userId) {
 
   // If no rule matches, use the first rule as default
   if (!choosenRule) {
-    choosenRule = rules[0];
+    choosenRule = screenRules[0];
   }
 
   console.log('Chosen rule:', choosenRule);
@@ -128,6 +65,8 @@ async function get_next_screen(gameId, userId) {
  * @param {string} screenName - The screen name to move to
  */
 async function moveUserToScreen(socket, gameId, userId, screenName) {
+  /** @type {GAME_STATES} */
+  //@ts-ignore
   const gameState = { screenName };
   await moveUserToGameState(socket, gameId, userId, gameState);
 }

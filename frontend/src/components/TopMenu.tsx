@@ -1,6 +1,8 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTracking } from '../contexts/TrackingContext';
+import { useSocket } from '../contexts/SocketContext';
 
 interface TopMenuProps {
   isOpen: boolean;
@@ -11,12 +13,41 @@ interface TopMenuProps {
 export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps): JSX.Element {
   const { texts, language, toggleLanguage } = useLanguage();
   const { trackEvent } = useTracking();
+  const { socket } = useSocket();
+  const navigate = useNavigate();
   const isRTL = texts.direction === 'rtl';
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
+  };
+
+  const handleLogout = () => {
+    if (socket) {
+      trackEvent('logout_clicked', {});
+      
+      // Emit logout event to server
+      socket.emit('logout', {});
+      
+      // Listen for logout response
+      socket.once('logout_response', (response) => {
+        if (response.success) {
+          console.log('✅ Logout successful');
+          // Navigate to root
+          navigate('/');
+        } else {
+          console.error('❌ Logout failed:', response.error);
+          // Still navigate to root even if server logout failed
+          navigate('/');
+        }
+      });
+    } else {
+      // If no socket, just navigate to root
+      navigate('/');
+    }
+    
+    onClose();
   };
 
   const menuItems = [
@@ -61,9 +92,9 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
       >
         <div className="p-5">
           {/* Fun Header */}
-          <div className="text-center mb-6">
-            <div className="text-2xl mb-2">🎮</div>
-            <div className="text-lg font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="mb-6 text-center">
+            <div className="mb-2 text-2xl">🎮</div>
+            <div className="text-lg font-bold text-transparent bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
               {texts.menu.title}
             </div>
           </div>
@@ -78,9 +109,9 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
                 });
                 toggleLanguage();
               }}
-              className="group flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl transition-all duration-300 transform hover:scale-105 hover:shadow-lg shadow-md"
+              className="flex items-center gap-2 px-4 py-3 text-white transition-all duration-300 transform shadow-md group bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 rounded-xl hover:scale-105 hover:shadow-lg"
             >
-              <span className="text-lg group-hover:scale-110 transition-transform duration-200">
+              <span className="text-lg transition-transform duration-200 group-hover:scale-110">
                 {language === 'he' ? '🇺🇸' : '🇮🇱'}
               </span>
               <span className="text-sm font-medium">
@@ -107,6 +138,12 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
                     has_link: !!item.link,
                     text: item.text
                   });
+                  
+                  // Handle logout specifically
+                  if (item.text === texts.menu.logout) {
+                    handleLogout();
+                    return;
+                  }
                   
                   // Handle menu item click
                   console.log(`Clicked: ${item.text}`);
@@ -137,7 +174,7 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
                   isRTL ? 'text-right' : 'text-left'
                 }`}>
                   {/* Icon with animation */}
-                  <div className="text-2xl flex-shrink-0 group-hover:scale-125 group-hover:rotate-12 transition-transform duration-300 filter drop-shadow-lg">
+                  <div className="flex-shrink-0 text-2xl transition-transform duration-300 group-hover:scale-125 group-hover:rotate-12 filter drop-shadow-lg">
                     {item.isEmoji ? (
                       <span>{item.icon}</span>
                     ) : (
@@ -157,13 +194,13 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
                   </span>
                   
                   {/* Sparkle effect for hover */}
-                  <div className="absolute top-1 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute transition-opacity duration-300 opacity-0 top-1 right-2 group-hover:opacity-100">
                     ✨
                   </div>
                 </div>
                 
                 {/* Hover shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                <div className="absolute inset-0 transition-transform duration-700 transform -translate-x-full -skew-x-12 opacity-0 bg-gradient-to-r from-transparent via-white to-transparent group-hover:opacity-20 group-hover:translate-x-full" />
               </button>
             ))}
           </div>

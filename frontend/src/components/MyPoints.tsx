@@ -4,9 +4,9 @@ import { usePoints } from "../contexts/GameContext";
 export default function MyPoints(): JSX.Element {
   var {points}=usePoints();
   return (
-    <div className={`text-white absolute end-5 align-middle top-5`}>
+    <div className={`text-white absolute end-5 align-middle top-5`} data-testid="my-points-display">
       <div className="flex items-center gap-2">
-        <span className="text-lg font-bold text-white">
+        <span className="text-lg font-bold text-white" data-testid="my-points-value">
         {points}
         </span>
         נקודות

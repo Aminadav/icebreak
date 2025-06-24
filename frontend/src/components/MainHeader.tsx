@@ -55,7 +55,7 @@ export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Eleme
     <>
       <div className="sticky top-0 z-50 w-full h-[60px] flex items-center justify-between px-[13px] box-border">
         <button 
-          className={`absolute ${isRTL ? 'left-[13px]' : 'right-[13px]'} top-1/2 -translate-y-1/2 w-6 h-6 bg-transparent border-none cursor-pointer p-0`}
+          className={`absolute ${isRTL ? 'right-[9px]' : 'right-[9px]'} top-1/2 -translate-y-1/2 w-6 h-6 bg-transparent border-none cursor-pointer p-0`}
           onClick={toggleMenu}
         >
           <div className="w-[18px] h-3 mx-auto">
@@ -73,12 +73,22 @@ export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Eleme
           </div>
         </button>
         
-        <button className={`absolute ${isRTL ? 'left-[60px]' : 'right-[60px]'} top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white text-xl opacity-80 p-0`}>
+        <button className={`absolute ${isRTL ? 'left-[9px]' : 'right-[9px]'} top-1/2 -translate-y-1/2 bg-transparent border-none cursor-pointer text-white text-xl opacity-80 p-0`}>
           <div className="w-[21.5px] h-[23px] flex items-center justify-center">→</div>
         </button>
         
-        <div className={`absolute ${isRTL ? 'right-9' : 'left-9'} top-1/2 -translate-y-1/2 w-[80px]`}>
-          <IceBreak onClick={handleLogoClick} />
+        <div
+        onClick={handleLogoClick}
+        style={{
+          background:'url(/images/logos/ib-white.png?)',
+          backgroundSize:'contain',
+          backgroundRepeat:'no-repeat',
+          backgroundPosition:'center',
+          width:30,
+          height:40,
+          cursor: 'pointer'
+        }}
+        className={`absolute ${isRTL ? 'right-9' : 'left-9'} top-1/2 -translate-y-1/2 w-[80px]`}>
         </div>
       </div>
 

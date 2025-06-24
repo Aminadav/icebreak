@@ -1,5 +1,5 @@
 const pool = require("../config/database");
-const getUserAllMetadata = require("./getUserAllMetaData");
+const getUserAllMetadata = require("./getUserAllMetadata");
 
 /**
  * Increment a metadata value by a specific amount for a user in a game

@@ -38,7 +38,7 @@ async function handleDownloadWhatsappImage(socket, data) {
     
     // Call WhatsApp API to get profile picture URL
     console.log(`📞 Calling WhatsApp API for phone: ${cleanPhone}`);
-    
+    //@ts-ignore
     const whatsappResponse = await axios.get('https://whatsapp-data.p.rapidapi.com/wspicture', {
       params: {
         phone: cleanPhone
@@ -60,7 +60,7 @@ async function handleDownloadWhatsappImage(socket, data) {
     
     // Download the image from WhatsApp
     console.log(`⬇️ Downloading image from WhatsApp...`);
-    
+    //@ts-ignore
     const imageResponse = await axios.get(imageUrl, {
       responseType: 'arraybuffer',
       timeout: 30000,

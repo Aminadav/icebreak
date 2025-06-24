@@ -1,5 +1,5 @@
 const { getNextQuestionAboutYou } = require("../../utils/getNextQuestionAboutYou");
-const getUserAllMetaData = require("../../utils/getUserAllMetaData");
+const getUserAllMetadata = require("../../utils/getUserAllMetadata");
 const { increaseUserStateMetadata } = require("../../utils/incrementUserStateMetadata");
 const { lessThanOrEqualTo } = require("../../utils/screen_logic_utils");
 const { updateMetaDataBinder } = require("../../utils/update-meta-data");
@@ -76,7 +76,7 @@ module.exports.getScreenRules=function getScreenRules(gameId,userId) {
       ANSWER_ABOUT_MYSELF: lessThanOrEqualTo(5),
       onScreen: async () => {
         var nextQuestionAboutMySelf = await getNextQuestionAboutYou(gameId, userId)
-        const metadata = await getUserAllMetaData(gameId, userId);
+        const metadata = await getUserAllMetadata(gameId, userId);
         var answeredCount = metadata.ANSWER_ABOUT_MYSELF || 0
         /** @type {GAME_STATES} */
         var nextScreen = {

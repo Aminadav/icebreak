@@ -4,7 +4,7 @@ const { moveUserToScreen } = require("./get-next-screen-logic");
 const { updateMetaDataBinder, updateMetadata } = require("../../utils/update-meta-data");
 const { addPointsWithBadgeCheckAndEmit } = require("../../utils/points-helper");
 const moveUserToGameState = require("./moveUserToGameState");
-const getUserAllMetaData = require("../../utils/getUserAllMetaData");
+const getUserAllMetadata = require("../../utils/getUserAllMetadata");
 const { increaseUserStateMetadata } = require("../../utils/incrementUserStateMetadata");
 
 /**
@@ -39,7 +39,7 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
     await increaseUserStateMetadata(gameId, userId, 'ANSWER_ABOUT_MYSELF', 1);
     
     // Fetch updated metadata to verify the change
-    var updatedMetadata = await getUserAllMetaData(gameId, userId);
+    var updatedMetadata = await getUserAllMetadata(gameId, userId);
     console.log('After update metadata:', updatedMetadata);
     
     // Add 10 points for answering about myself

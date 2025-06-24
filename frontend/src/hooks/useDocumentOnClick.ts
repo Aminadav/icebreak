@@ -15,11 +15,14 @@ export function useDocumentOnClick(callback: (event: MouseEvent) => void, enable
 
       callback(event);
     }
-
-    document.addEventListener('click', handleClick);
+    // Timeout to ensure it's after the current clicks finish
+    let timeout=setTimeout(() => {
+      document.addEventListener('click', handleClick);
+    },0)
     return () => {
       document.removeEventListener('click', handleClick);
       document.body.style.cursor = 'default';
+      clearTimeout(timeout);
     }
   }, [callback, enabled]);
 }

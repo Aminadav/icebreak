@@ -8,27 +8,13 @@ import { BadgeProgressBar } from '../components/BadgeProgressBar';
 import { useOnEnter } from '../hooks/useOnEnter';
 import { useDocumentOnClick } from '../hooks/useDocumentOnClick';
 
-// Badge types array based on the Figma design
-// const badges = [
-//   { name: 'מתחמם', image: '/images/badges/badge-sample.webp', pointsToAchieve:10 },
-//   { name: 'שובר קרחים', image: '/images/badges/badge-sample.webp', pointsToAchieve:20 },
-//   { name: 'פותח השיחות', image: '/images/badges/badge-sample.webp', pointsToAchieve:30 },
-//   { name: 'השראה מהלכת', image: '/images/badges/badge-sample.webp', pointsToAchieve:40 },
-//   { name: 'מגדלור אנושי', image: '/images/badges/badge-sample.webp', pointsToAchieve:50 },
-//   { name: 'נוגע בלבבות', image: '/images/badges/badge-sample.webp', pointsToAchieve:60 },
-//   { name: 'מעמיק הקשרים', image: '/images/badges/badge-sample.webp', pointsToAchieve:70 },
-//   { name: 'מרים המסיבות', image: '/images/badges/badge-sample.webp', pointsToAchieve:80 },
-//   { name: 'מקהיל קהילות', image: '/images/badges/badge-sample.webp', pointsToAchieve:90 },
-//   { name: 'מאחד הלבבות', image: '/images/badges/badge-sample.webp', pointsToAchieve:100 }
-// ];
-
 interface Friend {
   user_id: string;
   name: string;
   image: string;
 }
 
-export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): JSX.Element {
+export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE, isModal?: boolean, onClose?: () => void}): JSX.Element {
   var myPoints=usePoints().points
   const { emitMoveToNextPage } = useGame();
    // User's current points - can be changed to test different levels
@@ -39,8 +25,13 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
   const progress = getProgressToNextLevel(userPoints);
 
   const handleContinue = () => {
-    console.log('Badge page continue clicked - moving to next screen');
-    emitMoveToNextPage();
+    if (props.isModal && props.onClose) {
+      console.log('Badge modal continue clicked - closing modal');
+      props.onClose();
+    } else {
+      console.log('Badge page continue clicked - moving to next screen');
+      emitMoveToNextPage();
+    }
   };
 
   // If no current badge, shouldn't happen, but handle gracefully
@@ -49,7 +40,7 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
   }
 
   useOnEnter(handleContinue);
-  useDocumentOnClick(handleContinue)
+  useDocumentOnClick(handleContinue); // Enable document click for both modal and normal mode
 
   return (
     <div
@@ -136,7 +127,7 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
               {/* Congratulations text */}
               <div className=" font-normal leading-[0] not-italic text-[#ffffff] text-[32px] text-center px-[45px] pb-[20px]">
                 <p className="block leading-[normal]" dir="auto">
-                  כל הכבוד! עלית בדרגה!
+                  {props.isModal ? 'הדרגה שלך' : 'כל הכבוד! עלית בדרגה!'}
                 </p>
               </div>
 

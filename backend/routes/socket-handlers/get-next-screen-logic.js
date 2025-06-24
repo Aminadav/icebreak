@@ -1,6 +1,6 @@
 const { getUserIdFromDevice } = require("./utils");
 const moveUserToGameState = require("./moveUserToGameState");
-const getUserAllMetaData = require("../../utils/getUserAllMetaData");
+const getUserAllMetadata = require("../../utils/getUserAllMetadata");
 const { getScreenRules } = require("./screens_rules");
 const { Socket } = require("socket.io");
 
@@ -13,7 +13,7 @@ var DEBUG = true
  * @returns {Promise<GAME_STATES>} The next screen state
  */
 async function get_next_screen(gameId, userId) {
-  const metadata = await getUserAllMetaData(gameId, userId);
+  const metadata = await getUserAllMetadata(gameId, userId);
   var screenRules = getScreenRules(gameId, userId);
 
   // Choose rule based on metadata - dynamic matching

@@ -5,7 +5,7 @@ const { formatPhoneNumber } = require('../utils/smsService');
 /**
  * Find user by phone number
  * @param {string} phoneNumber - Phone number in any format
- * @returns {Object|null} - User object or null if not found
+ * @returns {Promise<Object|null>} - User object or null if not found
  */
 async function findUserByPhone(phoneNumber) {
   try {
@@ -24,7 +24,7 @@ async function findUserByPhone(phoneNumber) {
 /**
  * Find user by user ID
  * @param {string} userId - User ID
- * @returns {Object|null} - User object or null if not found
+ * @returns {Promise<Object|null>} - User object or null if not found
  */
 async function getUserById(userId) {
   try {
@@ -43,7 +43,7 @@ async function getUserById(userId) {
 /**
  * Get all devices for a user
  * @param {string} userId - User ID
- * @returns {Array} - Array of device objects
+ * @returns {Promise<Array>} - Array of device objects
  */
 async function getUserDevices(userId) {
   try {
@@ -61,7 +61,7 @@ async function getUserDevices(userId) {
 /**
  * Get user statistics
  * @param {string} userId - User ID
- * @returns {Object} - User statistics
+ * @returns {Promise<Object>} - User statistics
  */
 async function getUserStats(userId) {
   try {
@@ -91,7 +91,7 @@ async function getUserStats(userId) {
  * Update user email address
  * @param {string} userId - User ID
  * @param {string} email - Email address (normalized)
- * @returns {Object} - Success result or error
+ * @returns {Promise<Object>} - Success result or error
  */
 async function updateUserEmail(userId, email) {
   try {
@@ -126,7 +126,7 @@ async function updateUserEmail(userId, email) {
  * @param {string} userId - User ID
  * @param {string} name - User name
  * @param {string} gender - User gender ('male' or 'female')
- * @returns {Object} - Success result or error
+ * @returns {Promise<Object>} - Success result or error
  */
 async function updateUserNameAndGender(userId, name, gender) {
   try {
@@ -159,7 +159,7 @@ async function updateUserNameAndGender(userId, name, gender) {
  * Update user name only
  * @param {string} userId - User ID
  * @param {string} name - User name
- * @returns {Object} - Success result or error
+ * @returns {Promise<Object>} - Success result or error
  */
 async function updateUserName(userId, name) {
   try {
@@ -187,7 +187,7 @@ async function updateUserName(userId, name) {
  * Update user selected image
  * @param {string} userId - User ID
  * @param {string} imageHash - Selected image hash
- * @returns {Object} - Success result or error
+ * @returns {Promise<Object>} - Success result or error
  */
 async function updateUserImage(userId, imageHash) {
   try {

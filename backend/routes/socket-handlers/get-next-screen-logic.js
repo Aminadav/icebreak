@@ -20,32 +20,52 @@ async function get_next_screen(gameId, userId) {
   var screenRules= getScreenRules(gameId, userId);
 
   // Choose rule based on metadata - dynamic matching
-  var choosenRule = screenRules.find(rule => {
-    if(DEBUG) console.log('Checking rule:', rule);
-    // Check if all rule conditions match the metadata
-    for (let key in rule) {
-      if (key === 'onScreen') continue 
-      if (key === 'ruleName') continue
-      const metadataValue = metadata[key] !== undefined ? metadata[key] : false;
-      const ruleValue = rule[key];
-      
-      // Handle function comparators
-      if (typeof ruleValue === 'function') {
-        if (!ruleValue(metadata[key])) {
-          if(DEBUG) console.log(`Rule rejected because ${key} function comparison failed`);
-          return false;
-        }
-      } else {
-        if(DEBUG) console.log(`Comparing metadata[${key}] (${metadataValue}) !== rule[${key}] (${ruleValue})`);
-        if (metadataValue !== ruleValue) {
-          if(DEBUG) console.log(`Rule rejected because ${key} doesn't match`);
-          return false; // This rule doesn't match
-        }
+  var choosenRule = null;
+  
+  // First check rules with async conditions
+  for (const rule of screenRules) {
+    if (rule.condition && typeof rule.condition === 'function') {
+      if(DEBUG) console.log('Checking async condition for rule:', rule.ruleName);
+      const conditionResult = await rule.condition();
+      if (conditionResult) {
+        if(DEBUG) console.log('Async condition passed for rule:', rule.ruleName);
+        choosenRule = rule;
+        break;
       }
     }
-    if(DEBUG) console.log('Rule matches all conditions');
-    return true; // All conditions match
-  });
+  }
+  
+  // If no async condition rule matched, check metadata-based rules
+  if (!choosenRule) {
+    choosenRule = screenRules.find(rule => {
+      if (rule.condition) return false; // Skip condition-based rules in this pass
+      if(DEBUG) console.log('Checking rule:', rule);
+      // Check if all rule conditions match the metadata
+      for (let key in rule) {
+        if (key === 'onScreen') continue 
+        if (key === 'ruleName') continue
+        if (key === 'condition') continue
+        const metadataValue = metadata[key] !== undefined ? metadata[key] : false;
+        const ruleValue = rule[key];
+        
+        // Handle function comparators
+        if (typeof ruleValue === 'function') {
+          if (!ruleValue(metadata[key])) {
+            if(DEBUG) console.log(`Rule rejected because ${key} function comparison failed`);
+            return false;
+          }
+        } else {
+          if(DEBUG) console.log(`Comparing metadata[${key}] (${metadataValue}) !== rule[${key}] (${ruleValue})`);
+          if (metadataValue !== ruleValue) {
+            if(DEBUG) console.log(`Rule rejected because ${key} doesn't match`);
+            return false; // This rule doesn't match
+          }
+        }
+      }
+      if(DEBUG) console.log('Rule matches all conditions');
+      return true; // All conditions match
+    });
+  }
 
   // If no rule matches, use the first rule as default
   if (!choosenRule) {

@@ -1,14 +1,18 @@
 const pool = require('../config/database');
 
 /**
- * Adds points to a user and emits points_updated event
+ * Adds points to a user, checks for new badges, and emits points_updated event
  * @param {string} userId - The user ID
  * @param {string} gameId - The game ID  
  * @param {number} amount - Points to add
  * @param {Object} socket - Socket instance to emit to
- * @returns {Promise<number>} New total points for the user in this game
+ * @returns {Promise<{totalPoints: number, earnedBadge: Object|null}>} New total points and any earned badge
  */
-async function addPointsAndEmit(userId, gameId, amount, socket) {
+async function addPointsWithBadgeCheckAndEmit(userId, gameId, amount, socket) {
+  console.log('addPointsWithBadgeCheckAndEmit', { userId, gameId, amount });
+  // Get current points before adding new points
+  const oldPoints = await getUserTotalPoints(userId, gameId);
+  
   // Insert point transaction
   await pool.query(`
     INSERT INTO user_points (user_id, game_id, points)
@@ -16,22 +20,36 @@ async function addPointsAndEmit(userId, gameId, amount, socket) {
   `, [userId, gameId, amount]);
   
   // Calculate new total points for this user in this game
-  const totalResult = await pool.query(`
-    SELECT COALESCE(SUM(points), 0) as total_points
-    FROM user_points 
-    WHERE user_id = $1 AND game_id = $2
-  `, [userId, gameId]);
+  const totalPoints = oldPoints + amount;
   
-  const totalPoints = parseInt(totalResult.rows[0].total_points);
+  // Check if user should get a new badge but don't award it here
+  // The screen flow will handle badge awarding when user continues from GOT_POINTS
+  const { checkForMissingBadge } = require('../routes/socket-handlers/badgeHelpers');
+  const badgeToAward = await checkForMissingBadge(userId, gameId);
+
+  console.log('badgeToAward (for info only)', {badgeToAward});
   
-  // Emit points updated event to the user
+  // Emit points updated event to the user (without badge info for now)
   socket.emit('points_updated', {
     success: true,
     points: totalPoints,
-    pointsAdded: amount
+    pointsAdded: amount,
+    hasPendingBadge: badgeToAward !== null // Let frontend know there might be a badge coming
   });
   
-  return totalPoints;
+  return {
+    totalPoints,
+    earnedBadge: badgeToAward // Return badge info for backward compatibility but don't award yet
+  };
+}
+
+/**
+ * Legacy function for backward compatibility - use addPointsWithBadgeCheckAndEmit instead
+ * @deprecated Use addPointsWithBadgeCheckAndEmit for automatic badge checking
+ */
+async function addPointsAndEmit(userId, gameId, amount, socket) {
+  const result = await addPointsWithBadgeCheckAndEmit(userId, gameId, amount, socket);
+  return result.totalPoints;
 }
 
 /**
@@ -52,5 +70,6 @@ async function getUserTotalPoints(userId, gameId) {
 
 module.exports = {
   addPointsAndEmit,
+  addPointsWithBadgeCheckAndEmit,
   getUserTotalPoints
 };

@@ -19,6 +19,7 @@ export default [
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
+      "tailwindcss/no-contradicting-classname": "off",
       "@typescript-eslint/no-unused-vars": "off",
       'react-refresh/only-export-components': [
         'warn',

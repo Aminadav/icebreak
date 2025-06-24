@@ -2,7 +2,7 @@ const { getUserIdFromDevice } = require("./utils");
 const pool = require('../../config/database');
 const { moveUserToScreen } = require("./get-next-screen-logic");
 const { updateMetaDataBinder, updateMetadata } = require("../../utils/update-meta-data");
-const { addPointsAndEmit } = require("../../utils/points-helper");
+const { addPointsWithBadgeCheckAndEmit } = require("../../utils/points-helper");
 const moveUserToGameState = require("./moveUserToGameState");
 const getUserAllMetaData = require("../../utils/getUserAllMetaData");
 const { increaseUserStateMetadata } = require("../../utils/incrementUserStateMetadata");
@@ -43,7 +43,8 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
     console.log('After update metadata:', updatedMetadata);
     
     // Add 10 points for answering about myself
-    await addPointsAndEmit(userId, gameId, 10, socket);
+    const pointsResult = await addPointsWithBadgeCheckAndEmit(userId, gameId, 10, socket);
+    const { totalPoints, earnedBadge } = pointsResult;
     
     var textArray=[
       'כל הכבוד!',
@@ -53,6 +54,8 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
       'אין עליך!',
     ]
     var text=textArray.sort(()=>Math.random() - 0.5)[0]
+    
+    // Always show GOT_POINTS first - the screen flow will check for badges when user continues
     await moveUserToGameState(socket, gameId, userId, {
       screenName: 'GOT_POINTS',
       points: 10,

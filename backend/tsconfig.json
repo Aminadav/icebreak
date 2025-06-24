@@ -4,7 +4,8 @@
     "noEmit": true,
     "target": "esnext",
     "moduleResolution": "node",
-    "module": "commonjs"
+    "module": "commonjs",
+    "resolveJsonModule": true
   },
   "include": [
     "../shared/**/*",

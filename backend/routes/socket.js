@@ -34,6 +34,8 @@ const { registerGetQuestionsHandler } = require('./socket-handlers/getQuestions'
 const { registerDeleteQuestionHandler } = require('./socket-handlers/deleteQuestion');
 const { registerGetNextScreenHandler } = require('./socket-handlers/get-next-screen');
 const { registerSubmitAnswerMyselfHandler } = require('./socket-handlers/submit-answer-myself');
+const { registerGetUserBadgesHandler } = require('./socket-handlers/getUserBadges');
+const { registerGetUserDataHandler } = require('./socket-handlers/getUserData');
 const { registerLogoutHandler } = require('./socket-handlers/logout');
 // Import utilities
 const { getUserIdFromDevice, sendUserDataToClient } = require('./socket-handlers/utils');
@@ -97,6 +99,8 @@ function setupSocketHandlers(io) {
     registerDeleteQuestionHandler(socket);
     registerGetNextScreenHandler(socket);
     registerSubmitAnswerMyselfHandler(socket);
+    registerGetUserBadgesHandler(socket);
+    registerGetUserDataHandler(socket);
     registerLogoutHandler(socket);
   });
 }

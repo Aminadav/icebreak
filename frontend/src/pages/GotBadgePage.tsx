@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { usePoints } from '../contexts/GameContext';
-import { badges, getCurrentBadge, getNextBadge, getProgressToNextLevel, mockFriends } from '../components/BadgeSystem';
+import { usePoints, useGame } from '../contexts/GameContext';
+import { badges, getCurrentBadge, getNextBadge, getProgressToNextLevel, mockFriends, getBadgeImage } from '../components/BadgeSystem';
 import { BadgeSectionHeader } from '../components/BadgeSectionHeader';
 import { BadgeListOfFriendsInYourLevel } from '../components/BadgeListOfFriendsInYourLevel';
 import { BadgeListOfLevelsToAchieve } from '../components/BadgeListOfLevelsToAchieve';
 import { BadgeProgressBar } from '../components/BadgeProgressBar';
+import { useOnEnter } from '../hooks/useOnEnter';
+import { useDocumentOnClick } from '../hooks/useDocumentOnClick';
 
 // Badge types array based on the Figma design
 // const badges = [
@@ -28,12 +30,26 @@ interface Friend {
 
 export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): JSX.Element {
   var myPoints=usePoints().points
+  const { emitMoveToNextPage } = useGame();
    // User's current points - can be changed to test different levels
-  const [userPoints] = useState(382);
+  const [userPoints] = useState(myPoints);
   
   const currentBadge = getCurrentBadge(userPoints);
   const nextBadge = getNextBadge(userPoints);
   const progress = getProgressToNextLevel(userPoints);
+
+  const handleContinue = () => {
+    console.log('Badge page continue clicked - moving to next screen');
+    emitMoveToNextPage();
+  };
+
+  // If no current badge, shouldn't happen, but handle gracefully
+  if (!currentBadge) {
+    return <div>Loading...</div>;
+  }
+
+  useOnEnter(handleContinue);
+  useDocumentOnClick(handleContinue)
 
   return (
     <div
@@ -154,11 +170,11 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
                       <img
                         alt={currentBadge.name}
                         className="block max-w-none size-full"
-                        src={currentBadge.image}
+                        src={getBadgeImage(currentBadge.id)}
                         style={{
                           borderRadius: '170.099px',
                           border: '2px solid #FFD700',
-                          background: `url('${currentBadge.image}') lightgray 50% / cover no-repeat`,
+                          background: `url('${getBadgeImage(currentBadge.id)}') lightgray 50% / cover no-repeat`,
                           boxShadow: '0px 0px 22px 10px rgba(255, 215, 0, 0.8), 0px 0px 44px 20px rgba(255, 255, 255, 0.4)',
                           animation: 'badgeRotate 3s linear forwards'
                         }}
@@ -197,7 +213,7 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE}): 
                       <img
                         alt={nextBadge.name}
                         className="block max-w-none size-full"
-                        src={nextBadge.image}
+                        src={getBadgeImage(nextBadge.id)}
                         /**border-radius: 82px;
 background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
                         style={{
@@ -282,6 +298,16 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
                 <p className="block leading-[normal]" dir="auto">
                   כל עליה שלכם בדרגה משקפת שינוי גדול שאתם יוצרים בעולם.
                 </p>
+              </div>
+
+              {/* Continue Button */}
+              <div className="px-[45px] pb-[60px]">
+                <button
+                  onClick={handleContinue}
+                  className="w-full px-8 py-4 text-xl font-bold text-purple-900 transition-all duration-300 transform rounded-full shadow-lg bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 hover:scale-105"
+                >
+                  המשך
+                </button>
               </div>
             </div>
           </div>

@@ -24,9 +24,12 @@ interface GameContextType {
   gameData: GameData | null;
   userData: UserData;
   points: number;
+  currentBadge: any | null;
+  allBadges: any[];
   isLoading: boolean;
   error: string | null;
   refreshPoints: () => void;
+  refreshBadges: () => void;
   gameEmitter:(eventName:string,data:Object,callback?:Function)=>void
   emitMoveToNextPage: () => void;
 }
@@ -42,6 +45,8 @@ export function GameProvider({ children }: GameProviderProps) {
   const { socket } = useSocket();
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [userData, setUserData] = useState<UserData>({});
+  const [currentBadge, setCurrentBadge] = useState<any | null>(null);
+  const [allBadges, setAllBadges] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -55,6 +60,19 @@ export function GameProvider({ children }: GameProviderProps) {
             ...prev,
             points: response.points
           }));
+        }
+      });
+    }
+  };
+
+  const refreshBadges = () => {
+    if (socket && gameId && userData.userId) {
+      console.log('🏆 GameContext: Refreshing badges for user', userData.userId, 'in game', gameId);
+      socket.emit('get_user_badges', { gameId }, (response: any) => {
+        if (response?.success) {
+          console.log('🏆 GameContext: Badges refreshed:', response);
+          setCurrentBadge(response.currentBadge);
+          setAllBadges(response.allBadges || []);
         }
       });
     }
@@ -111,11 +129,12 @@ export function GameProvider({ children }: GameProviderProps) {
       console.log('THE BIG EMIT')
       socket.emit('get_game_data', { gameId });
       
-      // Also request current device registration to get latest user data
-      // console.log('🎮 GameContext: Requesting device registration to get latest user data');
+      // Request complete user data on page load
+      console.log('🎮 GameContext: Requesting complete user data on page load');
+      socket.emit('get_user_data', { gameId });
     };
 
-    // Listen for user data updates (auto-sent on connection and after changes)
+    // Listen for user data updates (complete user data from server)
     const userDataUpdatedHandler = (data: any) => {
       if (data.success) {
         console.log('🎮 GameContext: User data updated:', data);
@@ -124,75 +143,77 @@ export function GameProvider({ children }: GameProviderProps) {
           userId: data.userId,
           email: data.email,
           name: data.name,
-          gender: data.gender
+          gender: data.gender,
+          selectedImageHash: data.selectedImageHash,
+          points: data.points
         });
+        
+        // Update badges if provided
+        if (data.currentBadge !== undefined) {
+          setCurrentBadge(data.currentBadge);
+        }
+        if (data.allBadges !== undefined) {
+          setAllBadges(data.allBadges || []);
+        }
       }
     };
 
     // Also listen for device registration to get user data (backward compatibility)
     const deviceRegisteredHandler = (data: any) => {
       if (data.success) {
-        console.log('🎮 GameContext: Device registered with user data:', data);
-        setUserData({
-          phoneNumber: data.phoneNumber,
-          userId: data.userId,
-          email: data.email,
-          name: data.name,
-          gender: data.gender
-        });
+        console.log('🎮 GameContext: Device registered, requesting complete user data');
+        // Request complete user data instead of setting partial data
+        if (gameId) {
+          socket.emit('get_user_data', { gameId });
+        }
       }
     };
 
     // Listen for successful 2FA verification which creates/finds the user
     const twoFAVerifiedHandler = (data: any) => {
       if (data.success && data.user) {
-        console.log('🎮 GameContext: 2FA verified, updating userData with user info:', data.user);
-        setUserData(prev => ({
-          ...prev,
-          phoneNumber: data.user.phoneNumber,
-          userId: data.user.userId
-        }));
+        console.log('🎮 GameContext: 2FA verified, requesting complete user data');
+        // Request complete user data instead of setting partial data
+        if (gameId) {
+          socket.emit('get_user_data', { gameId });
+        }
       }
     };
 
-    // Listen for user data updates (email saved, name saved, etc.)
+    // Listen for user data updates (name saved, gender saved, etc.)
     const nameUpdatedHandler = (data: any) => {
       if (data.success && data.name) {
-        console.log('🎮 GameContext: Name updated:', data.name);
-        setUserData(prev => ({
-          ...prev,
-          name: data.name
-        }));
+        console.log('🎮 GameContext: Name updated, requesting complete user data');
+        if (gameId) {
+          socket.emit('get_user_data', { gameId });
+        }
       }
     };
 
     const emailUpdatedHandler = (data: any) => {
       if (data.success && data.email) {
-        console.log('🎮 GameContext: Email updated');
-        setUserData(prev => ({
-          ...prev,
-          email: data.email
-        }));
+        console.log('🎮 GameContext: Email updated, requesting complete user data');
+        if (gameId) {
+          socket.emit('get_user_data', { gameId });
+        }
       }
     };
 
     const genderUpdatedHandler = (data: any) => {
       if (data.success && data.gender) {
-        console.log('🎮 GameContext: Gender updated');
-        setUserData(prev => ({
-          ...prev,
-          gender: data.gender
-        }));
+        console.log('🎮 GameContext: Gender updated, requesting complete user data');
+        if (gameId) {
+          socket.emit('get_user_data', { gameId });
+        }
       }
     };
 
     const smsSentHandler = (data: any) => {
       if (data.success && data.phoneNumber) {
-        console.log('🎮 GameContext: SMS sent, updating userData with phone number:', data.phoneNumber);
-        setUserData(prev => ({
-          ...prev,
-          phoneNumber: data.phoneNumber
-        }));
+        console.log('🎮 GameContext: SMS sent, requesting complete user data');
+        if (gameId) {
+          socket.emit('get_user_data', { gameId });
+        }
       }
     };
 
@@ -204,7 +225,22 @@ export function GameProvider({ children }: GameProviderProps) {
           ...prev,
           points: data.points
         }));
+        
+        // If points updated included badge info, refresh all user data to get updated badges
+        if (data.earnedBadge || data.hasPendingBadge) {
+          console.log('🏆 GameContext: Badge-related points update, requesting complete user data');
+          if (gameId) {
+            socket.emit('get_user_data', { gameId });
+          }
+        }
       }
+    };
+
+    // Listen for badge updates
+    const badgeUpdatedHandler = (data: any) => {
+      console.log('🏆 GameContext: Badges updated:', data);
+      setCurrentBadge(data.currentBadge);
+      setAllBadges(data.allBadges || []);
     };
 
     socket.on('user_data_updated', userDataUpdatedHandler);
@@ -215,6 +251,7 @@ export function GameProvider({ children }: GameProviderProps) {
     socket.on('gender_saved', genderUpdatedHandler);
     socket.on('my_points', pointsUpdatedHandler);
     socket.on('points_updated', pointsUpdatedHandler);
+    socket.on('user_badges_updated', badgeUpdatedHandler);
 
     loadGameData();
 
@@ -227,24 +264,12 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.off('gender_saved', genderUpdatedHandler);
       socket.off('my_points', pointsUpdatedHandler);
       socket.off('points_updated', pointsUpdatedHandler);
+      socket.off('user_badges_updated', badgeUpdatedHandler);
     };
   }, [gameId, socket,socket?.connected]);
 
-  // Load user points when both gameId and userId are available
-  useEffect(() => {
-    if (socket && gameId && userData.userId && userData.points === undefined) {
-      // console.log('🎯 GameContext: Loading points for user', userData.userId, 'in game', gameId);
-      socket.emit('my_points', { gameId }, (response: any) => {
-        if (response?.success && typeof response.points === 'number') {
-          // console.log('🎯 GameContext: Points loaded:', response.points);
-          setUserData(prev => ({
-            ...prev,
-            points: response.points
-          }));
-        }
-      });
-    }
-  }, [socket, gameId, userData.userId, userData.points]);
+  // Note: User data loading is now handled by get_user_data socket event
+  // No separate effects needed for points/badges loading
 
   function gameEmitter(eventName:string,data:any={},callback:Function | undefined = undefined) {
     data.gameId= gameId;
@@ -262,9 +287,12 @@ export function GameProvider({ children }: GameProviderProps) {
     gameData,
     userData,
     points: userData.points || 0,
+    currentBadge,
+    allBadges,
     isLoading,
     error,
     refreshPoints,
+    refreshBadges,
     gameEmitter,
     emitMoveToNextPage
   };

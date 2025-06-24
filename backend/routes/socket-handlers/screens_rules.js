@@ -14,10 +14,43 @@ function getScreenRules(gameId,userId) {
    *    SEEN_GAME_READY?:any
    *    SEEN_BEFORE_ASK_ABOUT_YOU?:any
    *    ANSWER_ABOUT_MYSELF?:any,
+   *    condition?:()=>Promise<boolean>,
    *    onScreen:()=>Promise<GAME_STATES>
    * }[]}
    */
   var screenRules = [
+    {
+      ruleName: 'Check for missing badges',
+      condition: async () => {
+        const { checkForMissingBadge } = require('./badgeHelpers');
+        const { getUserTotalPoints } = require('../../utils/points-helper');
+        const metadata = await getUserAllMetaData(gameId, userId);
+        
+        const missingBadge = await checkForMissingBadge(userId, gameId);
+        return missingBadge !== null;
+      },
+      onScreen: async () => {
+        const { checkForMissingBadge, awardBadge } = require('./badgeHelpers');
+        const { getUserTotalPoints } = require('../../utils/points-helper');
+        
+        const missingBadge = await checkForMissingBadge(userId, gameId);
+        
+        if (missingBadge) {
+          // Award the badge
+          const awardedBadge = await awardBadge(userId, gameId, missingBadge.id);
+          console.log(`🏆 Screen rule awarded badge: ${awardedBadge?.name || missingBadge.id} to user ${userId}`);
+          
+          return {
+            screenName: 'GOT_BADGE',
+            badgeId: missingBadge.id,
+            friendsInLevel: [] // TODO: Implement friends in level logic
+          };
+        }
+        
+        // This shouldn't happen since condition checked for missing badge
+        throw new Error('Badge rule triggered but no missing badge found');
+      }
+    },
     {
       ruleName:'First screen for creator',
       IS_CREATOR: true,

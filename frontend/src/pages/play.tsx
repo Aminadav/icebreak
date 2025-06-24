@@ -26,8 +26,9 @@ import PictureUploadPage from './PictureUploadPage';
 import CameraPage from './CameraPage';
 import CreatorGameReadyPage from './CreatorGameReadyPage';
 import QuestionAboutOtherPage from './QuestionPageAboutOther';
+import { getIsTesting } from '../utils/isTesting';
 
-const DEBUG_DIV=false
+const DEBUG_DIV=getIsTesting() ? false : true
 export default function Play(): JSX.Element {
   const gameId = useGameId();
   const {socket}=useSocket();

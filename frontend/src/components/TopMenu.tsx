@@ -77,7 +77,7 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
       
       {/* Menu */}
       <div
-        className={`fixed top-[60px] ${isRTL ? 'left-0' : 'right-0'} w-[300px] bg-gradient-to-br from-indigo-50 via-white to-purple-50 shadow-2xl z-50 transform transition-transform duration-300 ease-out border-l-4 border-gradient-to-b from-blue-400 to-purple-500 ${
+        className={`fixed top-[60px] ${isRTL ? 'left-0' : 'right-0'} w-[300px] bg-gradient-to-br via-white  shadow-2xl z-50 transform transition-transform duration-300 ease-out border-l-4 border-gradient-to-b from-blue-400 to-purple-500 ${
           isOpen 
             ? 'translate-x-0' 
             : isRTL 

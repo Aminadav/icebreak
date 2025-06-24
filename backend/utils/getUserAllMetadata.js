@@ -13,7 +13,6 @@ module.exports=async function getUserAllMetadata(gameId, userId) {
   `;
 
   const result = await pool.query(metadataQuery, [userId, gameId]);
-  console.log('Fetched metadata:', result.rows);
   
   let metadata = {};
   if (result.rows.length > 0 && result.rows[0].metadata) {

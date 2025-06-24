@@ -53,7 +53,7 @@ export default function MainHeader({ onMenuAction }: MainHeaderProps): JSX.Eleme
 
   return (
     <>
-      <div className="bg-black sticky top-0 z-50 w-full h-[60px] flex items-center justify-between px-[13px] box-border">
+      <div className="sticky top-0 z-50 w-full h-[60px] flex items-center justify-between px-[13px] box-border">
         <button 
           className={`absolute ${isRTL ? 'left-[13px]' : 'right-[13px]'} top-1/2 -translate-y-1/2 w-6 h-6 bg-transparent border-none cursor-pointer p-0`}
           onClick={toggleMenu}

@@ -50,6 +50,8 @@ export function GameProvider({ children }: GameProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log({userData})
+
   const refreshPoints = () => {
     if (socket && gameId && userData.userId) {
       console.log('🎯 GameContext: Refreshing points for user', userData.userId, 'in game', gameId);
@@ -131,7 +133,7 @@ export function GameProvider({ children }: GameProviderProps) {
       
       // Request complete user data on page load
       console.log('🎮 GameContext: Requesting complete user data on page load');
-      socket.emit('get_user_data', { gameId });
+      socket.emit('get_user_game_data', { gameId });
     };
 
     // Listen for user data updates (complete user data from server)
@@ -164,7 +166,7 @@ export function GameProvider({ children }: GameProviderProps) {
         console.log('🎮 GameContext: Device registered, requesting complete user data');
         // Request complete user data instead of setting partial data
         if (gameId) {
-          socket.emit('get_user_data', { gameId });
+          socket.emit('get_user_game_data', { gameId });
         }
       }
     };
@@ -175,7 +177,7 @@ export function GameProvider({ children }: GameProviderProps) {
         console.log('🎮 GameContext: 2FA verified, requesting complete user data');
         // Request complete user data instead of setting partial data
         if (gameId) {
-          socket.emit('get_user_data', { gameId });
+          socket.emit('get_user_game_data', { gameId });
         }
       }
     };
@@ -185,7 +187,7 @@ export function GameProvider({ children }: GameProviderProps) {
       if (data.success && data.name) {
         console.log('🎮 GameContext: Name updated, requesting complete user data');
         if (gameId) {
-          socket.emit('get_user_data', { gameId });
+          socket.emit('get_user_game_data', { gameId });
         }
       }
     };
@@ -194,7 +196,7 @@ export function GameProvider({ children }: GameProviderProps) {
       if (data.success && data.email) {
         console.log('🎮 GameContext: Email updated, requesting complete user data');
         if (gameId) {
-          socket.emit('get_user_data', { gameId });
+          socket.emit('get_user_game_data', { gameId });
         }
       }
     };
@@ -203,7 +205,7 @@ export function GameProvider({ children }: GameProviderProps) {
       if (data.success && data.gender) {
         console.log('🎮 GameContext: Gender updated, requesting complete user data');
         if (gameId) {
-          socket.emit('get_user_data', { gameId });
+          socket.emit('get_user_game_data', { gameId });
         }
       }
     };
@@ -212,7 +214,7 @@ export function GameProvider({ children }: GameProviderProps) {
       if (data.success && data.phoneNumber) {
         console.log('🎮 GameContext: SMS sent, requesting complete user data');
         if (gameId) {
-          socket.emit('get_user_data', { gameId });
+          socket.emit('get_user_game_data', { gameId });
         }
       }
     };
@@ -230,7 +232,7 @@ export function GameProvider({ children }: GameProviderProps) {
         if (data.earnedBadge || data.hasPendingBadge) {
           console.log('🏆 GameContext: Badge-related points update, requesting complete user data');
           if (gameId) {
-            socket.emit('get_user_data', { gameId });
+            socket.emit('get_user_game_data', { gameId });
           }
         }
       }
@@ -243,7 +245,7 @@ export function GameProvider({ children }: GameProviderProps) {
       setAllBadges(data.allBadges || []);
     };
 
-    socket.on('user_data_updated', userDataUpdatedHandler);
+    socket.on('user_game_data_updated', userDataUpdatedHandler);
     socket.on('device_registered', deviceRegisteredHandler);
     socket.on('2fa_verified', twoFAVerifiedHandler);
     socket.on('sms_sent', smsSentHandler);
@@ -256,7 +258,7 @@ export function GameProvider({ children }: GameProviderProps) {
     loadGameData();
 
     return () => {
-      socket.off('user_data_updated', userDataUpdatedHandler);
+      socket.off('user_game_data_updated', userDataUpdatedHandler);
       socket.off('device_registered', deviceRegisteredHandler);
       socket.off('2fa_verified', twoFAVerifiedHandler);
       socket.off('sms_sent', smsSentHandler);
@@ -268,7 +270,7 @@ export function GameProvider({ children }: GameProviderProps) {
     };
   }, [gameId, socket,socket?.connected]);
 
-  // Note: User data loading is now handled by get_user_data socket event
+  // Note: User data loading is now handled by get_user_game_data socket event
   // No separate effects needed for points/badges loading
 
   function gameEmitter(eventName:string,data:any={},callback:Function | undefined = undefined) {

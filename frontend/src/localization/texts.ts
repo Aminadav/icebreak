@@ -126,7 +126,7 @@ export const texts: Record<'he' | 'en', Texts> = {
     direction: 'rtl',
     menu: {
       title: 'תפריט משחק',
-      greeting: 'שלום שלמה!',
+      greeting: 'שלום',
       mute: 'השתק',
       shareGame: 'הזמנה למשחק זה',
       champions: 'אלופי הקבוצה',

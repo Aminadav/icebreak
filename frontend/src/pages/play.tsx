@@ -1,12 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import PageLayout from '../components/PageLayout';
-import Button from '../components/Button';
-import AnimatedImage from '../components/AnimatedImage';
-import MyPoints from '../components/MyPoints';
 import { useSocket } from '../contexts/SocketContext';
 import { useGameId } from '../utils/useGameId';
-import { useGame, usePoints } from '../contexts/GameContext';
 import { EMPTY_GAME_STATE } from '../../../shared/games_states_interface';
 import BeforeStartAskAboutYou from './BeforeStartAskAboutYou';
 import TextMessageToUserPage from './TextMessageToUserPage';

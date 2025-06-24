@@ -3,10 +3,10 @@ const { getUserTotalPoints } = require('../../utils/points-helper');
 const pool = require('../../config/database');
 
 /**
- * Get complete user data and emit user_data_updated event
+ * Get complete user data and emit user_game_data_updated event
  */
-module.exports.registerGetUserDataHandler = function(socket) {
-  socket.on('get_user_data', async (data) => {
+module.exports.registerGetUserGameDataHandler = function(socket) {
+  socket.on('get_user_game_data', async (data) => {
     try {
       const { gameId } = data;
       const userId = await getUserIdFromDevice(socket.deviceId);
@@ -51,14 +51,14 @@ module.exports.registerGetUserDataHandler = function(socket) {
       console.log(`📋 User data loaded: ${user.name}, ${points} points, ${userBadgeIds.length} badges`);
 
       // Emit complete user data
-      socket.emit('user_data_updated', {
+      socket.emit('user_game_data_updated', {
         success: true,
         userId: userId,
         phoneNumber: user.phone_number,
         email: user.email,
         name: user.name,
         gender: user.gender,
-        selectedImageHash: user.image,
+        image: user.image,
         points: points,
         currentBadge: currentBadge,
         allBadges: userBadgeIds
@@ -66,7 +66,7 @@ module.exports.registerGetUserDataHandler = function(socket) {
 
     } catch (error) {
       console.error('❌ getUserData error:', error);
-      socket.emit('user_data_updated', {
+      socket.emit('user_game_data_updated', {
         success: false,
         message: 'Failed to load user data'
       });

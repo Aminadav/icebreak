@@ -35,10 +35,11 @@ const { registerDeleteQuestionHandler } = require('./socket-handlers/deleteQuest
 const { registerGetNextScreenHandler } = require('./socket-handlers/get-next-screen');
 const { registerSubmitAnswerMyselfHandler } = require('./socket-handlers/submit-answer-myself');
 const { registerGetUserBadgesHandler } = require('./socket-handlers/getUserBadges');
-const { registerGetUserDataHandler } = require('./socket-handlers/getUserData');
+const {  registerGetUserGameDataHandler } = require('./socket-handlers/getUserGameData');
 const { registerLogoutHandler } = require('./socket-handlers/logout');
 // Import utilities
 const { getUserIdFromDevice, sendUserDataToClient } = require('./socket-handlers/utils');
+const {registerGetUserDataHandler} = require('./socket-handlers/registerGetUserData');
 /**
  * Setup socket event handlers for the application.
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
@@ -100,8 +101,9 @@ function setupSocketHandlers(io) {
     registerGetNextScreenHandler(socket);
     registerSubmitAnswerMyselfHandler(socket);
     registerGetUserBadgesHandler(socket);
-    registerGetUserDataHandler(socket);
+    registerGetUserGameDataHandler(socket);
     registerLogoutHandler(socket);
+    registerGetUserDataHandler(socket);
   });
 }
 

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTracking } from '../contexts/TrackingContext';
 import { useSocket } from '../contexts/SocketContext';
+import { useGame } from '../contexts/GameContext';
 
 interface TopMenuProps {
   isOpen: boolean;
@@ -50,8 +51,12 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
     onClose();
   };
 
+  var {userData,isLoggedIn}=useSocket();
+
   const menuItems = [
-    { text: texts.menu.greeting, icon: '👋', hasGreeting: true, gradient: 'from-yellow-400 to-orange-500', isEmoji: true },
+    { 
+      show:isLoggedIn,
+      text: texts.menu.greeting + ' ' + userData?.name + '!', icon: '👋', hasGreeting: true, gradient: 'from-yellow-400 to-orange-500', isEmoji: true },
     { text: texts.menu.mute, icon: '/images/icons/mute.svg', gradient: 'from-purple-400 to-purple-600' },
     { text: texts.menu.shareGame, icon: '/images/icons/share.svg', gradient: 'from-blue-400 to-blue-600' },
     { text: texts.menu.champions, icon: '/images/icons/champions.svg', gradient: 'from-yellow-500 to-yellow-700' },
@@ -120,7 +125,10 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
 
           {/* Menu Items */}
           <div className="space-y-3">
-            {menuItems.map((item, index) => (
+            {menuItems
+            // Filter out items that should not be shown
+            .filter(item=>item.show===undefined || item.show) 
+            .map((item, index) => (
               <button
                 key={index}
                 className={`group w-full relative overflow-hidden rounded-xl transition-all duration-300 transform hover:scale-102 hover:shadow-xl shadow-md ${

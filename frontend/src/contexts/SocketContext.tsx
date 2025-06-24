@@ -7,6 +7,8 @@ interface SocketContextType {
   isConnected: boolean;
   error: string | null;
   deviceId: string | null;
+  isLoggedIn: boolean | null 
+  userData: any | null;
 }
 
 const SocketContext = createContext<SocketContextType | undefined>(undefined);
@@ -20,6 +22,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
   const [isConnected, setIsConnected] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deviceId, setDeviceIdState] = useState<string | null>(null);
+  const [userData, setUserData] = useState<any>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<any>(null);
 
   useEffect(() => {
     // console.log('🚀 SocketProvider: Initializing socket connection...');
@@ -83,6 +87,13 @@ export function SocketProvider({ children }: SocketProviderProps) {
       }
     });
 
+    function userDataUpdatedHandler(data:any) {
+      setIsLoggedIn(!!data.name)
+      setUserData(data);
+    }
+    newSocket.on('user_data_updated',userDataUpdatedHandler)
+    newSocket.emit('get_user_data')
+
     // Handle server errors
     newSocket.on('error', (data) => {
       console.error('❌ Server error:', data);
@@ -92,6 +103,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     // Cleanup on unmount
     return () => {
       console.log('🧹 SocketProvider: Cleaning up socket connection...');
+      newSocket.off('user_data_updated',userDataUpdatedHandler);
       newSocket.disconnect();
     };
   }, []); // No dependencies - device ID is managed internally
@@ -102,6 +114,8 @@ export function SocketProvider({ children }: SocketProviderProps) {
     isConnected,
     error,
     deviceId,
+    isLoggedIn,
+    userData,
   };
 
   return (

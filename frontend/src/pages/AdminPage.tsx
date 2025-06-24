@@ -231,6 +231,11 @@ export default function AdminPage(): JSX.Element {
     },
     {
       state: {
+        screenName: 'ASK_PLAYER_NAME',
+      },
+    },
+    {
+      state: {
         screenName: 'TEXT_MESSAGE_TO_USER',
         text: 'נשארו רק עוד 2 שאלות',
         messageId: 'TWO_MORE_QUESTIONS_ABOUT_YOU'

@@ -18,7 +18,7 @@ interface EnterNamePageProps {
   gameId?: string;
 }
 
-export default function EnterNamePage(): JSX.Element {
+export default function EnterNamePage({ phoneNumber, userId, email }: EnterNamePageProps): JSX.Element {
   const DEBUG = false;
   var gameId=useGameId()
   const { texts } = useLanguage();
@@ -29,6 +29,7 @@ export default function EnterNamePage(): JSX.Element {
   
   const [name, setName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleContinue = async () => {
     if (!name.trim()) {
@@ -88,6 +89,23 @@ export default function EnterNamePage(): JSX.Element {
   };
 
   const handleInputChange = (value: string) => {
+    // Hebrew letters regex: א-ת plus quotes for ד"ר
+    const hebrewPattern = /^[א-ת"' ]*$/;
+    
+    // Check if input contains only Hebrew letters and quotes
+    if (!hebrewPattern.test(value)) {
+      setErrorMessage('Can type only hebrew letters');
+      return;
+    }
+    
+    // Check maximum length
+    if (value.length > 15) {
+      setErrorMessage('Maximum 15 letters allowed');
+      return;
+    }
+    
+    // Clear error if input is valid
+    setErrorMessage('');
     setName(value);
   };
 
@@ -130,6 +148,11 @@ export default function EnterNamePage(): JSX.Element {
               }
             }}
           />
+          {errorMessage && (
+            <div className="mt-2 text-sm text-center text-red-300">
+              {errorMessage}
+            </div>
+          )}
         </div>
         
         {/* Continue Button */}

@@ -1,4 +1,5 @@
 const pool = require('../../config/database');
+const { sendUserDataToClient } = require('./utils');
 
 /**
  * Handle user logout - clears user_id from device and performs cleanup
@@ -31,6 +32,7 @@ module.exports.registerLogoutHandler = function(socket) {
         success: true,
         message: 'Logged out successfully'
       });
+      await sendUserDataToClient(socket, null)
 
     } catch (error) {
       console.error('Error during logout:', error);

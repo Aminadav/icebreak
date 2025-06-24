@@ -67,7 +67,9 @@ export default function TopMenu({ isOpen, onClose, onMenuAction }: TopMenuProps)
     { text: texts.menu.help, icon: '/images/icons/whatsapp.svg', gradient: 'from-cyan-400 to-cyan-600', link: 'https://chat.whatsapp.com/GbDiSa5pMNsLWgnTlDjXm5' },
     { text: texts.menu.about, icon: '/images/icons/about.svg', gradient: 'from-indigo-400 to-indigo-600' },
     { text: texts.menu.updates, icon: '/images/icons/whatsapp.svg', gradient: 'from-red-400 to-red-600', link: 'https://chat.whatsapp.com/GzczSiemSHxEKOMIkrxBOb' },
-    { text: texts.menu.logout, icon: '/images/icons/logout.svg', gradient: 'from-gray-400 to-gray-600' }
+    { 
+      show: isLoggedIn,
+      text: texts.menu.logout, icon: '/images/icons/logout.svg', gradient: 'from-gray-400 to-gray-600' }
   ];
 
   return (

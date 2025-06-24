@@ -116,7 +116,7 @@ async function getUserDetails(userId) {
 async function sendUserDataToClient(socket, userId) {
   try {
     if (!userId) {
-      return;
+      socket.emit('user_data_updated')
     }
     
     const userDetails = await getUserDetails(userId);

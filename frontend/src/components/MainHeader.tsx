@@ -5,6 +5,7 @@ import { useSocket } from '../contexts/SocketContext';
 import TopMenu from './TopMenu';
 import { useGame } from '../contexts/GameContext';
 import MyPoints from './MyPoints';
+import { env } from '../env';
 
 const DEBUG_SHOW_POINTS=true
 
@@ -87,7 +88,7 @@ export default function MainHeader({ onMenuAction,hidePoints=false }: MainHeader
         {isInsideGame && (userData?.name || DEBUG_SHOW_POINTS) && <div className={`absolute ${isRTL ? 'left-[9px]' : 'right-[9px]'} bg-transparent border-none text-white text-xl  p-0 top-[15px]`}>
           {(!hidePoints || DEBUG_SHOW_POINTS) && <MyPoints/>}
         </div>}
-        
+
         <div
         onClick={handleLogoClick}
         style={{
@@ -101,6 +102,12 @@ export default function MainHeader({ onMenuAction,hidePoints=false }: MainHeader
         }}
         className={`absolute ${isRTL ? 'right-9' : 'left-9'} top-1/2 -translate-y-1/2 w-[80px]`}>
         </div>
+
+        {env.is_dev && (
+          <div className="absolute top-0 pt-1 text-xs text-white transform -translate-x-1/2 opacity-50 left-1/2">
+            DEVELOPMENT MODE
+          </div>
+        )}
       </div>
 
       <TopMenu isOpen={isMenuOpen} onClose={closeMenu} onMenuAction={onMenuAction} />

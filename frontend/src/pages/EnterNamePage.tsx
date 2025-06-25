@@ -114,8 +114,6 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
   return (
     <PageLayout 
       showHeader={true} 
-      
-      onBack={() => navigate(-1)}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Name Entry Icon */}

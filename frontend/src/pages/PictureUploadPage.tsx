@@ -177,8 +177,6 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   return (
     <PageLayout 
       showHeader={true} 
-      
-      onBack={() => navigate(-1)}
     >
       <main className="flex flex-col items-center justify-between w-full min-h-[calc(100vh-88px)] py-8 px-4">
         

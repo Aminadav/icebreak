@@ -6,6 +6,7 @@ import { useSocket } from '../contexts/SocketContext';
 import { useGame } from '../contexts/GameContext';
 import AboutPage from './AboutPage';
 import FullScreenModal from './FullScreenModal';
+import { env } from '../env';
 
 export default function TopMenu({ isOpen, onClose }: {
   isOpen: boolean;
@@ -17,6 +18,8 @@ export default function TopMenu({ isOpen, onClose }: {
   const navigate = useNavigate();
   const { userData, isLoggedIn } = useSocket();
   const isRTL = texts.direction === 'rtl';
+  var game= useGame();
+  var isInGame = !!game;
 
   var [showInFullScreenModal,set_showInFullScreenModal]=useState<JSX.Element | null>(null)
 
@@ -41,6 +44,7 @@ export default function TopMenu({ isOpen, onClose }: {
       icon: language === 'he' ? '🇺🇸' : '🇮🇱',
       gradient: 'from-blue-500 to-purple-600',
       isEmoji: true,
+      hide: !env.DEBUG_SHOW_ENGLISH,
       isSmaller: true,
       onClick: () => {
         trackEvent('language_toggle_clicked', {
@@ -59,24 +63,28 @@ export default function TopMenu({ isOpen, onClose }: {
     {
       title: texts.menu.shareGame,
       icon: '/images/icons/share.svg',
+      hide:!isInGame,
       gradient: 'from-blue-400 to-blue-600',
       onClick: () => console.log('Share game clicked')
     },
     {
       title: texts.menu.champions,
       icon: '/images/icons/champions.svg',
+      hide:!isInGame,
       gradient: 'from-yellow-500 to-yellow-700',
       onClick: () => console.log('Champions clicked')
     },
     {
       title: texts.menu.dashboard,
       icon: '/images/icons/dashboard.svg',
+      hide:!isInGame,
       gradient: 'from-green-400 to-green-600',
       onClick: () => console.log('Dashboard clicked')
     },
     {
       title: texts.menu.myGames,
       icon: '/images/icons/my_games.svg',
+      hide:!isInGame,
       gradient: 'from-pink-400 to-pink-600',
       onClick: () => console.log('My games clicked')
     },
@@ -90,6 +98,7 @@ export default function TopMenu({ isOpen, onClose }: {
       title: texts.menu.components,
       icon: '🎨',
       gradient: 'from-indigo-400 to-pink-500',
+      hide:!env.DEBUG_SHOW_COMPONENTS_LIBRARY_IN_MENU,
       isEmoji: true,
       // onClick: () => onMenuAction?.('components')
     },

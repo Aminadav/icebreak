@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGame } from '../contexts/GameContext';
+import { useSocket } from '../contexts/SocketContext';
 
 interface FullScreenModalProps {
   open: boolean;

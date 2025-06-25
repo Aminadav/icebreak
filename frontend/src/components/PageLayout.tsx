@@ -5,13 +5,11 @@ import { useGame } from '../contexts/GameContext';
 
 interface PageLayoutProps {
   children: React.ReactNode;
-  onBack?: () => void;
   title?: string;
   showHeader?: boolean;
-  onMenuAction?: (action: string) => void;
   hidePoints?: boolean;
 }
-export default function PageLayout({ children, onBack, title, showHeader, onMenuAction,hidePoints=false }: PageLayoutProps): JSX.Element {
+export default function PageLayout({ children, title, showHeader,hidePoints=false }: PageLayoutProps): JSX.Element {
   const { texts } = useLanguage();
   const isRTL = texts.direction === 'rtl';  
   return (

@@ -88,7 +88,7 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
       
       <div className="relative px-6 pt-6 mb-8">
       <div 
-        className={`fixed inset-0 z-[9999] transition-opacity duration-300 ${
+        className={`overflow-y-scroll fixed inset-0 z-[9999] transition-opacity duration-300 ${
           open && !isClosing ? 'opacity-100' : 'opacity-0'
         }`}
         style={{ height: '100vh', width: '100vw' }}

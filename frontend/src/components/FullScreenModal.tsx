@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useLanguage } from '../contexts/LanguageContext';
 
 interface FullScreenModalProps {
   open: boolean;
@@ -49,11 +50,12 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
       document.removeEventListener('keydown', handleEscape);
     };
   }, [open, isClosing]);
+  const { texts } = useLanguage();
+  const isRTL = texts.direction === 'rtl';  
 
   if (!shouldRender) return <></>;
-
   return (
-    <>
+    <div>
       <style>{`
         @keyframes slideUpIn {
           from {
@@ -82,6 +84,7 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
         }
       `}</style>
       
+      <div className="relative px-6 pt-6 mb-8">
       <div 
         className={`fixed inset-0 z-[9999] transition-opacity duration-300 ${
           open && !isClosing ? 'opacity-100' : 'opacity-0'
@@ -100,13 +103,26 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
             isClosing ? 'modal-slide-out' : 'modal-slide-in'
           }`}
         >
+          </div>
           <div 
             className="w-full min-h-full"
           >
+            <div 
+            style={{zIndex:1000}}
+            className={`absolute  top-2 ${isRTL ? 'left-6' : 'right-6'}`}>
+              <button
+                onClick={onRequestClose}
+                className="flex items-center px-3 py-1 font-medium text-white transition-all duration-300 ease-out transform border shadow-lg cursor-pointer bg-white/20 backdrop-blur-md rounded-2xl border-white/30 hover:bg-white/30 hover:scale-105 hover:shadow-xl"
+              >
+                <span className={`text-3xl transform transition-transform duration-200 ${isRTL ? 'rotate-180' : ''}`}>
+                  →
+                </span>
+              </button>
+            </div>  
             {children}
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

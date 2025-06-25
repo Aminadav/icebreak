@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useTracking } from '../contexts/TrackingContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useGame } from '../contexts/GameContext';
+import AboutPage from './AboutPage';
+import FullScreenModal from './FullScreenModal';
 
 export default function TopMenu({ isOpen, onClose }: {
   isOpen: boolean;
@@ -15,6 +17,8 @@ export default function TopMenu({ isOpen, onClose }: {
   const navigate = useNavigate();
   const { userData, isLoggedIn } = useSocket();
   const isRTL = texts.direction === 'rtl';
+
+  var [showInFullScreenModal,set_showInFullScreenModal]=useState<JSX.Element | null>(null)
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -100,7 +104,9 @@ export default function TopMenu({ isOpen, onClose }: {
       title: texts.menu.about,
       icon: '/images/icons/about.svg',
       gradient: 'from-indigo-400 to-indigo-600',
-      // onClick: () => onMenuAction?.('about')
+      onClick: () => {
+        set_showInFullScreenModal(<AboutPage/>)
+      }
     },
     {
       title: texts.menu.updates,
@@ -136,6 +142,11 @@ export default function TopMenu({ isOpen, onClose }: {
 
   return (
     <>
+      <FullScreenModal
+      open={!!showInFullScreenModal}
+      onRequestClose={() => set_showInFullScreenModal(null)}
+      >{showInFullScreenModal}</FullScreenModal>
+
       {/* Overlay */}
       <div
         className={`fixed inset-0 bg-black bg-opacity-50 transition-opacity duration-300 z-40 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'

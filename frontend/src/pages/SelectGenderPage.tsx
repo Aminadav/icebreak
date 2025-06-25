@@ -4,7 +4,7 @@ import PageLayout from '../components/PageLayout';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 import { useGame } from '../contexts/GameContext';
 import { useGameId } from '../utils/useGameId';
 
@@ -21,7 +21,7 @@ type Gender = 'male' | 'female';
 export default function SelectGenderPage(): JSX.Element {
   const { texts } = useLanguage();
   var gameId=useGameId()
-  const { handleMenuAction } = useMenuNavigation();
+  
   const { socket } = useSocket();
   const navigate = useNavigate();
   
@@ -102,7 +102,7 @@ export default function SelectGenderPage(): JSX.Element {
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
+      
       onBack={() => navigate(-1)}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">

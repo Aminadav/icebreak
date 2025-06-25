@@ -32,11 +32,13 @@ function IceBreak({ onClick }: IceBreakProps): JSX.Element {
 }
 
 interface MainHeaderProps {
-  onMenuAction?: (action: string) => void;
   hidePoints?: boolean;
 }
 
-export default function MainHeader({ onMenuAction,hidePoints=false }: MainHeaderProps): JSX.Element {
+export default function MainHeader({ hidePoints=false }: {
+  hidePoints?: boolean;
+}
+): JSX.Element {
   const { texts } = useLanguage();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -110,7 +112,7 @@ export default function MainHeader({ onMenuAction,hidePoints=false }: MainHeader
         )}
       </div>
 
-      <TopMenu isOpen={isMenuOpen} onClose={closeMenu} onMenuAction={onMenuAction} />
+      <TopMenu isOpen={isMenuOpen} onClose={closeMenu}  />
     </>
   );
 }

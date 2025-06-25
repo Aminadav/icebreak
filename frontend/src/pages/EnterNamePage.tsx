@@ -8,7 +8,7 @@ import NameConfirmationModal from '../components/NameConfirmationModal';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModal } from '../contexts/ModalContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 import { useGameId } from '../utils/useGameId';
 
 interface EnterNamePageProps {
@@ -22,7 +22,7 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
   const DEBUG = false;
   var gameId=useGameId()
   const { texts } = useLanguage();
-  const { handleMenuAction } = useMenuNavigation();
+  
   const { openModal } = useModal();
   const { socket } = useSocket();
   const navigate = useNavigate();
@@ -114,7 +114,7 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
+      
       onBack={() => navigate(-1)}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">

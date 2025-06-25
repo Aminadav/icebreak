@@ -24,7 +24,7 @@ export default function PageLayout({ children, onBack, title, showHeader, onMenu
     >
       {/* Header */}
       {showHeader && (
-        <MainHeader onMenuAction={onMenuAction} hidePoints={hidePoints} />
+        <MainHeader  hidePoints={hidePoints} />
       )}
       
       {/* Content */}

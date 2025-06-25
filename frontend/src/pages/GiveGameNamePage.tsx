@@ -5,7 +5,7 @@ import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 import { useGameId } from '../utils/useGameId';
 
 
@@ -13,7 +13,7 @@ export default function GiveGameNamePage(): JSX.Element {
   var gameId=useGameId()
   const { texts } = useLanguage();
   const { socket, isConnected } = useSocket();
-  const { handleMenuAction } = useMenuNavigation(); // For menu navigation
+  
   
   const [gameName, setGameName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -46,7 +46,7 @@ export default function GiveGameNamePage(): JSX.Element {
   // Show connection status
   if (!isConnected) {
     return (
-      <PageLayout showHeader={true} onMenuAction={handleMenuAction}>
+      <PageLayout showHeader={true} >
         
         <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
           <div className="text-center">
@@ -61,7 +61,7 @@ export default function GiveGameNamePage(): JSX.Element {
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
+      
     >
     
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">

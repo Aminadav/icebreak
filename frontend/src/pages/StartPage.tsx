@@ -5,14 +5,14 @@ import Button from '../components/Button';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
 import { useTracking } from '../contexts/TrackingContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 
 export default function StartPage(): JSX.Element {
   const { texts } = useLanguage();
   const { error, socket } = useSocket();
   const navigate = useNavigate(); // Use for game flow navigation
   const { trackEvent } = useTracking();
-  const { handleMenuAction } = useMenuNavigation(); // Use for menu navigation
+  
   const [isCreating, setIsCreating] = useState(false);
 
   // Silence unused warnings - keeping for future use
@@ -73,7 +73,7 @@ export default function StartPage(): JSX.Element {
   return (
     <PageLayout 
       showHeader={true}
-      onMenuAction={handleMenuAction}
+      
     >
       
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">

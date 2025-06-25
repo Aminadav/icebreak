@@ -5,7 +5,7 @@ import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModal } from '../contexts/ModalContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 import SkipConfirmationModal from '../components/SkipConfirmationModal';
 import { useGameId } from '../utils/useGameId';
 
@@ -21,7 +21,7 @@ interface PictureUploadPageProps {
 export default function PictureUploadPage({ phoneNumber, userId, email, name, gender }: PictureUploadPageProps): JSX.Element {
   const { texts } = useLanguage();
   var gameId = useGameId(); // Get gameId from context or utility
-  const { handleMenuAction } = useMenuNavigation();
+  
   const { openModal } = useModal();
   const { socket } = useSocket();
   const navigate = useNavigate();
@@ -177,7 +177,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
+      
       onBack={() => navigate(-1)}
     >
       <main className="flex flex-col items-center justify-between w-full min-h-[calc(100vh-88px)] py-8 px-4">

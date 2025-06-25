@@ -5,19 +5,14 @@ import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
-import { useGameId } from '../utils/useGameId';
 
-interface Enter2faCodePageProps {
-  phoneNumber?: string;
-  gameId?: string;
-}
+import { useGameId } from '../utils/useGameId';
 
 export default function Enter2faCodePage(): JSX.Element {
   const DEBUG=false
   const { texts } = useLanguage();
   var gameId=useGameId() 
-  const { handleMenuAction } = useMenuNavigation(); // For menu navigation  
+  
   const { socket } = useSocket();
   const navigate = useNavigate(); // For game flow navigation
   
@@ -220,7 +215,6 @@ export default function Enter2faCodePage(): JSX.Element {
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
       onBack={() => navigate(-1)}
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
@@ -330,12 +324,6 @@ export default function Enter2faCodePage(): JSX.Element {
           </Button>
         </div> */}
 
-        {/* Debug info - only show in development */}
-        {DEBUG && phoneNumber && (
-          <div className="mt-4 text-sm text-white opacity-70">
-            SMS נשלח ל: {phoneNumber}
-          </div>
-        )}
       </main>
     </PageLayout>
   );

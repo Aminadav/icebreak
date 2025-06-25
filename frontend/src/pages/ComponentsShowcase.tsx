@@ -233,7 +233,7 @@ export default function ComponentsShowcase() {
           </h2>
           
           <div className="bg-black rounded-2xl overflow-hidden">
-            <MainHeader onMenuAction={handleMenuAction} />
+            <MainHeader  />
           </div>
           
           <div className="mt-4 text-purple-200 text-sm">
@@ -263,7 +263,7 @@ export default function ComponentsShowcase() {
               <TopMenu 
                 isOpen={isTopMenuOpen} 
                 onClose={() => setIsTopMenuOpen(false)} 
-                onMenuAction={handleMenuAction}
+                
               />
             </div>
           </div>

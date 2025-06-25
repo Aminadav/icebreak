@@ -6,7 +6,7 @@ import Input from '../components/Input';
 import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 import { useGameId } from '../utils/useGameId';
 
 interface EnterPhoneNumberPageProps {
@@ -17,7 +17,7 @@ export default function EnterPhoneNumberPage(): JSX.Element {
   const { texts } = useLanguage();
   var gameId = useGameId(); // Get gameId from context or utility
   const { socket } = useSocket();
-  const { handleMenuAction } = useMenuNavigation(); // For menu navigation
+  
   const navigate = useNavigate(); // For game flow navigation
   
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -58,7 +58,7 @@ export default function EnterPhoneNumberPage(): JSX.Element {
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
+      
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* No Entry Icon */}

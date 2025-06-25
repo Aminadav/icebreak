@@ -6,7 +6,7 @@ import AnimatedImage from '../components/AnimatedImage';
 import ShareGameModal from '../components/ShareGameModal';
 import { useSocket } from '../contexts/SocketContext';
 import { useModal } from '../contexts/ModalContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 import { useGameId } from '../utils/useGameId';
 import { useGame } from '../contexts/GameContext';
 
@@ -14,7 +14,7 @@ import { useGame } from '../contexts/GameContext';
 export default function CreatorGameReadyPage(): JSX.Element {
   const { socket } = useSocket();
   const { openModal } = useModal();
-  const { handleMenuAction } = useMenuNavigation();
+  
   const {emitMoveToNextPage} = useGame();
 
   var gameId=useGameId()
@@ -41,7 +41,7 @@ export default function CreatorGameReadyPage(): JSX.Element {
   return (
     <PageLayout 
       showHeader={true} 
-      onMenuAction={handleMenuAction}
+      
     >
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         

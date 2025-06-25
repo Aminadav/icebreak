@@ -4,7 +4,7 @@ import PageLayout from '../components/PageLayout';
 import ProcessingModal from '../components/ProcessingModal';
 import ImagePreviewModal from '../components/ImagePreviewModal';
 import { useSocket } from '../contexts/SocketContext';
-import { useMenuNavigation } from '../hooks/useMenuNavigation';
+
 import { useGameId } from '../utils/useGameId';
 
 interface ImageGalleryPageProps {
@@ -29,7 +29,7 @@ interface GalleryImage {
 
 export default function ImageGalleryPage(): JSX.Element {
   const { socket } = useSocket();
-  const { handleMenuAction } = useMenuNavigation();
+  
   const navigate = useNavigate();
 
   // Get backend URL from environment
@@ -362,7 +362,7 @@ export default function ImageGalleryPage(): JSX.Element {
 
       <PageLayout 
         showHeader={true} 
-        onMenuAction={handleMenuAction}
+        
       >
       <main className="flex flex-col min-h-[calc(100vh-88px)] px-4 py-6">
         

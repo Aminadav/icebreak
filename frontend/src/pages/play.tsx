@@ -21,8 +21,8 @@ import CameraPage from './CameraPage';
 import CreatorGameReadyPage from './CreatorGameReadyPage';
 import QuestionAboutOtherPage from './QuestionPageAboutOther';
 import { getIsTesting } from '../utils/isTesting';
+import { env } from '../env';
 
-const DEBUG_DIV=getIsTesting() ? false : true
 export default function Play(): JSX.Element {
   const gameId = useGameId();
   const {socket}=useSocket();
@@ -98,7 +98,7 @@ export default function Play(): JSX.Element {
       {gameState.screenName=="GOT_BADGE" && 
         <GotBadgePage gameState={gameState} />
       }
-        {DEBUG_DIV && <div dir="ltr"style={{
+        {env.DEBUG_SHOW_SCREEN_NAME && <div dir="ltr"style={{
         position: 'fixed',
         bottom: 0,
         left: 0,

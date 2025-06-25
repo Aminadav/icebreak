@@ -10,6 +10,8 @@ import AboutPage from './components/AboutPage';
 import ComponentsShowcase from './pages/ComponentsShowcase';
 import ModalRenderer from './components/ModalRenderer';
 import './App.css';
+import { useEffect } from 'react';
+import { env } from './env';
 
 function App(): JSX.Element {
   return (

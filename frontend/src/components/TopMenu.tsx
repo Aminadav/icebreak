@@ -20,8 +20,40 @@ export default function TopMenu({ isOpen, onClose }: {
   const isRTL = texts.direction === 'rtl';
   var game= useGame();
   var isInGame = !!game;
+  var thisGameId= game?.gameId || '';
 
   var [showInFullScreenModal,set_showInFullScreenModal]=useState<JSX.Element | null>(null)
+
+  // Listen for debug player response
+  React.useEffect(() => {
+    if (socket) {
+      const handleDebugResponse = (response: any) => {
+        if (response.success) {
+          alert(`✅ Successfully added ${response.count} debug players!`);
+        } else {
+          alert(`❌ Error: ${response.error}`);
+        }
+      };
+      
+      const handleSpeedCreatorResponse = (response: any) => {
+        if (response.success) {
+          alert(`⚡ Creator setup completed successfully!`);
+          // Optionally refresh the page or emit get_next_screen
+          socket.emit('get_next_screen', { gameId: thisGameId });
+        } else {
+          alert(`❌ Error: ${response.error}`);
+        }
+      };
+      
+      socket.on('debug-add-players-response', handleDebugResponse);
+      socket.on('debug-speed-creator-signup-response', handleSpeedCreatorResponse);
+      
+      return () => {
+        socket.off('debug-add-players-response', handleDebugResponse);
+        socket.off('debug-speed-creator-signup-response', handleSpeedCreatorResponse);
+      };
+    }
+  }, [socket, thisGameId]);
 
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -93,6 +125,43 @@ export default function TopMenu({ isOpen, onClose }: {
       icon: '/images/icons/icons/plus.svg',
       gradient: 'from-emerald-400 to-emerald-600',
       onClick: () => console.log('Create game clicked')
+    },
+    {
+      title: 'Add Debug Players',
+      icon: '🤖',
+      gradient: 'from-purple-500 to-purple-700',
+      hide: !env.DEBUG_SHOW_ADD_PLAYERS || !isInGame,
+      isEmoji: true,
+      onClick: () => {
+        const numPlayers = prompt('How many players to add?');
+        if (numPlayers && !isNaN(parseInt(numPlayers))) {
+          const count = parseInt(numPlayers);
+          if (count > 0 && count <= 50) { // Reasonable limit
+            socket?.emit('debug-add-players', { 
+              gameId: thisGameId, 
+              count: count 
+            });
+            console.log(`🤖 Adding ${count} debug players to game ${thisGameId}`);
+          } else {
+            alert('Please enter a number between 1 and 50');
+          }
+        }
+      }
+    },
+    {
+      title: 'Speed Creator Sign Up',
+      icon: '⚡',
+      gradient: 'from-orange-500 to-red-600',
+      hide: !env.DEBUG_SHOW_ADD_PLAYERS || !isInGame,
+      isEmoji: true,
+      onClick: () => {
+        if (confirm('Complete creator onboarding and set to GAME_READY state?')) {
+          socket?.emit('debug-speed-creator-signup', { 
+            gameId: thisGameId
+          });
+          console.log(`⚡ Setting up speed creator signup for game ${thisGameId}`);
+        }
+      }
     },
     {
       title: texts.menu.components,

@@ -37,6 +37,8 @@ const { registerLogoutHandler } = require('./socket-handlers/logout');
 // Import utilities
 const { getUserIdFromDevice, sendUserDataToClient } = require('./socket-handlers/utils');
 const {registerGetUserDataHandler} = require('./socket-handlers/registerGetUserData');
+const { registerDebugAddPlayersHandler } = require('./socket-handlers/debugAddPlayers');
+const { registerDebugSpeedCreatorSignupHandler } = require('./socket-handlers/debugSpeedCreatorSignup');
 /**
  * Setup socket event handlers for the application.
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
@@ -97,6 +99,8 @@ function setupSocketHandlers(io) {
     registerGetUserGameDataHandler(socket);
     registerLogoutHandler(socket);
     registerGetUserDataHandler(socket);
+    registerDebugAddPlayersHandler(socket);
+    registerDebugSpeedCreatorSignupHandler(socket);
   });
 }
 

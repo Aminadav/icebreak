@@ -42,7 +42,7 @@ module.exports.getScreenRules=function getScreenRules(gameId,userId) {
           return {
             screenName: 'GOT_BADGE',
             badgeId: missingBadge.id,
-            friendsInLevel: [] // TODO: Implement friends in level logic
+            // friendsInLevel: [] // TODO: Implement friends in level logic
           };
         }
         

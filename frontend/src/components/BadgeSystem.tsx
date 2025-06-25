@@ -10,20 +10,20 @@ export interface Badge {
 }
 
 export interface Friend {
-  userId: string;
+  user_id: string;
   name: string;
   image: string;
 }
 
 
 export const mockFriends: Friend[] = [
-  { userId: "1", name: "משה מרילוס", image: '/images/badges/badge-sample.webp' },
-  { userId: "2", name: "דני גמבום", image: '/images/badges/badge-sample.webp' },
-  { userId: "3", name: "ישראל לורנץ", image: '/images/badges/badge-sample.webp' },
-  { userId: "4", name: "רם טרשתי", image: '/images/badges/badge-sample.webp' },
-  { userId: "5", name: "אליכם הכהן כראזי", image: '/images/badges/badge-sample.webp' },
-  { userId: "6", name: "רפי כהן", image: '/images/badges/badge-sample.webp' },
-  { userId: "7", name: "שלמה לוי", image: '/images/badges/badge-sample.webp' }
+  { user_id: "1", name: "משה מרילוס", image: '/images/badges/badge-sample.webp' },
+  { user_id: "2", name: "דני גמבום", image: '/images/badges/badge-sample.webp' },
+  { user_id: "3", name: "ישראל לורנץ", image: '/images/badges/badge-sample.webp' },
+  { user_id: "4", name: "רם טרשתי", image: '/images/badges/badge-sample.webp' },
+  { user_id: "5", name: "אליכם הכהן כראזי", image: '/images/badges/badge-sample.webp' },
+  { user_id: "6", name: "רפי כהן", image: '/images/badges/badge-sample.webp' },
+  { user_id: "7", name: "שלמה לוי", image: '/images/badges/badge-sample.webp' }
 ];
 
 export function getCurrentBadge(points: number): Badge | null {

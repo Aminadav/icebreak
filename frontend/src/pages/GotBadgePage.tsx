@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usePoints, useGame } from '../contexts/GameContext';
+import { useSocket } from '../contexts/SocketContext';
 import { badges, getCurrentBadge, getNextBadge, getProgressToNextLevel, mockFriends, getBadgeImage } from '../components/BadgeSystem';
 import { BadgeSectionHeader } from '../components/BadgeSectionHeader';
 import { BadgeListOfFriendsInYourLevel } from '../components/BadgeListOfFriendsInYourLevel';
@@ -14,15 +15,67 @@ interface Friend {
   image: string;
 }
 
+interface BadgeSystemFriend {
+  user_id: string;
+  name: string;
+  image: string;
+}
+
 export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE, isModal?: boolean, onClose?: () => void}): JSX.Element {
   var myPoints=usePoints().points
-  const { emitMoveToNextPage } = useGame();
-   // User's current points - can be changed to test different levels
+  const { emitMoveToNextPage, gameId } = useGame();
+  const { socket } = useSocket();
+  
+  // User's current points - can be changed to test different levels
   const [userPoints] = useState(myPoints);
+  
+  // Badge data from backend
+  const [badgeData, setBadgeData] = useState<{
+    gameId: string;
+    friendsByBadge: { [badgeId: string]: Friend[] }
+  } | null>(null);
+  
+  // Emit event to get badge data when component mounts
+  useEffect(() => {
+    if (socket && gameId) {
+      console.log('Requesting badge data for game:', gameId);
+      socket.emit('get-data-for-badge-page', { gameId });
+    }
+  }, [socket, gameId]);
+  
+  // Listen for badge data updates
+  useEffect(() => {
+    if (!socket) return;
+    
+    const handleBadgeUpdate = (data: { gameId: string; friendsByBadge: { [badgeId: string]: Friend[] } }) => {
+      console.log('Received badge data:', data);
+      
+      // Only update if this event is for the current game
+      if (data.gameId === gameId) {
+        setBadgeData(data);
+      } else {
+        console.log('Ignoring badge update for different game:', data.gameId, 'current:', gameId);
+      }
+    };
+    
+    socket.on('game-badges-update', handleBadgeUpdate);
+    
+    return () => {
+      socket.off('game-badges-update', handleBadgeUpdate);
+    };
+  }, [socket, gameId]);
   
   const currentBadge = getCurrentBadge(userPoints);
   const nextBadge = getNextBadge(userPoints);
   const progress = getProgressToNextLevel(userPoints);
+  var {userData}=useSocket()
+
+
+  // Get friends for current badge level
+  const currentBadgeFriends = badgeData?.friendsByBadge?.[currentBadge?.id || ''] 
+    ? badgeData.friendsByBadge[currentBadge?.id || '']
+    .filter(item=>item.user_id!=userData?.user_id)
+    : []
 
   const handleContinue = () => {
     if (props.isModal && props.onClose) {
@@ -227,7 +280,7 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
                   <div className=" font-normal leading-[28px] not-italic text-[#ffffff] text-[19px] text-center mb-[20px]">
                     <p className="block" dir="auto">
                       <span>על מנת להגיע לדרגת </span>
-                      <span className="font-['Inter:Bold',_sans-serif] font-bold not-italic">
+                      <span className="not-italic font-bold ">
                         {nextBadge.name}
                       </span>
                       <span> עליכם לקבל {nextBadge.pointsRequired} נקודות</span>
@@ -237,14 +290,14 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
                   <div className=" font-normal leading-[25px] not-italic text-[#ffffff] text-[15px] text-center mb-[20px]">
                     <p className="block mb-0" dir="auto">
                       <span>יש לכם </span>
-                      <span className="font-['Inter:Bold',_sans-serif] font-bold not-italic">
+                      <span className="not-italic font-bold ">
                         {progress.current}
                       </span>
                       <span> נקודות</span>
                     </p>
                     <p className="block" dir="auto">
                       <span>נשארו לכם רק עוד </span>
-                      <span className="font-['Inter:Bold',_sans-serif] font-bold not-italic">
+                      <span className="not-italic font-bold ">
                         {progress.needed}
                       </span>
                       <span> למעבר לדרגה הבאה</span>
@@ -253,8 +306,9 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
 
                   {/* Animated Progress Bar */}
                   <div className="px-[6px] mb-[40px]">
-                    <BadgeProgressBar percentage={progress.percentage} animated={true} />
+                    <BadgeProgressBar percentage={Math.max(progress.percentage,10)} animated={true} />
                   </div>
+                  {JSON.stringify(Math.max(progress.percentage,10))}
                 </div>
               ) : (
                 <div className="px-[45px] pb-[40px]">
@@ -272,7 +326,9 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
               </div>
 
               <div className="px-[27px] pb-[40px]">
-                <BadgeListOfFriendsInYourLevel friends={mockFriends} />
+                <BadgeListOfFriendsInYourLevel 
+                  friends={currentBadgeFriends} 
+                />
               </div>
 
               {/* List of Levels Section */}
@@ -281,7 +337,10 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
               </div>
 
               <div className="px-[60px] pb-[40px]">
-                <BadgeListOfLevelsToAchieve badges={badges} userPoints={userPoints} />
+                <BadgeListOfLevelsToAchieve 
+                badges={badges}
+                friendsByBadge={badgeData?.friendsByBadge}
+                />
               </div>
 
               {/* Bottom Message */}

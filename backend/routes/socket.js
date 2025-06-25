@@ -5,6 +5,7 @@ const { registerUseWhatsappImageHandler } = require('./socket-handlers/useWhatsa
 const { registerLoadExistingGalleryImagesHandler } = require('./socket-handlers/loadExistingGalleryImages');
 //@ts-ignore
 const colors=require('colors');
+const { setGlobalIo } = require('../utils/socketGlobal');
 const { registerSetGameNameHandler } = require('./socket-handlers/setGameName');
 const { registerCreateGameImmediatelyHandler } = require('./socket-handlers/createGameImmediately');
 const { registerGetGameDataHandler } = require('./socket-handlers/getGameData');
@@ -33,6 +34,7 @@ const { registerGetNextScreenHandler } = require('./socket-handlers/get-next-scr
 const { registerSubmitAnswerMyselfHandler } = require('./socket-handlers/submit-answer-myself');
 const { registerGetUserBadgesHandler } = require('./socket-handlers/getUserBadges');
 const {  registerGetUserGameDataHandler } = require('./socket-handlers/getUserGameData');
+const { getDataForBadgePage } = require('./socket-handlers/getDataForBadgePage');
 const { registerLogoutHandler } = require('./socket-handlers/logout');
 // Import utilities
 const { getUserIdFromDevice, sendUserDataToClient } = require('./socket-handlers/utils');
@@ -44,6 +46,9 @@ const { registerDebugSpeedCreatorSignupHandler } = require('./socket-handlers/de
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
  */
 function setupSocketHandlers(io) {
+  // Set global io instance for use in other modules
+  setGlobalIo(io);
+  
   // Add middleware to extract device ID and attach to socket
   io.use((socket, next) => {
     const deviceId = socket.handshake.query.deviceId;
@@ -62,6 +67,13 @@ function setupSocketHandlers(io) {
     
     socket.prependAny((eventName, ...args) => {
       console.log(colors.cyan('<< ' + eventName + ': ' +  JSON.stringify(args)));
+      
+      // Auto-join user to game room if gameId is provided in the event data
+      if (args && args[0] && args[0].gameId) {
+        const gameId = args[0].gameId;
+        socket.join(gameId);
+        console.log(colors.yellow(`Socket ${socket.id} joined room: ${gameId}`));
+      }
     })
 
     // Register all socket event handlers
@@ -101,6 +113,9 @@ function setupSocketHandlers(io) {
     registerGetUserDataHandler(socket);
     registerDebugAddPlayersHandler(socket);
     registerDebugSpeedCreatorSignupHandler(socket);
+    
+    // Register the getDataForBadgePage handler
+    socket.on('get-data-for-badge-page', (data) => getDataForBadgePage(socket, data));
   });
 }
 

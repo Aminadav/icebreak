@@ -1,20 +1,33 @@
-import { Badge } from "./BadgeSystem";
+import { useSocket } from "../contexts/SocketContext";
+import { env } from "../env";
+import Avatar from "./Avatar";
+import { Badge, getBadgeImage } from "./BadgeSystem";
+
+interface Friend {
+  user_id: string;
+  name: string;
+  image: string;
+}
 
 interface ListOfLevelsToAchieveProps {
   badges: Badge[];
-  userPoints: number;
+  friendsByBadge?: { [badgeId: string]: Friend[] };
 }
 
-export function BadgeListOfLevelsToAchieve({ badges, userPoints }: ListOfLevelsToAchieveProps) {
+export function BadgeListOfLevelsToAchieve({ badges, friendsByBadge }: ListOfLevelsToAchieveProps) {
+  var currentUserId=useSocket().userData?.userId;
   return (
     <div className="flex flex-col items-center w-full gap-7">
       {badges.map((badge) => {
-        const isAchieved = userPoints >= badge.pointsRequired;
+        const badgeFriends = friendsByBadge?.[badge.id] || [];
+        const isAchieved = currentUserId ? badgeFriends.some(friend => friend.user_id === currentUserId) : false;
+        
         return (
           <OneLevelToAchieve
             key={badge.id}
             badge={badge}
             isAchieved={isAchieved}
+            badgeFriends={badgeFriends}
           />
         );
       })}
@@ -30,9 +43,10 @@ interface OneLevelToAchieveProps {
   badge: Badge;
   isAchieved: boolean;
   isNext?: boolean;
+  badgeFriends: Friend[];
 }
 
-export function OneLevelToAchieve({ badge, isAchieved, isNext = false }: OneLevelToAchieveProps) {
+export function OneLevelToAchieve({ badge, isAchieved, badgeFriends }: OneLevelToAchieveProps) {
   const backgroundClass = isAchieved ? "bg-[#fae3ff]" : "bg-gray-100";
   const borderClass = isAchieved 
     ? "border border-[#925b03]" 
@@ -43,67 +57,104 @@ export function OneLevelToAchieve({ badge, isAchieved, isNext = false }: OneLeve
     ? "drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.25))" 
     : "grayscale(100%) drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.25))";
 
+  // Prepare users display
+  var displayedUsers = badgeFriends.slice(0, 10);
+  var remainingCount = badgeFriends.length - 10;
+  // displayedUsers=[...displayedUsers,...displayedUsers]
+  // displayedUsers=[...displayedUsers,...displayedUsers]
+  // displayedUsers=[...displayedUsers,...displayedUsers]
+  // displayedUsers=[...displayedUsers,...displayedUsers]
+  // remainingCount=20
   return (
     <div className={`
-      flex items-center flex-row-reverse justify-between 
-      h-32 w-[299px] p-4 
+      flex flex-col w-[299px] p-4 
       rounded-lg shadow-md 
       ${backgroundClass} ${borderClass}
     `}>
-      {/* Left section - Text content */}
-      <div className="flex flex-col items-start flex-1 gap-4">
-        <h3 className={`
-          font-bold text-lg leading-tight text-right
-          ${textColor}
-        `}>
-          {badge.name}
-        </h3>
-        <div className={`
-          flex items-center gap-1 text-right opacity-75
-          ${textColor}
-        `}>
-          <span className="text-xs">{badge.achieversCount}</span>
-          <span className="text-sm">איש זכו בדרגה זו</span>
-        </div>
-      </div>
-
-      {/* Center section - Badge image */}
-      <div className="flex items-center justify-center mx-4">
-        <div className="flex items-center justify-center w-20 h-20">
-          <img
-            src={badge.image}
-            alt={badge.name}
-            className="object-cover w-20 h-20 rounded-full shadow-lg"
-            style={{ filter: imageFilter }}
-          />
-        </div>
-      </div>
-
-      {/* Right section - Badge number and checkmark */}
-      <div className="flex flex-col items-center gap-2">
-        <span className={`
-          text-lg text-[#898888] font-normal
-          ${numberOpacity}
-        `}>
-          {badge.id}
-        </span>
-        
-        {isAchieved && (
-          <div className="w-3 h-3">
-            <svg
-              className="w-full h-full"
-              fill="none"
-              viewBox="0 0 14 15"
-            >
-              <path
-                d={svgPaths.pe89b200}
-                stroke="#039902"
-                strokeWidth="2"
-              />
-            </svg>
+      {/* Top section - Badge info */}
+      <div className="flex flex-row-reverse items-center justify-between mb-4">
+        {/* Left section - Text content */}
+        <div className="flex flex-col items-start flex-1 gap-2">
+          <h3 className={`
+            font-bold text-lg leading-tight text-right
+            ${textColor}
+          `}>
+            {badge.name}
+          </h3>
+          <div className={`
+            flex items-center gap-1 text-right opacity-75
+            ${textColor}
+          `}>
+            <span className="text-xs">{badgeFriends.length}</span>
+            <span className="text-sm">זכו בדרגה זו</span>
           </div>
-        )}
+        </div>
+
+        {/* Center section - Badge image */}
+        <div className="flex items-center justify-center mx-4">
+          <div 
+            className="flex items-center justify-center w-21 h-21 rounded-full bg-[#EEE]"
+            style={{ 
+              filter: "drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.25))",
+              width: "84px",
+              height: "84px"
+            }}
+          >
+            <img
+              src={`/images/badges/${badge.id}.png`}
+              alt={badge.name}
+              className="object-cover w-20 h-20 rounded-full shadow-lg"
+              style={{ filter: imageFilter }}
+            />
+          </div>
+        </div>
+
+        {/* Right section - Badge number and checkmark */}
+        <div className="flex flex-col items-center gap-2">
+          <span className={`
+            text-lg text-[#898888] font-normal
+            ${numberOpacity}
+          `}>
+          </span>
+          {isAchieved && (
+            <div className="w-3 h-3">
+              <svg
+                className="w-full h-full"
+                fill="none"
+                viewBox="0 0 14 15"
+              >
+                <path
+                  d={svgPaths.pe89b200}
+                  stroke="#039902"
+                  strokeWidth="2"
+                />
+              </svg>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* Bottom section - User avatars */}
+      {badgeFriends.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-1">
+        
+          {displayedUsers.map((friend, index) => (
+              <Avatar friend={friend} animateIndex={index} size="small" />
+          ))}
+          
+          {remainingCount > 0 && (
+            <div className={`
+              flex items-center justify-center w-8 h-8 rounded-full 
+              bg-gradient-to-br from-purple-500 to-purple-700 
+              text-white text-xs font-bold shadow-lg
+              user-avatar
+              ${textColor}
+            `}>
+              +{remainingCount}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

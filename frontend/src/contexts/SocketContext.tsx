@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getDeviceId, setDeviceId, generateUUID } from '../utils/deviceManager';
+import { env } from '../env';
 interface SocketContextType {
   socket: Socket;
   isConnected: boolean;
@@ -41,7 +42,7 @@ export function SocketProvider({ children }: SocketProviderProps) {
     setDeviceIdState(currentDeviceId);
 
     // Create socket connection with device ID as query parameter
-    const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
+    const backendUrl = env.BACKEND_URL
     const newSocket = io(backendUrl, {
       transports: ['polling', 'websocket'],
       timeout: 10000,

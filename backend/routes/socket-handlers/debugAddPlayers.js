@@ -78,7 +78,7 @@ module.exports.registerDebugAddPlayersHandler = async function(socket) {
           const randomImage = faceImages[Math.floor(Math.random() * faceImages.length)];
           imageHash = crypto.createHash('md5').update(userId + randomImage).digest('hex');
           const sourcePath = path.join(devFacesDir, randomImage);
-          const destPath = path.join(uploadsDir, imageHash);
+          const destPath = path.join(uploadsDir, imageHash) + '.jpg';
           
           try {
             fs.copyFileSync(sourcePath, destPath);

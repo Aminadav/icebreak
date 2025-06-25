@@ -296,7 +296,7 @@ export default function AdminPage(): JSX.Element {
       state: {
         screenName: 'GOT_BADGE',
         badgeId: 'badge1',
-        friendsInLevel: []
+        // friendsInLevel: []
       },
       metadata: {
         IS_CREATOR: true,

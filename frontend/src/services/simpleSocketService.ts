@@ -1,5 +1,6 @@
 // Simple Socket Service for debugging
 import { io, Socket } from 'socket.io-client';
+import { env } from '../env';
 
 console.log('🔧 Creating simple socket service...');
 
@@ -12,7 +13,7 @@ class SimpleSocketService {
     return new Promise((resolve, reject) => {
       console.log('📡 Creating socket connection...');
       
-      const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:4001';
+      const backendUrl = env.BACKEND_URL;
       this.socket = io(backendUrl, {
         transports: ['polling', 'websocket'],
         timeout: 10000

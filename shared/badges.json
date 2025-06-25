@@ -6,12 +6,12 @@
   },
   {
     "id": "ice_breaker",
-    "name": "שובר קרחים",
+    "name": "שוברי קרחים",
     "pointsRequired": 30
   },
   {
     "id": "conversation_starter",
-    "name": "פותח השיחות",
+    "name": "פותחי השיחות",
     "pointsRequired": 90
   },
   {
@@ -26,27 +26,27 @@
   },
   {
     "id": "heart_toucher",
-    "name": "נוגע בלבבות",
+    "name": "נוגעים בלבבות",
     "pointsRequired": 250
   },
   {
     "id": "connection_deepener",
-    "name": "מעמיק הקשרים",
+    "name": "מעמיקי הקשרים",
     "pointsRequired": 270
   },
   {
     "id": "party_lifter",
-    "name": "מרים המסיבות",
+    "name": "מרימי המסיבות",
     "pointsRequired": 3840
   },
   {
     "id": "community_gatherer",
-    "name": "מקהיל קהילות",
+    "name": "מקהילי הקהילות",
     "pointsRequired": 7680
   },
   {
     "id": "heart_uniter",
-    "name": "מאחד הלבבות",
+    "name": "מאחדי הלבבות",
     "pointsRequired": 15360
   }
 ]

@@ -6,6 +6,7 @@ import ImagePreviewModal from '../components/ImagePreviewModal';
 import { useSocket } from '../contexts/SocketContext';
 
 import { useGameId } from '../utils/useGameId';
+import { env } from '../env';
 
 interface ImageGalleryPageProps {
   originalImageHash: string;
@@ -33,7 +34,7 @@ export default function ImageGalleryPage(): JSX.Element {
   const navigate = useNavigate();
 
   // Get backend URL from environment
-  const backendUrl = (import.meta as any).env.VITE_BACKEND_URL || 'http://localhost:4001';
+  const backendUrl = env.BACKEND_URL
   
   // State for gallery images (dynamic count based on backend)
   const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);

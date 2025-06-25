@@ -52,7 +52,7 @@ export default function MyPoints(): JSX.Element {
           gameState={{ 
             screenName: 'GOT_BADGE',
             badgeId: currentBadge?.id || '',
-            friendsInLevel: []
+            // friendsInLevel: []
           } as GAME_STATE_GOT_BADGE}
           isModal={true}
           onClose={handleModalClose}

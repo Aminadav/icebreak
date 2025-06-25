@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS "badges" (
   "badge_id" CHARACTER VARYING(50) NOT NULL,
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "badges_pkey" PRIMARY KEY ("id"),
-  CONSTRAINT "unique_user_game_badge" UNIQUE ("user_id"),
+  CONSTRAINT "unique_user_game_badge" UNIQUE ("user_id", "game_id", "badge_id"),
   CONSTRAINT "fk_badges_user_id" FOREIGN KEY ("user_id") REFERENCES "users"("user_id"),
   CONSTRAINT "fk_badges_game_id" FOREIGN KEY ("game_id") REFERENCES "games"("game_id")
 );

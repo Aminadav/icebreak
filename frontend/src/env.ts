@@ -8,5 +8,6 @@ export const env = {
   DEBUG_SHOW_COMPONENTS_LIBRARY_IN_MENU:is_dev ? false : false,
   DEBUG_SHOW_SWITCH_TO_ENGLISH:is_dev ? false : false,
   DEBUG_SHOW_ADD_PLAYERS:is_dev ? true : false,
+  BACKEND_URL: 'http://localhost:4001',
 
 }

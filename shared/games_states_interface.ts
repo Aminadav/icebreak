@@ -69,12 +69,7 @@ declare global {
 
   type GAME_STATE_GOT_BADGE={
     screenName:'GOT_BADGE',
-    badgeId:string,
-    friendsInLevel:{
-      user_id:string,
-      name:string,
-      image:string
-    }[]    
+    badgeId:string,    
   }
 
   type ONE_BADGE={

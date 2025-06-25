@@ -1,6 +1,7 @@
 const pool = require('../../config/database');
 const { getUserTotalPoints } = require('../../utils/points-helper');
 const moveUserToGameState = require('./moveUserToGameState');
+const { emitBadgeUpdateToGameRoom } = require('./getDataForBadgePage');
 
 /**
  * Award a badge to a user and show the badge screen
@@ -35,11 +36,14 @@ async function awardBadgeAndShowScreen(socket, userId, gameId, badgeId) {
   
   console.log(`🏆 Badge awarded: ${badgeDetails?.name || badgeId} to user ${userId} in game ${gameId}`);
   
+  // Broadcast badge update to all users in the game room
+  await emitBadgeUpdateToGameRoom(gameId);
+  
   // Show the badge screen
   await moveUserToGameState(socket, gameId, userId, {
     screenName: 'GOT_BADGE',
     badgeId: badgeId,
-    friendsInLevel: [] // TODO: Implement friends in level logic
+    // friendsInLevel: [] // TODO: Implement friends in level logic
   });
   
   return badgeDetails;
@@ -120,9 +124,10 @@ async function checkIfNewBadgeShouldBeAwarded(userId, gameId, oldPoints, newPoin
  * @param {string} userId - User ID
  * @param {string} gameId - Game ID
  * @param {string} badgeId - Badge ID to award
+ * @param {Object} socket - Optional socket instance for broadcasting updates
  * @returns {Promise<Object>} - The awarded badge object
  */
-async function awardBadge(userId, gameId, badgeId) {
+async function awardBadge(userId, gameId, badgeId, socket = null) {
   // Check if user already has this badge
   const existingBadgeResult = await pool.query(`
     SELECT id FROM badges 
@@ -144,6 +149,9 @@ async function awardBadge(userId, gameId, badgeId) {
   const badgeDetails = BADGES.find(badge => badge.id === badgeId);
   
   console.log(`🏆 Badge awarded: ${badgeDetails?.name || badgeId} to user ${userId} in game ${gameId}`);
+  
+  // Broadcast badge update to all users in the game room
+  await emitBadgeUpdateToGameRoom( gameId);
   return badgeDetails;
 }
 

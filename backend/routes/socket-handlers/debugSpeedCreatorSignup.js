@@ -97,7 +97,7 @@ module.exports.registerDebugSpeedCreatorSignupHandler = async function(socket) {
       }
       
       // Set image if not set
-      if (!user.image && !user.has_image) {
+      // if (!user.image && !user.has_image) {
         const devFacesDir = path.join(__dirname, '../../dev-faces');
         const uploadsDir = path.join(__dirname, '../../uploads');
         
@@ -107,7 +107,7 @@ module.exports.registerDebugSpeedCreatorSignupHandler = async function(socket) {
             const randomImage = faceImages[Math.floor(Math.random() * faceImages.length)];
             const imageHash = crypto.createHash('md5').update(userId + randomImage + 'creator').digest('hex');
             const sourcePath = path.join(devFacesDir, randomImage);
-            const destPath = path.join(uploadsDir, imageHash);
+            const destPath = path.join(uploadsDir, imageHash) + '.jpg';
             
             fs.copyFileSync(sourcePath, destPath);
             
@@ -120,7 +120,7 @@ module.exports.registerDebugSpeedCreatorSignupHandler = async function(socket) {
         } catch (err) {
           console.error('Error setting up image:', err);
         }
-      }
+      // }
       
       // Update or create game user state with creator metadata and GAME_READY screen
       const gameUserStateResult = await pool.query(`

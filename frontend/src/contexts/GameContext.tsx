@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useSocket } from './SocketContext';
 import { useParams } from 'react-router-dom';
+import { env } from '../env';
 
 interface GameData {
   gameId: string;
@@ -270,6 +271,24 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.off('game_data_updated', gameDataUpdatedHandler);
     };
   }, [gameId, socket,socket?.connected]);
+
+  // Debug: Listen for Control key press to get user metadata
+  useEffect(() => {
+    if (!env.is_dev || !socket || !gameId) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Control') {
+        socket.emit('debug_get_user_metadata', { gameId });
+      }
+    };
+
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [socket, gameId]);
 
   // Note: User data loading is now handled by get_user_game_data socket event
   // No separate effects needed for points/badges loading

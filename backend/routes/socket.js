@@ -40,6 +40,7 @@ const { getUserIdFromDevice, sendUserDataToClient } = require('./socket-handlers
 const {registerGetUserDataHandler} = require('./socket-handlers/registerGetUserData');
 const { registerDebugAddPlayersHandler } = require('./socket-handlers/debugAddPlayers');
 const { registerDebugSpeedCreatorSignupHandler } = require('./socket-handlers/debugSpeedCreatorSignup');
+const { registerDebugGetUserMetadataHandler } = require('./socket-handlers/debugGetUserMetadata');
 /**
  * Setup socket event handlers for the application.
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
@@ -111,6 +112,7 @@ function setupSocketHandlers(io) {
     registerGetUserDataHandler(socket);
     registerDebugAddPlayersHandler(socket);
     registerDebugSpeedCreatorSignupHandler(socket);
+    registerDebugGetUserMetadataHandler(socket);
     
     // Register the getDataForBadgePage handler
     socket.on('get-data-for-badge-page', (data) => getDataForBadgePage(socket, data));

@@ -308,7 +308,6 @@ background: url(<path-to-image>) lightgray 50% / cover no-repeat; */
                   <div className="px-[6px] mb-[40px]">
                     <BadgeProgressBar percentage={Math.max(progress.percentage,10)} animated={true} />
                   </div>
-                  {JSON.stringify(Math.max(progress.percentage,10))}
                 </div>
               ) : (
                 <div className="px-[45px] pb-[40px]">

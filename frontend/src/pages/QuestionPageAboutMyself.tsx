@@ -102,13 +102,14 @@ export default function QuestionAboutYourSelfPage({
       showHeader={true}
     >
       {/* Progress Circles */}
+      {gameState.isIntro && 
        <div className="pt-14">
         {gameState.introCurrentQuestion !== undefined && gameState.introTotalQuestions!==undefined &&
         <ProgressCircles 
           current={gameState.introCurrentQuestion} 
           total={gameState.introTotalQuestions} 
         />}
-      </div>
+      </div>}
 
       {/* Question Content */}
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">

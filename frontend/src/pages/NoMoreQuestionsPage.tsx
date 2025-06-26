@@ -46,7 +46,7 @@ export default function NoMoreQuestionsPage(): JSX.Element {
 
         {/* Main Message */}
         <div className="max-w-md mb-8 text-center">
-          <p className="text-xl leading-relaxed text-white/90 mb-4">
+          <p className="mb-4 text-xl leading-relaxed text-white/90">
             סיימת לענות על כל השאלות!
           </p>
           <p className="text-lg leading-relaxed text-white/80">
@@ -55,7 +55,7 @@ export default function NoMoreQuestionsPage(): JSX.Element {
         </div>
 
         {/* Fun Stats or Message */}
-        <div className="max-w-md mb-12 text-center bg-white/10 rounded-lg p-6">
+        <div className="max-w-md p-6 mb-12 text-center rounded-lg bg-white/10">
           <p className="text-lg text-white/90">
             💡 כל תשובה שלך תעזור לחברים להכיר אותך יותר טוב!
           </p>

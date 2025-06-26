@@ -2,14 +2,15 @@ import React from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import MainHeader from './MainHeader';
 import { useGame } from '../contexts/GameContext';
+import Footer from './Footer';
 
-interface PageLayoutProps {
+export default function PageLayout({ children, title, showHeader,showFooter=false, hidePoints=false }:  {
   children: React.ReactNode;
   title?: string;
   showHeader?: boolean;
+  showFooter?: boolean;
   hidePoints?: boolean;
-}
-export default function PageLayout({ children, title, showHeader,hidePoints=false }: PageLayoutProps): JSX.Element {
+}): JSX.Element {
   const { texts } = useLanguage();
   const isRTL = texts.direction === 'rtl';  
   return (
@@ -35,6 +36,7 @@ export default function PageLayout({ children, title, showHeader,hidePoints=fals
         )}
         {children}
       </div>
+      {showFooter && <Footer />}
     </div>
   );
 }

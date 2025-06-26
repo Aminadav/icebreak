@@ -4,7 +4,7 @@ const pool = require('../config/database');
  * Get all metadata for a specific user and game
  * @param {string|number} gameId - The game ID
  * @param {string|number} userId - The user ID
- * @returns {Promise<Object>} - The metadata object, empty object if no metadata found
+ * @returns {Promise<import('../GAME_METADATA_INTERFACE').GameMetadata>} - The metadata object, empty object if no metadata found
  */
 module.exports=async function getUserAllMetadata(gameId, userId) {
   const metadataQuery = `

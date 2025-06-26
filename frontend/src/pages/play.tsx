@@ -20,6 +20,7 @@ import PictureUploadPage from './PictureUploadPage';
 import CameraPage from './CameraPage';
 import CreatorGameReadyPage from './CreatorGameReadyPage';
 import CreatorFinishedOnboardingQuestionsPage from './CreatorFinishedOnboardingQuestionsPage';
+import NoMoreQuestionsPage from './NoMoreQuestionsPage';
 import QuestionAboutOtherPage from './QuestionPageAboutOther';
 import { getIsTesting } from '../utils/isTesting';
 import { env } from '../env';
@@ -90,6 +91,10 @@ export default function Play(): JSX.Element {
       
       {gameState.screenName=="CREATOR_FINISHED_ONBOARDING_QUESTIONS" && 
         <CreatorFinishedOnboardingQuestionsPage/>
+      }
+      
+      {gameState.screenName=="NO_MORE_QUESTIONS" && 
+        <NoMoreQuestionsPage/>
       }
       
       {gameState.screenName=="BEFORE_START_ABOUT_YOU" && 

@@ -94,6 +94,7 @@ declare global {
               | 'ASK_FOR_PICTURE'
               | 'CAMERA'
               | "CREATOR_GAME_READY"
+              | "NO_MORE_QUESTIONS"
   }
 
   export type GAME_STATES= 

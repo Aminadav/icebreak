@@ -385,6 +385,14 @@ export default function AdminPage(): JSX.Element {
       metadata: {
         IS_CREATOR: true,
       }
+    },
+    {
+      state: {
+        screenName: 'NO_MORE_QUESTIONS'
+      },
+      metadata: {
+        IS_CREATOR: true,
+      }
     }
   ]
 

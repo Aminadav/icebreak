@@ -67,7 +67,7 @@ module.exports.getScreenRules=function getScreenRules(gameId,userId) {
       }
     },
     {
-      ruleName:'Ask about you',
+      ruleName:'Ask about themself',
       SEEN_BEFORE_ASK_ABOUT_YOU:false,
       onScreen: async () => {
         await updateMetadata('SEEN_BEFORE_ASK_ABOUT_YOU', true);
@@ -90,20 +90,24 @@ module.exports.getScreenRules=function getScreenRules(gameId,userId) {
     },
     {
       /** Show a question */
-      ANSWER_ABOUT_MYSELF: lessThanOrEqualTo(5),
       onScreen: async () => {
         var nextQuestionAboutMySelf = await getNextQuestionAboutYou(gameId, userId)
         const metadata = await getUserAllMetadata(gameId, userId);
         var answeredCount = metadata.ANSWER_ABOUT_MYSELF || 0
-        /** @type {GAME_STATES} */
-        var nextScreen = {
+
+        if(!nextQuestionAboutMySelf) {
+          return {
+            screenName: 'NO_MORE_QUESTIONS',
+          };
+        }
+        
+        return  {
           screenName: "QUESTION_ABOUT_MYSELF",
           question: nextQuestionAboutMySelf,
           introTotalQuestions: 5,
           introCurrentQuestion: answeredCount + 1,
-          isIntro: true
+          isIntro: answeredCount<=5,
         }
-        return nextScreen
       }
     },
     {

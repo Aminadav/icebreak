@@ -5,6 +5,9 @@ interface FooterProps {
   className?: string;
 }
 
+/**
+ * Showing the footer ONLY if there is a game, and the user answered at least 5 questions about themselves.
+ */
 export default function Footer({ className = '' }: FooterProps): JSX.Element {
   var gameData=useGame()
   // Do not show share footer if less that 5 questions users answered

@@ -3,6 +3,30 @@ import { useLanguage } from '../contexts/LanguageContext';
 import { useGame } from '../contexts/GameContext';
 import { useSocket } from '../contexts/SocketContext';
 
+/**
+ * Example how to use:
+ *  var shareModal=useFullScreenModal()
+ *
+*   <shareModal.element>
+         <ShareGamePage onClose={() => shareModal.close()} />
+  </shareModal.element>
+ */
+export function useFullScreenModal() {
+  const [open, setOpen] = useState(false);
+  
+  function FullScreenModalHelper({children}: {children: React.ReactNode}) {
+    return <FullScreenModal open={open} onRequestClose={() => setOpen(false)}>
+      {children}
+    </FullScreenModal>;  
+  }
+  
+  return {
+    element:FullScreenModalHelper,
+    open: () => setOpen(true),
+    close: () => setOpen(false),
+  }
+}
+
 interface FullScreenModalProps {
   open: boolean;
   onRequestClose: () => void;

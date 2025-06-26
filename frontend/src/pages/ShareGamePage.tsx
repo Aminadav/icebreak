@@ -17,7 +17,7 @@ export default function ShareGamePage({ onClose }: ShareGamePageProps): JSX.Elem
   const gameLink = `${window.location.origin}/game/${gameData?.gameId}`;
 
   // Pre-defined Hebrew messages
-  const shareMessages = [
+  var shareMessages = [
     "היי! יצרתי חידון מגניב שיגלה לכם דברים מפתיעים עליי 🎯 בואו תנחשו מה אתם יודעים עליי באמת!",
     "מוכנים לגלות כמה אתם באמת מכירים אותי? 🤔 יצרתי חידון אישי שיפתיע אתכם! בואו נראה מי יזכה 🏆",
     "חברים יקרים! יש לי אתגר בשבילכם 💪 יצרתי חידון על עצמי - מי שיענה הכי טוב יזכה בכבוד! בואו נשחק 🎮",
@@ -115,8 +115,11 @@ export default function ShareGamePage({ onClose }: ShareGamePageProps): JSX.Elem
                 className="p-6 transition-all duration-300 transform border-2 border-purple-400 shadow-lg bg-black/70 backdrop-blur-md rounded-2xl hover:scale-105 hover:shadow-xl animate-fade-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
-                <p className="mb-4 text-lg leading-relaxed text-right text-white">
+                <p className="mb-2 text-lg leading-relaxed text-right text-white">
                   {message}
+                </p>
+                <p className="mb-4 text-sm text-blue-300 break-all" dir="ltr">
+                  {gameLink}
                 </p>
                 
                 <div className="flex justify-center gap-3">
@@ -139,6 +142,17 @@ export default function ShareGamePage({ onClose }: ShareGamePageProps): JSX.Elem
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Close Button */}
+        <div className="w-full max-w-md mb-8">
+          <Button
+            variant="secondary"
+            onClick={onClose}
+            className="w-full py-3 text-lg"
+          >
+            סגור
+          </Button>
         </div>
 
         <style>{`

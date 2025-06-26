@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import PageLayout from '../components/PageLayout';
 import MyPoints from '../components/MyPoints';
 import ProgressCircles from '../components/ProgressCircles';
@@ -20,6 +20,37 @@ export default function QuestionAboutYourSelfPage({
   const [freeformAnswer, setFreeformAnswer] = useState<string>('');
   const [otherAnswer, setOtherAnswer] = useState<string>('');
   const {gameEmitter} = useGame();
+
+  // Add keyboard event listener for number keys 1-9
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      // Only handle keyboard shortcuts for multiple choice questions
+      if (question.question_type !== 'choose_one' || !question.answers) {
+        return;
+      }
+
+      const key = event.key;
+      const numberKey = parseInt(key);
+      
+      // Check if pressed key is a number 1-9 and within answer range
+      if (numberKey >= 1 && numberKey <= 9 && numberKey <= question.answers.length) {
+        const answerIndex = numberKey - 1; // Convert to 0-based index
+        const selectedAnswer = question.answers[answerIndex];
+        
+        // Submit the answer immediately
+        gameEmitter('submit-answer-myself', {
+          questionId: question.question_id,
+          answer: selectedAnswer
+        });
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [question, gameEmitter]);
 
   const handleAnswerClick = (answerId: string, value?: string) => {
     setSelectedAnswerId(answerId);

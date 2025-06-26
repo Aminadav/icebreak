@@ -5,8 +5,10 @@ import { useParams } from 'react-router-dom';
 interface GameData {
   gameId: string;
   gameName: string;
-  status: string;
+  status: "waiting_for_creator_answers" | "ready";
   createdAt: string;
+  answeredQuestionsAboutThemself?: number;
+  answeredQuestionsAboutOthers?: number;
 }
 
 interface UserData {
@@ -26,6 +28,8 @@ interface GameContextType {
   points: number;
   currentBadge: any | null;
   allBadges: any[];
+  answeredQuestionsAboutMe: number;
+  answeredQuestionsAboutOthers: number;
   isLoading: boolean;
   error: string | null;
   refreshPoints: () => void;
@@ -49,6 +53,7 @@ export function GameProvider({ children }: GameProviderProps) {
   const [allBadges, setAllBadges] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
 
   const refreshPoints = () => {
     if (socket && gameId && userData.userId) {
@@ -104,7 +109,9 @@ export function GameProvider({ children }: GameProviderProps) {
             gameId: data.gameId,
             gameName: data.gameName,
             status: data.status,
-            createdAt: data.createdAt
+            createdAt: data.createdAt,
+            answeredQuestionsAboutThemself: data.answeredQuestionsAboutThemself || 0,
+            answeredQuestionsAboutOthers: data.answeredQuestionsAboutOthers || 0
           });
           setIsLoading(false);
         }
@@ -228,6 +235,14 @@ export function GameProvider({ children }: GameProviderProps) {
       setAllBadges(data.allBadges || []);
     };
 
+    // Listen for game data updates (answer counts)
+    const gameDataUpdatedHandler = (data: any) => {
+      if (data.success && data.gameId === gameId) {
+        console.log('📊 GameContext: Game data updated:', data);
+        setGameData(data);
+      }
+    };
+
     socket.on('user_game_data_updated', userDataUpdatedHandler);
     socket.on('device_registered', deviceRegisteredHandler);
     socket.on('2fa_verified', twoFAVerifiedHandler);
@@ -237,6 +252,7 @@ export function GameProvider({ children }: GameProviderProps) {
     socket.on('my_points', pointsUpdatedHandler);
     socket.on('points_updated', pointsUpdatedHandler);
     socket.on('user_badges_updated', badgeUpdatedHandler);
+    socket.on('game_data_updated', gameDataUpdatedHandler);
 
     loadGameData();
 
@@ -250,6 +266,7 @@ export function GameProvider({ children }: GameProviderProps) {
       socket.off('my_points', pointsUpdatedHandler);
       socket.off('points_updated', pointsUpdatedHandler);
       socket.off('user_badges_updated', badgeUpdatedHandler);
+      socket.off('game_data_updated', gameDataUpdatedHandler);
     };
   }, [gameId, socket,socket?.connected]);
 
@@ -274,6 +291,8 @@ export function GameProvider({ children }: GameProviderProps) {
     points: userData.points || 0,
     currentBadge,
     allBadges,
+    answeredQuestionsAboutMe: gameData?.answeredQuestionsAboutThemself || 0,
+    answeredQuestionsAboutOthers: gameData?.answeredQuestionsAboutOthers || 0,
     isLoading,
     error,
     refreshPoints,

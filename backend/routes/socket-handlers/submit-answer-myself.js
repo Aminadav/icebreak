@@ -6,6 +6,25 @@ const { addPointsWithBadgeCheckAndEmit } = require("../../utils/points-helper");
 const moveUserToGameState = require("./moveUserToGameState");
 const getUserAllMetadata = require("../../utils/getUserAllMetadata");
 const { increaseUserStateMetadata } = require("../../utils/incrementUserStateMetadata");
+const { getGlobalIo } = require("../../utils/socketGlobal");
+const { getGameDataWithCounts } = require("./getGameData");
+
+/**
+ * Helper function to emit updated game data to all users in the game
+ */
+async function emitUpdatedGameData(gameId) {
+  try {
+    const io = getGlobalIo();
+    const gameData = await getGameDataWithCounts(gameId);
+    
+    // Emit to all users in the game room
+    io.to(gameId).emit('game_data_updated', gameData);
+    
+    console.log(`📊 Emitted updated game data to all users in game ${gameId}: themself=${gameData.answeredQuestionsAboutThemself}, others=${gameData.answeredQuestionsAboutOthers}`);
+  } catch (error) {
+    console.error('Error emitting updated game data:', error);
+  }
+}
 
 /**
  * Handles the 'submit-answer-myself' event for submitting answers about oneself
@@ -69,5 +88,8 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
       points: pointsToAward,
       text:message
     });
+
+    // Emit updated game data to all users in the game
+    await emitUpdatedGameData(gameId);
   });
 };

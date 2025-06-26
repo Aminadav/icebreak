@@ -38,7 +38,9 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
   }, [gameState.points]);
 
   return (
-      <div className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden bg-gradient-to-b from-purple-900 to-black">
+      <div 
+      onClick={handleContinue}
+      className="relative flex flex-col items-center justify-center min-h-screen px-6 overflow-hidden cursor-pointer bg-gradient-to-b from-purple-900 to-black">
         
         {/* Continuous floating sparkles */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -50,8 +52,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
               style={{
                 left: '-10px',
                 top: `${20 + i * 80}px`,
-                animation: `moveLeftToRight ${8 + Math.random() * 4}s linear infinite`,
-                animationDelay: `${i * 1.5}s`
+                animation: `moveLeftToRight ${8 + Math.random() * 4}s linear infinite ${i * 1.5}s`
               }}
             />
           ))}
@@ -64,8 +65,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
               style={{
                 right: '-10px',
                 top: `${50 + i * 80}px`,
-                animation: `moveRightToLeft ${8 + Math.random() * 4}s linear infinite`,
-                animationDelay: `${i * 2}s`
+                animation: `moveRightToLeft ${8 + Math.random() * 4}s linear infinite ${i * 2}s`
               }}
             />
           ))}
@@ -78,8 +78,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
               style={{
                 left: `${Math.random() * 100}%`,
                 top: `${Math.random() * 100}%`,
-                animation: `floatUpDown ${4 + Math.random() * 3}s ease-in-out infinite`,
-                animationDelay: `${Math.random() * 3}s`
+                animation: `floatUpDown ${4 + Math.random() * 3}s ease-in-out infinite ${Math.random() * 3}s`
               }}
             />
           ))}
@@ -143,7 +142,7 @@ export default function GotPointsPage(props: {gameState:GAME_STATE_GOT_POINTS}):
         {/* Continue button - Custom festive design */}
         <div className="z-10 w-full max-w-xs">
           <button
-            onClick={handleContinue}
+            // onClick={handleContinue}
             className="relative w-full px-8 py-4 overflow-hidden text-xl font-bold text-white transition-all duration-300 transform shadow-2xl bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-2xl hover:scale-110 group animate-pulse hover:animate-none"
             data-testid="got-points-continue-button"
           >

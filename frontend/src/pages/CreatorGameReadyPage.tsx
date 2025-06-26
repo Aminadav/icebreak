@@ -9,6 +9,7 @@ import { useModal } from '../contexts/ModalContext';
 
 import { useGameId } from '../utils/useGameId';
 import { useGame } from '../contexts/GameContext';
+import { env } from '../env';
 
 
 export default function CreatorGameReadyPage(): JSX.Element {
@@ -83,13 +84,13 @@ export default function CreatorGameReadyPage(): JSX.Element {
           </Button>
 
           {/* Share Game - Ghost Button */}
-          <Button
+          {env.SHOW_SHARE_BUTTON_WHEN_GAME_READY && <Button
             variant="ghost"
             onClick={handleShareGame}
             className="px-6 py-3"
           >
             שיתוף המשחק
-          </Button>
+          </Button>}
         </div>
       </main>
     </PageLayout>

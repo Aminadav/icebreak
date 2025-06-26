@@ -116,7 +116,6 @@ export default function Play(): JSX.Element {
       {gameState.screenName=="GOT_BADGE" && 
         <GotBadgePage gameState={gameState} />
       }
-      {JSON.stringify({isShiftPressed})}
         {(env.DEBUG_SHOW_SCREEN_NAME || (env.is_dev && isShiftPressed)) && <div dir="ltr"style={{
         position: 'fixed',
         bottom: 0,

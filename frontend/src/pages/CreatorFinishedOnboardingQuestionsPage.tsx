@@ -1,15 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PageLayout from '../components/PageLayout';
 import Button from '../components/Button';
 import AnimatedImage from '../components/AnimatedImage';
+import FullScreenModal from '../components/FullScreenModal';
+import ShareGamePage from './ShareGamePage';
 import { useGame } from '../contexts/GameContext';
 
 export default function CreatorFinishedOnboardingQuestionsPage(): JSX.Element {
   const { emitMoveToNextPage } = useGame();
+  const [showShareModal, setShowShareModal] = useState(false);
 
   const handleWhatsappShare = () => {
-    // TODO: Implement WhatsApp sharing functionality
     console.log('📱 WhatsApp share clicked');
+    setShowShareModal(true);
   };
 
   const handleContinue = () => {
@@ -18,8 +21,15 @@ export default function CreatorFinishedOnboardingQuestionsPage(): JSX.Element {
     emitMoveToNextPage()
   };
 
+  // var shareModal=useModal()
   return (
-    <PageLayout showHeader={true}>
+    <>
+    {/* <shareModal.element>asdasd</shareModal.element> */}
+      <FullScreenModal open={showShareModal} onRequestClose={() => setShowShareModal(false)}>
+        <ShareGamePage onClose={() => setShowShareModal(false)} />
+      </FullScreenModal>
+      
+      <PageLayout showHeader={true}>
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-6">
         
         {/* Celebration Image */}
@@ -81,5 +91,6 @@ export default function CreatorFinishedOnboardingQuestionsPage(): JSX.Element {
         </div>
       </main>
     </PageLayout>
+    </>
   );
 }

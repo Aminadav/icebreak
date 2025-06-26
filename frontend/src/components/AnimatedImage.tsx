@@ -1,18 +1,16 @@
 import React from 'react';
 
-interface AnimatedImageProps {
-  src: string;
-  alt: string;
-  className?: string;
-  size?: 'small' | 'medium' | 'large' | 'custom';
-}
-
 export default function AnimatedImage({ 
   src, 
   alt, 
   className = '', 
   size = 'medium' 
-}: AnimatedImageProps): JSX.Element {
+}:  {
+  src: string;
+  alt?: string;
+  className?: string;
+  size?: 'small' | 'medium' | 'large' | 'custom';
+}): JSX.Element {
   
   const getSizeClasses = () => {
     switch (size) {

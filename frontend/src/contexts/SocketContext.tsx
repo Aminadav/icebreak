@@ -100,7 +100,6 @@ export function SocketProvider({ children }: SocketProviderProps) {
 
     function userDataUpdatedHandler(data:any) {
       setIsLoggedIn(!!data?.name)
-      console.log({data})
       setUserData(data);
     }
     newSocket.on('user_data_updated',userDataUpdatedHandler)

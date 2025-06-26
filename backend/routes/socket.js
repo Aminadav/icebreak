@@ -20,7 +20,6 @@ const { registerUploadPendingImageHandler } = require('./socket-handlers/uploadP
 const { registerGetOriginalImageHashHandler } = require('./socket-handlers/getOriginalImageHash');
 const { registerCameraUploadRequestedHandler } = require('./socket-handlers/cameraUploadRequested');
 const { registerGetGameStateHandler } = require('./socket-handlers/getGameState');
-const { registerStartIntroQuestionsHandler } = require('./socket-handlers/startIntroQuestions');
 const { registerAdminSetQuestionHandler } = require('./socket-handlers/adminSetQuestion');
 const { registerAdminDeleteMyGameStatesHandler } = require('./socket-handlers/adminDeleteMyGameStates');
 const { registerAdminSetPageHandler } = require('./socket-handlers/adminSetPage');
@@ -91,7 +90,6 @@ function setupSocketHandlers(io) {
     registerGetOriginalImageHashHandler(socket);
     registerCameraUploadRequestedHandler(socket);
     registerGetGameStateHandler(socket);
-    registerStartIntroQuestionsHandler(socket);
     registerAdminSetQuestionHandler(socket);
     registerAdminDeleteMyGameStatesHandler(socket);
     registerAdminSetPageHandler(socket);

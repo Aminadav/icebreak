@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useGame } from '../contexts/GameContext';
 import { useSocket } from '../contexts/SocketContext';
@@ -13,15 +13,15 @@ import { useSocket } from '../contexts/SocketContext';
  */
 export function useFullScreenModal() {
   const [open, setOpen] = useState(false);
-  
-  function FullScreenModalHelper({children}: {children: React.ReactNode}) {
+
+  function FullScreenModalHelper({ children }: { children: React.ReactNode }) {
     return <FullScreenModal open={open} onRequestClose={() => setOpen(false)}>
       {children}
-    </FullScreenModal>;  
+    </FullScreenModal>;
   }
-  
+
   return {
-    element:FullScreenModalHelper,
+    element: FullScreenModalHelper,
     open: () => setOpen(true),
     close: () => setOpen(false),
   }
@@ -77,11 +77,34 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
     };
   }, [open, isClosing]);
   const { texts } = useLanguage();
-  const isRTL = texts.direction === 'rtl';  
+  const isRTL = texts.direction === 'rtl';
+
+  var modalRef= useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    function handler(event: MouseEvent) {
+      if (!open) return
+      if (event.target instanceof HTMLElement) {
+        if (event.target.clientHeight >= window.innerHeight) {
+          onRequestClose();
+          return
+        }
+      }
+    }
+    setTimeout(()=>{
+      if(!modalRef.current) return;
+      modalRef.current.addEventListener('click', handler)
+    }, 0);
+    return () => {
+      if(!modalRef.current) return;
+      modalRef.current.removeEventListener('click', handler);
+    };
+  }, [modalRef.current]);
+
 
   if (!shouldRender) return <></>;
   return (
-    <div>
+    <div ref={modalRef}>
       <style>{`
         @keyframes slideUpIn {
           from {
@@ -109,33 +132,31 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
           animation: slideDownOut 0.3s ease-in forwards;
         }
       `}</style>
-      
+
       <div className="relative px-6 pt-6 mb-8">
-      <div 
-        className={`overflow-y-scroll fixed inset-0 z-[9999] transition-opacity duration-300 ${
-          open && !isClosing ? 'opacity-100' : 'opacity-0'
-        }`}
-        style={{ height: '100vh', width: '100vw' }}
-      >
-        {/* Background overlay */}
-        <div 
-          className="absolute inset-0 bg-black bg-opacity-50 cursor-pointer"
-          onClick={handleClose}
-        />
-        
-        {/* Modal content with slide animations */}
-        <div 
-          className={`absolute inset-0 w-full h-full overflow-y-auto ${
-            isClosing ? 'modal-slide-out' : 'modal-slide-in'
-          }`}
+        <div
+          className={`overflow-y-scroll fixed inset-0 z-[9999] transition-opacity duration-300 ${open && !isClosing ? 'opacity-100' : 'opacity-0'
+            }`}
+          style={{ height: '100vh', width: '100vw' }}
         >
+          {/* Background overlay */}
+          <div
+            className="absolute inset-0 bg-black bg-opacity-50 cursor-pointer"
+            onClick={handleClose}
+          />
+
+          {/* Modal content with slide animations */}
+          <div
+            className={`absolute inset-0 w-full h-full overflow-y-auto ${isClosing ? 'modal-slide-out' : 'modal-slide-in'
+              }`}
+          >
           </div>
-          <div 
+          <div
             className="w-full min-h-full"
           >
-            <div 
-            style={{zIndex:1000}}
-            className={`absolute  top-2 ${isRTL ? 'left-6' : 'right-6'}`}>
+            <div
+              style={{ zIndex: 1000 }}
+              className={`absolute  top-2 ${isRTL ? 'left-6' : 'right-6'}`}>
               <button
                 onClick={onRequestClose}
                 className="flex items-center px-3 py-1 font-medium text-white transition-all duration-300 ease-out transform border shadow-lg cursor-pointer bg-white/20 backdrop-blur-md rounded-2xl border-white/30 hover:bg-white/30 hover:scale-105 hover:shadow-xl"
@@ -144,7 +165,7 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
                   →
                 </span>
               </button>
-            </div>  
+            </div>
             {children}
           </div>
         </div>

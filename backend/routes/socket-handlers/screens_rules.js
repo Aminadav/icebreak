@@ -55,6 +55,10 @@ module.exports.getScreenRules=function getScreenRules(gameId,userId) {
       ruleName:'First screen for creator',
       IS_CREATOR: true,
       SEEN_GAME_READY: false,
+      // condition:async () => {
+      //   const metadata = await getUserAllMetadata(gameId, userId);
+      //   return metadata.SEEN_GAME_READY && metadata.SEEN_GAME_READY === false;
+      // },
       onScreen: async () => {
         await updateMetadata('SEEN_GAME_READY', true);
         return {

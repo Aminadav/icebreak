@@ -79,6 +79,10 @@ declare global {
     points:number,
     badgeId:string,
   }
+  type gameStateCreatorFinishedOnboardingQuestions = {
+    screenName: 'CREATOR_FINISHED_ONBOARDING_QUESTIONS'
+  }
+
   type OTHER_SCREENS={
     screenName: 'GALLERY' 
               | "GIVE_GAME_NAME" 
@@ -95,6 +99,7 @@ declare global {
   export type GAME_STATES= 
               gameStateEmptyGameState
             | gameStateBefore
+            | gameStateCreatorFinishedOnboardingQuestions
             | OTHER_SCREENS
             | gameStateTextMessageToUser
             | gameStateAnswerFeedback

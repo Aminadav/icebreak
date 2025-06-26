@@ -13,3 +13,6 @@
 
 - Tasks:
 - Game Managemnt Screen
+
+
+אחרי 4 שאלות, הבונוס של 50 נקודות

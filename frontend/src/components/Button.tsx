@@ -12,19 +12,6 @@ export type ButtonVariant =
   | 'outline-purple' 
   | 'outline-purple-icon';
 
-interface ButtonProps {
-  variant: ButtonVariant;
-  children: React.ReactNode;
-  onClick?: () => void;
-  disabled?: boolean;
-  className?: string;
-  icon?: React.ReactNode;
-  loading?: boolean;
-  trackingId?: string;
-  clickOnEnter?: boolean;
-  'data-testid'?: string;
-}
-
 const buttonVariants = {
   primary: `
     bg-[#2B045B]
@@ -119,12 +106,22 @@ export default function Button({
   onClick, 
   loading = false,
   disabled = false, 
-  className = '',
   icon,
   trackingId,
   clickOnEnter = false,
   'data-testid': testId
-}: ButtonProps) {
+}: {
+  variant: ButtonVariant;
+  children: React.ReactNode;
+  onClick?: () => void;
+  disabled?: boolean;
+  className?: string;
+  icon?: React.ReactNode;
+  loading?: boolean;
+  trackingId?: string;
+  clickOnEnter?: boolean;
+  'data-testid'?: string;
+}) {
   const [isVisible, setIsVisible] = useState(false);
   const { trackEvent } = useTracking();
   
@@ -187,7 +184,6 @@ export default function Button({
         className={`
           cursor-pointer
           ${buttonVariants[variant]}
-          ${className}
           select-none
           transform
           will-change-transform

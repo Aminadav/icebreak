@@ -30,7 +30,7 @@ export function BadgeListOfFriendsInYourLevel({ friends }: ListOfFriendsInYourLe
     <div className="[flex-flow:wrap] box-border content-start flex gap-[9px] items-start justify-center p-0 relative w-full">
       {friendsToShow.map((friend) => (
         <div key={friend.user_id} className="relative shrink-0" data-name="image">
-          <Avatar friend={friend} size="regular"/>
+          <Avatar friend={friend} size="medium"/>
         </div>
       ))}
     </div>

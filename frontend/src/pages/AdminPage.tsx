@@ -221,6 +221,17 @@ export default function AdminPage(): JSX.Element {
     },
     {
       state: {
+        screenName: 'CREATOR_FINISHED_ONBOARDING_QUESTIONS'
+      },
+      metadata: {
+        IS_CREATOR: true,
+        SEEN_GAME_READY: true,
+        SEEN_BEFORE_ASK_ABOUT_YOU: true,
+        ANSWER_ABOUT_MYSELF: 5,
+      }
+    },
+    {
+      state: {
         screenName: 'GOT_POINTS',
         points: 10,
         text: 'כל הכבוד!'

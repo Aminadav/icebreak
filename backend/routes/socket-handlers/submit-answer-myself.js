@@ -43,23 +43,31 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
     console.log('After update metadata:', updatedMetadata);
     
     // Add 10 points for answering about myself
-    const pointsResult = await addPointsWithBadgeCheckAndEmit(userId, gameId, 10, socket);
-    const { totalPoints, earnedBadge } = pointsResult;
+    var metadata=await getUserAllMetadata(gameId,userId)
+    var answeredQuestionsCount = metadata['ANSWER_ABOUT_MYSELF'] || 0;
+    if(answeredQuestionsCount == 5) {
+      var pointsToAward=50
+      var message = 'ענית על 5 שאלות! קיבלת בונוס';
+    } else {
+      pointsToAward=10
+      message=[
+        'כל הכבוד!',
+        'מצויין!',
+        'אליפות!',
+        'תודה רבה!',
+        'אין עליך!',
+      ].sort(()=>Math.random() - 0.5)[0]
+    }
     
-    var textArray=[
-      'כל הכבוד!',
-      'מצויין!',
-      'אליפות!',
-      'תודה רבה!',
-      'אין עליך!',
-    ]
-    var text=textArray.sort(()=>Math.random() - 0.5)[0]
+
+    const pointsResult = await addPointsWithBadgeCheckAndEmit(userId, gameId, pointsToAward, socket);
+    const { totalPoints, earnedBadge } = pointsResult;
     
     // Always show GOT_POINTS first - the screen flow will check for badges when user continues
     await moveUserToGameState(socket, gameId, userId, {
       screenName: 'GOT_POINTS',
-      points: 10,
-      text
+      points: pointsToAward,
+      text:message
     });
   });
 };

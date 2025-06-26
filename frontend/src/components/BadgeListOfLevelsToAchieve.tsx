@@ -88,6 +88,27 @@ export function OneLevelToAchieve({ badge, isAchieved, badgeFriends }: OneLevelT
             <span className="text-xs">{badgeFriends.length}</span>
             <span className="text-sm">זכו בדרגה זו</span>
           </div>
+          {/* Bottom section - User avatars */}
+      {badgeFriends.length > 0 && (
+        <div className="flex flex-wrap items-center justify-center gap-1">
+        
+          {displayedUsers.map((friend, index) => (
+              <Avatar friend={friend} animateIndex={index} size="small" />
+          ))}
+          
+          {remainingCount > 0 && (
+            <div className={`
+              flex items-center justify-center w-8 h-8 rounded-full 
+              bg-gradient-to-br from-purple-500 to-purple-700 
+              text-white text-xs font-bold shadow-lg
+              user-avatar
+              ${textColor}
+            `}>
+              +{remainingCount}
+            </div>
+          )}
+        </div>
+      )}
         </div>
 
         {/* Center section - Badge image */}
@@ -133,28 +154,7 @@ export function OneLevelToAchieve({ badge, isAchieved, badgeFriends }: OneLevelT
           )}
         </div>
       </div>
-
-      {/* Bottom section - User avatars */}
-      {badgeFriends.length > 0 && (
-        <div className="flex flex-wrap items-center justify-center gap-1">
-        
-          {displayedUsers.map((friend, index) => (
-              <Avatar friend={friend} animateIndex={index} size="small" />
-          ))}
-          
-          {remainingCount > 0 && (
-            <div className={`
-              flex items-center justify-center w-8 h-8 rounded-full 
-              bg-gradient-to-br from-purple-500 to-purple-700 
-              text-white text-xs font-bold shadow-lg
-              user-avatar
-              ${textColor}
-            `}>
-              +{remainingCount}
-            </div>
-          )}
-        </div>
-      )}
+      
     </div>
   );
 }

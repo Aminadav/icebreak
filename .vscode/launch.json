@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+
+    {
+      "type": "node",
+      "name": "Attach to server (5566)",
+      "request": "attach",
+      "port": 5566,
+      "restart": true,      
+    }
+  ]
+}

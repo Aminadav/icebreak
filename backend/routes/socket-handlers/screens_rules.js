@@ -14,6 +14,7 @@ module.exports.getScreenRules=function getScreenRules(gameId,userId) {
    *    SEEN_GAME_READY?:any
    *    SEEN_BEFORE_ASK_ABOUT_YOU?:any
    *    ANSWER_ABOUT_MYSELF?:any,
+   *    SEEN_CREATOR_FINISHED_ONBOARDING?:boolean
    *    condition?:()=>Promise<boolean>,
    *    onScreen:()=>Promise<GAME_STATES>
    * }[]}
@@ -68,6 +69,18 @@ module.exports.getScreenRules=function getScreenRules(gameId,userId) {
         await updateMetadata('SEEN_BEFORE_ASK_ABOUT_YOU', true);
         return {
           screenName: 'BEFORE_START_ABOUT_YOU',
+        };
+      }
+    },
+    {
+      ruleName:'Creator finished onboarding questions',
+      IS_CREATOR: true,
+      ANSWER_ABOUT_MYSELF: 5,
+      SEEN_CREATOR_FINISHED_ONBOARDING: false,
+      onScreen: async () => {
+        await updateMetadata('SEEN_CREATOR_FINISHED_ONBOARDING', true);
+        return {
+          screenName: 'CREATOR_FINISHED_ONBOARDING_QUESTIONS',
         };
       }
     },

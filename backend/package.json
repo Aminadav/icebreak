@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "Backend server for Icebreak game application",
   "scripts": {
-    "start": "pkill -f 'nodemon.*server.js' || pkill -f 'node.*server.js' || true && nodemon server.js",
-    "dev": "pkill -f 'nodemon.*server.js' || pkill -f 'node.*server.js' || true && nodemon server.js",
+    "dev": "pkill -f 'nodemon.*server.js' || pkill -f 'node.*server.js' || true && nodemon --inspect --inspect-port=5566  server.js",
     "clean-db": "node scripts/clean-db.js",
     "update-schema": "node scripts/update-schema.js",
     "db:setup": "node scripts/setupDatabase.js",

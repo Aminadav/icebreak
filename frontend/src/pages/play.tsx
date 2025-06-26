@@ -19,6 +19,7 @@ import SelectGenderPage from './SelectGenderPage';
 import PictureUploadPage from './PictureUploadPage';
 import CameraPage from './CameraPage';
 import CreatorGameReadyPage from './CreatorGameReadyPage';
+import CreatorFinishedOnboardingQuestionsPage from './CreatorFinishedOnboardingQuestionsPage';
 import QuestionAboutOtherPage from './QuestionPageAboutOther';
 import { getIsTesting } from '../utils/isTesting';
 import { env } from '../env';
@@ -27,6 +28,7 @@ export default function Play(): JSX.Element {
   const gameId = useGameId();
   const {socket}=useSocket();
   const [gameState, setGameState] = useState<GAME_STATES>(EMPTY_GAME_STATE);
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
 
   useEffect(() => {
     if(!socket) return console.error('socket not found')
@@ -38,6 +40,18 @@ export default function Play(): JSX.Element {
     return ()=>{
       socket.off('update-game-state', onUpdateGameState);
     }
+  }, []);
+  useEffect(() => {
+    if (!env.is_dev) return;
+    function handle(event: KeyboardEvent) {
+      if (event.key === 'Shift') {
+        setIsShiftPressed(x=>!x);
+      }
+    };
+    window.addEventListener('keydown', handle);
+    return () => {
+      window.removeEventListener('keydown', handle);
+    };
   }, []);
   
   return (
@@ -74,6 +88,10 @@ export default function Play(): JSX.Element {
         <CreatorGameReadyPage/>
       }
       
+      {gameState.screenName=="CREATOR_FINISHED_ONBOARDING_QUESTIONS" && 
+        <CreatorFinishedOnboardingQuestionsPage/>
+      }
+      
       {gameState.screenName=="BEFORE_START_ABOUT_YOU" && 
         <BeforeStartAskAboutYou gameState={gameState}/>
       }
@@ -98,7 +116,8 @@ export default function Play(): JSX.Element {
       {gameState.screenName=="GOT_BADGE" && 
         <GotBadgePage gameState={gameState} />
       }
-        {env.DEBUG_SHOW_SCREEN_NAME && <div dir="ltr"style={{
+      {JSON.stringify({isShiftPressed})}
+        {(env.DEBUG_SHOW_SCREEN_NAME || (env.is_dev && isShiftPressed)) && <div dir="ltr"style={{
         position: 'fixed',
         bottom: 0,
         left: 0,

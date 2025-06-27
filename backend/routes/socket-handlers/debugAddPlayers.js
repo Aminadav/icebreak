@@ -111,7 +111,6 @@ module.exports.registerDebugAddPlayersHandler = async function(socket) {
         ];
         const randomScreen = screens[Math.floor(Math.random() * screens.length)];
         const randomMetadata = {
-          IS_CREATOR: false,
           SEEN_GAME_READY: Math.random() > 0.5,
           SEEN_BEFORE_ASK_ABOUT_YOU: Math.random() > 0.5,
           ANSWER_ABOUT_MYSELF: Math.floor(Math.random() * 10)

@@ -36,10 +36,7 @@ module.exports.registerCreateGameImmediatelyHandler = async function(socket) {
       [gameId, gameName, userId]
     );
     
-    // Create game_user_state with IS_CREATOR metadata
-    /** @type {GameMetadata} */
     const creatorMetadata = {
-      IS_CREATOR: true
     };
     
     await pool.query(

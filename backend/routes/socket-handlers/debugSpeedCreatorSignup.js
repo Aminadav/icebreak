@@ -128,7 +128,6 @@ module.exports.registerDebugSpeedCreatorSignupHandler = async function(socket) {
       `, [gameId, userId]);
       
       const creatorMetadata = {
-        IS_CREATOR: true,
         SEEN_GAME_READY: false,
         SEEN_BEFORE_ASK_ABOUT_YOU: false,
         ANSWER_ABOUT_MYSELF: 0

@@ -2,6 +2,7 @@ const moveUserToGameState = require("./moveUserToGameState");
 const getUserAllMetadata = require("../../utils/getUserAllMetadata");
 const { updateMetaDataBinder } = require("../../utils/update-meta-data");
 const { getNextQuestionAboutYou } = require("../../utils/getNextQuestionAboutYou");
+const pool = require("../../config/database");
 
 var DEBUG = true
 /**
@@ -15,6 +16,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   const updateMetadata = updateMetaDataBinder(gameId, userId);
   const { checkForMissingBadge, awardBadge } = require('./badgeHelpers');
   const missingBadge = await checkForMissingBadge(userId, gameId);
+  const isCreator=(await pool.query(`select creator_user_id from games where game_id = $1`, [gameId])).rows[0].creator_user_id === userId;
 
   // check for missing badges
   if (missingBadge) {
@@ -28,7 +30,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   }
 
   // Check for First screen for creator
-  if (metadata.IS_CREATOR && !metadata.SEEN_GAME_READY) {
+  if (isCreator && !metadata.SEEN_GAME_READY) {
     await updateMetadata('SEEN_GAME_READY', true);
     return {
       screenName: 'CREATOR_GAME_READY',
@@ -44,7 +46,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   }
 
   // Creator finished onboarding questions
-  if (metadata.IS_CREATOR && metadata.ANSWER_ABOUT_MYSELF >= 5 && !metadata.SEEN_CREATOR_FINISHED_ONBOARDING) {
+  if (isCreator && metadata.ANSWER_ABOUT_MYSELF >= 5 && !metadata.SEEN_CREATOR_FINISHED_ONBOARDING) {
     await updateMetadata('SEEN_CREATOR_FINISHED_ONBOARDING', true);
     return {
       screenName: 'CREATOR_FINISHED_ONBOARDING_QUESTIONS',

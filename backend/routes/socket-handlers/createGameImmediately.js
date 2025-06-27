@@ -7,10 +7,6 @@ const pool = require('../../config/database');
 const { awardBadge } = require('./badgeHelpers');
 const { BADGES } = require('../../../shared/badge-list');
 
-/**
- * @typedef {import('../../GAME_METADATA_INTERFACE').GameMetadata} GameMetadata
- */
-
 module.exports.registerCreateGameImmediatelyHandler = async function(socket) {
 
   /**

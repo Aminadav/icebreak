@@ -12,10 +12,18 @@ module.exports=async function moveUserToGameState(socket,gameId,userId, gameStat
   if(socket) {
       socket.emit('update-game-state',gameState)
   }
+  
+  // Update current state
   var res=await pool.query(`
       INSERT INTO game_user_state (game_id, user_id, state) 
       VALUES ($1, $2, $3) 
       ON CONFLICT (game_id, user_id) 
       DO UPDATE SET state = $3, updated_at = CURRENT_TIMESTAMP
+  `, [gameId, userId, gameState]);
+  
+  // Record screen visit history
+  await pool.query(`
+      INSERT INTO screen_visits (game_id, user_id, state) 
+      VALUES ($1, $2, $3)
   `, [gameId, userId, gameState]);
 }

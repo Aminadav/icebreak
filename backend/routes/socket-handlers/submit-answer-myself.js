@@ -1,12 +1,9 @@
 const { getUserIdFromDevice } = require("./utils");
 const pool = require('../../config/database');
-const { updateMetaDataBinder, updateMetadata } = require("../../utils/update-meta-data");
-const { addPointsWithBadgeCheckAndEmit } = require("../../utils/points-helper");
 const moveUserToGameState = require("./moveUserToGameState");
-const getUserAllMetadata = require("../../utils/getUserAllMetadata");
-const { increaseUserStateMetadata } = require("../../utils/incrementUserStateMetadata");
 const { getGlobalIo } = require("../../utils/socketGlobal");
 const { getGameDataWithCounts } = require("./getGameData");
+const { addPointsWithBadgeCheckAndEmit } = require("../../utils/points-helper");
 
 /**
  * Helper function to emit updated game data to all users in the game
@@ -47,23 +44,14 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
     
     
     // Get current count of answers about myself
-    const currentAnswersResult = await pool.query(`
+    const currentAnswersResult = (await pool.query(`
       SELECT COUNT(*) as count 
       FROM user_answers 
       WHERE gameid = $1 AND answering_user_id = $2 AND is_about_me = true
       -- gameId=$1, userId=$2
-    `, [gameId, userId]);
+    `, [gameId, userId])).rows[0].count;
     
-    await increaseUserStateMetadata(gameId, userId, 'ANSWER_ABOUT_MYSELF', 1);
-    
-    // Fetch updated metadata to verify the change
-    var updatedMetadata = await getUserAllMetadata(gameId, userId);
-    console.log('After update metadata:', updatedMetadata);
-    
-    // Add 10 points for answering about myself
-    var metadata=await getUserAllMetadata(gameId,userId)
-    var answeredQuestionsCount = metadata['ANSWER_ABOUT_MYSELF'] || 0;
-    if(answeredQuestionsCount == 5) {
+    if(currentAnswersResult == 5) {
       var pointsToAward=50
       var message = 'ענית על 5 שאלות! קיבלת בונוס';
     } else {
@@ -77,10 +65,9 @@ module.exports.registerSubmitAnswerMyselfHandler = async function (socket) {
       ].sort(()=>Math.random() - 0.5)[0]
     }
     
-
     const pointsResult = await addPointsWithBadgeCheckAndEmit(userId, gameId, pointsToAward, socket);
-    const { totalPoints, earnedBadge } = pointsResult;
-    
+
+
     // Always show GOT_POINTS first - the screen flow will check for badges when user continues
     await moveUserToGameState(socket, gameId, userId, {
       screenName: 'GOT_POINTS',

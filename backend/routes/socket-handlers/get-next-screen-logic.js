@@ -13,7 +13,9 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   var userVisited =(screenName)=> hasSeenScreen(gameId, userId,screenName);
   var userNotVisited =async (screenName)=> !await userVisited(screenName);
   const missingBadge = await checkForMissingBadge(userId, gameId);
-  const isCreator = (await pool.query(`select creator_user_id from games where game_id = $1`, [gameId])).rows[0].creator_user_id === userId;
+  const gameResult = await pool.query(`select creator_user_id, name from games where game_id = $1`, [gameId]);
+  const isCreator = gameResult.rows[0].creator_user_id === userId;
+  const gameName = gameResult.rows[0].name;
 
   // check for missing badges
   if (missingBadge) {
@@ -24,6 +26,13 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
       screenName: 'GOT_BADGE',
       badgeId: missingBadge.id,
     }
+  }
+
+  // Check if creator needs to give game name
+  if (isCreator && (!gameName || gameName.trim().length === 0)) {
+    return {
+      screenName: 'GIVE_GAME_NAME',
+    };
   }
 
   // Show welcome screen for non-creators joining a game

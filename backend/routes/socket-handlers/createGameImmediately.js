@@ -1,7 +1,7 @@
 const Game = require('../../models/Game');
 const { sendToMixpanel } = require('../../utils/mixpanelService');
 const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
-var moveUserToGameState=require( './moveUserToGameState');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 const { generateGameId } = require('../../utils/idGenerator');
 const pool = require('../../config/database');
 const { awardBadge } = require('./badgeHelpers');
@@ -53,8 +53,7 @@ module.exports.registerCreateGameImmediatelyHandler = async function(socket) {
       success: true,
       message: 'Game created successfully. Complete verification to claim ownership.'
     });
-    var userId = await getUserIdFromDevice(socket.deviceId);
-    await moveUserToGameState(socket, gameId, userId, { screenName: 'GIVE_GAME_NAME' });
+    await push_user_to_next_screen(socket, gameId, userId);
 
     // console.log(`🎮 Game created immediately: ${gameName} (${gameId}) for device: ${socket.deviceId}`);
   });

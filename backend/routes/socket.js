@@ -35,6 +35,7 @@ const { registerGetUserBadgesHandler } = require('./socket-handlers/getUserBadge
 const {  registerGetUserGameDataHandler } = require('./socket-handlers/getUserGameData');
 const { getDataForBadgePage } = require('./socket-handlers/getDataForBadgePage');
 const { registerLogoutHandler } = require('./socket-handlers/logout');
+const { registerGetGameInfoHandler } = require('./socket-handlers/getGameInfo');
 // Import utilities
 const { getUserIdFromDevice, sendUserDataToClient } = require('./socket-handlers/utils');
 const {registerGetUserDataHandler} = require('./socket-handlers/registerGetUserData');
@@ -110,6 +111,7 @@ function setupSocketHandlers(io) {
     registerGetUserGameDataHandler(socket);
     registerLogoutHandler(socket);
     registerGetUserDataHandler(socket);
+    registerGetGameInfoHandler(socket);
     registerDebugAddPlayersHandler(socket);
     registerDebugSpeedCreatorSignupHandler(socket);
     registerDebugGetUserMetadataHandler(socket);

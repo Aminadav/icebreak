@@ -22,6 +22,7 @@ import CreatorGameReadyPage from './CreatorGameReadyPage';
 import CreatorFinishedOnboardingQuestionsPage from './CreatorFinishedOnboardingQuestionsPage';
 import NoMoreQuestionsPage from './NoMoreQuestionsPage';
 import QuestionAboutOtherPage from './QuestionPageAboutOther';
+import JoinGameWelcomePage from './JoinGameWelcomePage';
 import { getIsTesting } from '../utils/isTesting';
 import { env } from '../env';
 
@@ -57,6 +58,9 @@ export default function Play(): JSX.Element {
   
   return (
     <div>
+      {gameState.screenName=="JOIN_GAME_WELCOME" && 
+        <JoinGameWelcomePage/>
+      }
       {gameState.screenName=="GIVE_GAME_NAME" && 
         <GiveGameNamePage/>
       }

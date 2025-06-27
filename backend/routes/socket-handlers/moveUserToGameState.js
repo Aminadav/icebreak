@@ -14,7 +14,7 @@ module.exports=async function moveUserToGameState(socket,gameId,userId, gameStat
   }
   
   // Update current state
-  var res=await pool.query(`
+  await pool.query(`
       INSERT INTO game_user_state (game_id, user_id, state) 
       VALUES ($1, $2, $3) 
       ON CONFLICT (game_id, user_id) 

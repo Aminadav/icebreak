@@ -26,6 +26,13 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
     }
   }
 
+  // Show welcome screen for non-creators joining a game
+  if (!isCreator && await userNotVisited('JOIN_GAME_WELCOME')) {
+    return {
+      screenName: 'JOIN_GAME_WELCOME',
+    };
+  }
+
   // Check for First screen for creator
   if (isCreator && await userNotVisited('CREATOR_GAME_READY')) {
     return {

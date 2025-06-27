@@ -95,6 +95,7 @@ declare global {
               | 'CAMERA'
               | "CREATOR_GAME_READY"
               | "NO_MORE_QUESTIONS"
+              | "JOIN_GAME_WELCOME"
   }
 
   export type GAME_STATES= 

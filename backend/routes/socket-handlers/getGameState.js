@@ -1,4 +1,5 @@
 const pool = require('../../config/database');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 const { getUserIdFromDevice } = require('./utils');
 
 /**
@@ -16,11 +17,12 @@ function registerGetGameStateHandler(socket) {
     if(res.rows.length == 0) {
       gameState = {screenName:'BEFORE_START_ABOUT_YOU'}
       await pool.query('INSERT INTO game_user_state (user_id, game_id, state) VALUES ($1, $2, $3)', [userId, gameId, gameState]);
+      await push_user_to_next_screen(socket,gameId, userId);
     } else {
       gameState = res.rows[0].state;
-    }
+      socket.emit('update-game-state', gameState);
+    } 
 
-    socket.emit('update-game-state', gameState);
   });
 }
 

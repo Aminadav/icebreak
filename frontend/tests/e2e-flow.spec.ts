@@ -3,8 +3,9 @@ import { get2FACode } from './test-utils';
 //@ts-ignore
 import fs from 'fs'
 
-var DEFAULT_DELAY=250
-var LONG_DELAY=1000
+const DEFAULT_DELAY=50
+const DELAY_ON_MODAL=300
+const LONG_DELAY=1000
 
 /**
  * Enable testing mode on backend (sets MOCK_SMS and MOCK_GENERATE to true)
@@ -204,26 +205,26 @@ test.describe('Icebreak App E2E Flow', () => {
     
     // Show modal again and test No/Yes flow
     await nameContinueButton.click();
-    await delay(DEFAULT_DELAY);
+    await delay(DELAY_ON_MODAL);
     await step(page,'after click CONTINUE button on name screen 4th time');
     await expect(modalOverlay).toBeVisible();
     
     // Test clicking "No" first
     await page.getByTestId('name-confirmation-no').click();
-    await delay(DEFAULT_DELAY);
+    await delay(DELAY_ON_MODAL);
     await expect(modalOverlay).not.toBeVisible();
     await expect(nameInput).toBeVisible();
     
     await step(page,'after clicking NO to reject name');
     
     await nameContinueButton.click();
-    await delay(DEFAULT_DELAY);
+    await delay(DELAY_ON_MODAL);
     
     await step(page,'after click CONTINUE button on name screen 5th time');
 
     
     await page.getByTestId('name-confirmation-yes').click();
-    await delay(DEFAULT_DELAY)
+    await delay(DELAY_ON_MODAL)
 
     await step(page,'After clicking YES to confirm name');
     await expect(modalOverlay).not.toBeVisible();

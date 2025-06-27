@@ -1,6 +1,7 @@
 const moveUserToGameState = require("./moveUserToGameState");
 const getUserAllMetadata = require("../../utils/getUserAllMetadata");
-const { getScreenRules } = require("./screens_rules");
+const { updateMetaDataBinder } = require("../../utils/update-meta-data");
+const { getNextQuestionAboutYou } = require("../../utils/getNextQuestionAboutYou");
 
 var DEBUG = true
 /**
@@ -9,59 +10,62 @@ var DEBUG = true
  * @param {string} userId - The user ID
  * @returns {Promise<GAME_STATES>} The next screen state
  */
-module.exports.get_next_screen=async function get_next_screen(gameId, userId) {
+module.exports.get_next_screen = async function get_next_screen(gameId, userId) {
   const metadata = await getUserAllMetadata(gameId, userId);
-  var screenRules = getScreenRules(gameId, userId);
+  const updateMetadata = updateMetaDataBinder(gameId, userId);
+  const { checkForMissingBadge, awardBadge } = require('./badgeHelpers');
+  const missingBadge = await checkForMissingBadge(userId, gameId);
 
-  // Choose rule based on metadata - dynamic matching
-  var choosenRule = null;
+  // check for missing badges
+  if (missingBadge) {
+    const awardedBadge = await awardBadge(userId, gameId, missingBadge.id);
+    console.log(`🏆 Screen rule awarded badge: ${awardedBadge?.name || missingBadge.id} to user ${userId}`);
 
-  if (DEBUG) console.log('Metadata for user:', metadata)
-  ruleFor:
-  for (let rule of screenRules) {
-    if (DEBUG) console.log('Checking rule:', rule);
-    if (rule.condition) {
-      if (DEBUG) console.log('Checking async condition for rule:', rule.ruleName);
-      const conditionResult = await rule.condition();
-      console.log({conditionResult})
-      if (!conditionResult) {
-        if (DEBUG) console.log('Async condition failed for rule:', rule.ruleName);
-        continue
-      }
+    return {
+      screenName: 'GOT_BADGE',
+      badgeId: missingBadge.id,
     }
-    // Check if all rule conditions match the metadata
-    for (let key in rule) {
-      if (key === 'onScreen') continue
-      if (key === 'ruleName') continue
-      if (key === 'condition') continue
-      const metadataValue = metadata[key] !== undefined ? metadata[key] : false;
-      const ruleValue = rule[key];
-
-      // Handle function comparators
-      if (typeof ruleValue === 'function') {
-        if (!ruleValue(metadata[key])) {
-          if (DEBUG) console.log(`Rule rejected because ${key} function comparison failed`);
-          continue ruleFor
-        }
-      } else {
-        if (DEBUG) console.log(`Comparing metadata[${key}] (${metadataValue}) !== rule[${key}] (${ruleValue})`);
-        if (metadataValue !== ruleValue) {
-          if (DEBUG) console.log(`Rule rejected because ${key} doesn't match`);
-          continue ruleFor
-        }
-      }
-    }
-    if (DEBUG) console.log('Rule matches all conditions');
-    choosenRule = rule;
-    break
   }
 
-  // If no rule matches, use the first rule as default
-  if (!choosenRule) {
-    choosenRule = screenRules[0];
+  // Check for First screen for creator
+  if (metadata.IS_CREATOR && !metadata.SEEN_GAME_READY) {
+    await updateMetadata('SEEN_GAME_READY', true);
+    return {
+      screenName: 'CREATOR_GAME_READY',
+    };
   }
 
-  if (DEBUG) console.log('Chosen rule:', choosenRule);
-  var nextScreen = await choosenRule.onScreen();
-  return nextScreen;
+  // Ask about themself
+  if (!metadata.SEEN_BEFORE_ASK_ABOUT_YOU) {
+    await updateMetadata('SEEN_BEFORE_ASK_ABOUT_YOU', true);
+    return {
+      screenName: 'BEFORE_START_ABOUT_YOU',
+    };
+  }
+
+  // Creator finished onboarding questions
+  if (metadata.IS_CREATOR && metadata.ANSWER_ABOUT_MYSELF >= 5 && !metadata.SEEN_CREATOR_FINISHED_ONBOARDING) {
+    await updateMetadata('SEEN_CREATOR_FINISHED_ONBOARDING', true);
+    return {
+      screenName: 'CREATOR_FINISHED_ONBOARDING_QUESTIONS',
+    };
+  }
+
+  // Show a question about the user
+  const nextQuestionAboutMySelf = await getNextQuestionAboutYou(gameId, userId)
+  const answeredCount = metadata.ANSWER_ABOUT_MYSELF || 0
+
+  if (!nextQuestionAboutMySelf) {
+    return {
+      screenName: 'NO_MORE_QUESTIONS',
+    };
+  }
+
+  return {
+    screenName: "QUESTION_ABOUT_MYSELF",
+    question: nextQuestionAboutMySelf,
+    introTotalQuestions: 5,
+    introCurrentQuestion: answeredCount + 1,
+    isIntro: answeredCount <= 5,
+  }
 }

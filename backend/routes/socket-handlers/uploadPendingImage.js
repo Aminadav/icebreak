@@ -1,5 +1,5 @@
 
-const moveUserToGameState =require( './moveUserToGameState');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 
 const pool = require('../../config/database');
 const fs = require('fs');
@@ -68,9 +68,7 @@ module.exports.registerUploadPendingImageHandler = async function(socket) {
       //   imageHash: imageHash,
       //   userId: targetUserId
       // });
-      moveUserToGameState(socket, gameId,userId, {
-        screenName: 'GALLERY', 
-      })
+      await push_user_to_next_screen(socket, gameId, userId);
       console.log(`✅ Image uploaded successfully for user ${userId}: ${imageHash}`);
       
     } catch (error) {

@@ -38,8 +38,12 @@ async function improveFace(options) {
     if (process.env.MOCK_GENERATE === 'true') {
       console.log('🎭 Mock mode enabled - simulating face enhancement...');
       
-      // Wait 3-8 seconds to simulate processing time
-      await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 5000) + 4000));
+      if(process.env.FAST_MOCK_GENERATE === 'true') {
+        console.log('⚡ Fast mock mode enabled - using shorter processing time');
+      } else {
+        // Wait 3-8 seconds to simulate processing time
+        await new Promise(resolve => setTimeout(resolve, Math.floor(Math.random() * 5000) + 4000));
+      }
       
       // Copy mock output file to destination
       const mockOutputPath = path.join(__dirname, 'mock-output.png');

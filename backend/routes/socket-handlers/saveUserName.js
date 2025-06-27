@@ -1,6 +1,6 @@
 
 const User = require('../../models/User');
-const moveUserToGameState = require('./moveUserToGameState');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 const { getUserIdFromDevice, sendUserDataToClient } = require('./utils');
 
 module.exports.registerSaveUserNameHandler = async function(socket) {
@@ -47,9 +47,7 @@ module.exports.registerSaveUserNameHandler = async function(socket) {
         // Send updated user data to client
         await sendUserDataToClient(socket, targetUserId);
 
-        moveUserToGameState(socket, gameId, targetUserId, {
-          screenName: 'ASK_PLAYER_GENDER',
-        })
+        await push_user_to_next_screen(socket, gameId, targetUserId);
 
         
         console.log(`✅ Name saved successfully for user ${targetUserId}: ${trimmedName}`);

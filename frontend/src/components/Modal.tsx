@@ -79,7 +79,7 @@ export default function Modal({ children, onClose, closeOnOverlayClick = true }:
             isModalOpen ? 'scale-100 opacity-100' : 'scale-95 opacity-0'
           }`}
           onClick={(e) => {
-            console.log('Click on modal content, stopping propagation');
+            // console.log('Click on modal content, stopping propagation');
             e.stopPropagation();
           }}
         >

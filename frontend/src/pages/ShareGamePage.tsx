@@ -18,11 +18,15 @@ export default function ShareGamePage({ onClose }: ShareGamePageProps): JSX.Elem
 
   // Pre-defined Hebrew messages
   var shareMessages = [
-    "היי! יצרתי חידון מגניב שיגלה לכם דברים מפתיעים עליי 🎯 בואו תנחשו מה אתם יודעים עליי באמת!",
-    "מוכנים לגלות כמה אתם באמת מכירים אותי? 🤔 יצרתי חידון אישי שיפתיע אתכם! בואו נראה מי יזכה 🏆",
-    "חברים יקרים! יש לי אתגר בשבילכם 💪 יצרתי חידון על עצמי - מי שיענה הכי טוב יזכה בכבוד! בואו נשחק 🎮",
-    "תאמינו? יצרתי חידון מטורף עליי 😄 יש שם שאלות שגם אני לא הייתי יודע לענות עליהן! בואו תנסו את המזל שלכם 🎲",
-    "משעמם לכם? בואו נשחק במשחק חידון שיצרתי! 🎊 תגלו דברים חדשים עליי ותתחרו מי הכי מכיר אותי 🥇"
+    `היי! יצרתי משחק IceBreak לקבוצת הזו. מוזמנים לשחק. `,
+    `שלום! אתם חייבים לנסות. יצרתי משחק לקבוצת ווצאפ הזו. קוראים לזה IceBreak. זה משחק גיבוש והיכרות עם נקודות. בואו נראה מי כאן מכיר הכי טוב אחד את השני 🏆
+כניסה למשחק:`,
+
+    `המשחק התחיל. חידון קבוצתי חדש: IceBreak. כל שאלה עוסקת באחד מחברי הקבוצה. עונים, צוברים נקודות, ומגלים מי הכי מכיר את כולם. מצורף קישור:`,
+
+    `יאללה, משחק היכרות חדש בקבוצה! זה נקרא IceBreak. עונים על שאלות אישיות על חברי הקבוצה, צוברים נקודות, ומגלים דברים שלא ידענו. מוזמנים להיכנס:`,
+
+    `הפסקה קצרה מהשגרה: משחק קצר, מצחיק ומאתגר שנקרא IceBreak. כמה אתם באמת מכירים את החברים כאן? רק דרך אחת לגלות:`
   ];
 
   const handleCopyLink = async () => {

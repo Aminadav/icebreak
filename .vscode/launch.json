@@ -7,7 +7,12 @@
       "name": "Attach to server (5566)",
       "request": "attach",
       "port": 5566,
-      "restart": true,      
+      "restart": true,       
+      "skipFiles": [
+        "<node_internals>/**",
+        "${workspaceFolder}/**/node_modules/**/*.js",
+
+      ],     
     }
   ]
 }

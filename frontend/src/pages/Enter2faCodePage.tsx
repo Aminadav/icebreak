@@ -197,7 +197,7 @@ export default function Enter2faCodePage(): JSX.Element {
     
     try {
       // Emit verification request (listeners are already set up in useEffect)
-      console.log('📤 Emitting verify_2fa_code:', fullCode);
+      // console.log('📤 Emitting verify_2fa_code:', fullCode);
       socket.emit('verify_2fa_code', { code: fullCode,gameId });
     } catch (error) {
       console.error('Failed to verify 2FA code:', error);

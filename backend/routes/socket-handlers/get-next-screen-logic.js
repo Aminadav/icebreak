@@ -16,6 +16,32 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   const gameResult = await pool.query(`select creator_user_id, name from games where game_id = $1`, [gameId]);
   const isCreator = gameResult.rows[0].creator_user_id === userId;
   const gameName = gameResult.rows[0].name;
+  
+  // Get user verification status
+  const userResult = await pool.query(`select phone_number, phone_verified, name, email, gender, has_image, pending_image from users where user_id = $1`, [userId]);
+  const user = userResult.rows[0];
+  const hasPhoneNumber = user.phone_number && user.phone_number.trim().length > 0;
+  const isPhoneVerified = user.phone_verified;
+  const hasName = user.name && user.name.trim().length > 0;
+  const hasEmail = user.email && user.email.trim().length > 0;
+  const hasGender = user.gender && user.gender.trim().length > 0;
+  const hasImage = user.has_image;
+  const hasPendingImage = user.pending_image && user.pending_image.trim().length > 0;
+
+  // console.log({
+  //   gameId,
+  //   userId,
+  //   isCreator,
+  //   gameName,
+  //   hasPhoneNumber,
+  //   isPhoneVerified,
+  //   hasName,
+  //   hasEmail,
+  //   hasGender,
+  //   hasImage,
+  //   hasPendingImage,
+  //   missingBadge: missingBadge ? missingBadge.id : null
+  // })
 
   // check for missing badges
   if (missingBadge) {
@@ -32,6 +58,55 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   if (isCreator && (!gameName || gameName.trim().length === 0)) {
     return {
       screenName: 'GIVE_GAME_NAME',
+    };
+  }
+
+  // Check if user needs to enter phone number
+  if (!hasPhoneNumber) {
+    return {
+      screenName: 'ASK_USER_PHONE',
+    };
+  }
+
+  // Check if user needs to verify phone number
+  if (hasPhoneNumber && !isPhoneVerified) {
+    return {
+      screenName: 'ASK_USER_VERIFICATION_CODE',
+    };
+  }
+  
+  // Check if user needs to enter email
+  if (!hasEmail) {
+    return {
+      screenName: 'ASK_FOR_EMAIL',
+    };
+  }
+
+  // Check if user needs to enter name
+  if (!hasName) {
+    return {
+      screenName: 'ASK_PLAYER_NAME',
+    };
+  }
+
+  // Check if user needs to select gender
+  if (!hasGender) {
+    return {
+      screenName: 'ASK_PLAYER_GENDER',
+    };
+  }
+
+  // Check if user needs to upload image
+  if (!hasImage && !hasPendingImage) {
+    return {
+      screenName: 'ASK_FOR_PICTURE',
+    };
+  }
+
+  // Check if user has pending image but hasn't selected from gallery
+  if (hasPendingImage && !hasImage) {
+    return {
+      screenName: 'GALLERY',
     };
   }
 

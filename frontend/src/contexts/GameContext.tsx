@@ -239,7 +239,7 @@ export function GameProvider({ children }: GameProviderProps) {
     // Listen for game data updates (answer counts)
     const gameDataUpdatedHandler = (data: any) => {
       if (data.success && data.gameId === gameId) {
-        console.log('📊 GameContext: Game data updated:', data);
+        // console.log('📊 GameContext: Game data updated:', data);
         setGameData(data);
         setIsLoading(false);
       }

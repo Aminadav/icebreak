@@ -2,7 +2,7 @@
 const pool = require('../../config/database');
 
 const { sendVerificationCode, formatPhoneNumber } = require('../../utils/smsService');
-const moveUserToGameState = require('./moveUserToGameState');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
 
 module.exports.registerSubmitPhoneNumberHandler = async function(socket) {
@@ -27,9 +27,7 @@ module.exports.registerSubmitPhoneNumberHandler = async function(socket) {
         socket.phoneNumber = smsResult.phoneNumber;
         await pool.query(`update users set phone_number = $1 where user_id = $2`, [phoneNumber, userId]);
         
-        moveUserToGameState(socket, gameId, userId, {
-          screenName: 'ASK_USER_VERIFICATION_CODE',
-        })
+        await push_user_to_next_screen(socket, gameId, userId);
         
       } else {
         throw new Error(smsResult.error || 'Failed to send SMS');

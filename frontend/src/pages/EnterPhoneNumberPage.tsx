@@ -40,7 +40,7 @@ export default function EnterPhoneNumberPage(): JSX.Element {
     
     try {
       // Emit phone number (listeners are already set up in useEffect)
-      console.log('📤 Emitting submit_phone_number:', phoneNumber);
+      // console.log('📤 Emitting submit_phone_number:', phoneNumber);
       socket.emit('submit_phone_number', { phoneNumber,gameId });
     } catch (error) {
       console.error('Failed to process phone number:', error);

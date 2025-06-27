@@ -1,7 +1,7 @@
 
 const User = require('../../models/User');
-const moveUserToGameState = require('./moveUserToGameState');
-const { validateUserVerification, getUserIdFromDevice } = require('./utils');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
+const { getUserIdFromDevice } = require('./utils');
 
 module.exports.registerSaveEmailHandler = async function(socket) {
   socket.on('save_email', async (data) => {
@@ -34,9 +34,7 @@ module.exports.registerSaveEmailHandler = async function(socket) {
       const result = await User.updateUserEmail(targetUserId, normalizedEmail);
       
       if (result.success) {
-        moveUserToGameState(socket, gameId, targetUserId, {
-          screenName: 'ASK_PLAYER_NAME',
-        })
+        await push_user_to_next_screen(socket, gameId, targetUserId);
       } else {
         throw new Error(result.error || 'Failed to save email address');
       }

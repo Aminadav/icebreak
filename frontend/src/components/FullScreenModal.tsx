@@ -14,7 +14,11 @@ import { useSocket } from '../contexts/SocketContext';
 export function useFullScreenModal() {
   const [open, setOpen] = useState(false);
 
-  function FullScreenModalHelper({ children }: { children: React.ReactNode }) {
+  function FullScreenModalHelper({ children, preventAlwaysMounted = false }: { children: React.ReactNode, preventAlwaysMounted?: boolean }) {
+    if (preventAlwaysMounted && !open) {
+      // If alwaysMounted is true and modal is not open, render an empty fragment
+      return <></>;
+    }
     return <FullScreenModal open={open} onRequestClose={() => setOpen(false)}>
       {children}
     </FullScreenModal>;
@@ -79,7 +83,7 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
   const { texts } = useLanguage();
   const isRTL = texts.direction === 'rtl';
 
-  var modalRef= useRef<HTMLDivElement>(null);
+  var modalRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     function handler(event: MouseEvent) {
@@ -91,12 +95,12 @@ export default function FullScreenModal({ open, onRequestClose, children }: Full
         }
       }
     }
-    setTimeout(()=>{
-      if(!modalRef.current) return;
+    setTimeout(() => {
+      if (!modalRef.current) return;
       modalRef.current.addEventListener('click', handler)
     }, 0);
     return () => {
-      if(!modalRef.current) return;
+      if (!modalRef.current) return;
       modalRef.current.removeEventListener('click', handler);
     };
   }, [modalRef.current]);

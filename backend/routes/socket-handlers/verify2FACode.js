@@ -6,7 +6,7 @@ const { verifyCode, formatPhoneNumber } = require('../../utils/smsService');
 const { sendToMixpanel, setUserProfile, trackLogin, trackRegistration } = require('../../utils/mixpanelService');
 const { updateUserIdAcrossAllTables } = require('../../utils/updateUserIdAcrossAllTables');
 const { validateDeviceRegistration, getUserIdFromDevice } = require('./utils');
-const moveUserToGameState = require('./moveUserToGameState');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 const Socket = require('socket.io').Socket;
 
 module.exports.registerVerify2FACodeHandler = async function(socket) {
@@ -51,9 +51,7 @@ module.exports.registerVerify2FACodeHandler = async function(socket) {
         theRealUser_id = tempUserId 
       }
       
-      moveUserToGameState(socket, gameId, theRealUser_id, {
-        screenName: 'ASK_FOR_EMAIL',
-      });
+      await push_user_to_next_screen(socket, gameId, theRealUser_id);
 
     } catch (error) {
       console.error('Error verifying 2FA code:', error);

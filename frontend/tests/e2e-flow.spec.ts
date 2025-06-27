@@ -2,48 +2,15 @@ import { test, expect } from '@playwright/test';
 import { get2FACode } from './test-utils';
 //@ts-ignore
 import fs from 'fs'
+import { disableTestingMode } from './disableTestingMode';
+import { enableTestingMode } from './enableTestingMode';
 
-const DEFAULT_DELAY=50
+const DEFAULT_DELAY=100
 const DELAY_ON_MODAL=300
 const LONG_DELAY=1000
 
-/**
- * Enable testing mode on backend (sets MOCK_SMS and MOCK_GENERATE to true)
- */
-async function enableTestingMode() {
-  try {
-    const response = await fetch('http://localhost:4001/api/testing/start', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const result = await response.json();
-    console.log('🧪 Testing mode enabled:', result);
-    return result.success;
-  } catch (error) {
-    console.error('❌ Failed to enable testing mode:', error);
-    return false;
-  }
-}
-
-/**
- * Disable testing mode on backend (restores original environment variables)
- */
-async function disableTestingMode() {
-  try {
-    const response = await fetch('http://localhost:4001/api/testing/end', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' }
-    });
-    const result = await response.json();
-    console.log('🔄 Testing mode disabled:', result);
-    return result.success;
-  } catch (error) {
-    console.error('❌ Failed to disable testing mode:', error);
-    return false;
-  }
-}
-
-const TEST_PHONE_NUMBER = '972523737233';
+const TEST_PHONE_NUMBER =  new Date().valueOf().toString()
+console.log({TEST_PHONE_NUMBER})
 
 test.describe('Icebreak App E2E Flow', () => {
   test('Complete user registration flow from homepage to creator game ready', async ({page}) => {

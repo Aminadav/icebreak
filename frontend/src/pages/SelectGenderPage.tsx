@@ -29,11 +29,6 @@ export default function SelectGenderPage(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
 
 
-  // Journey state is now managed by URL routing
-  useEffect(() => {
-    console.log('🎭 SelectGenderPage mounted - state managed by React Router');
-  }, []);
-
   // Handle Enter key press to select male by default
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {

@@ -28,11 +28,12 @@ Such as: `node loader/my-new-file.js`
 if(!module.parent ){
   // Here is the unit testing
 }
+```
 
 # Checking for compilation errors.
-If you want to check for errors, ask the user to copy errors from the logs. Do not create test file for that.
+If you want to check for errors, you have acess to the problem panes.
 
-# When agent finish and after the summary give me suggessted git commit message. one line up to 10 words. such as "feature X" or "Fixed bug Y". Try to run this command in terminal "./autocommit.sh "{COMMIT_MESSAGE}". If terminal not avaibable just show the command to copy to copy and paste.
+# When agent finish and after the summary give me suggessted git commit message. one line up to 10 words. such as "feature X" or "Fixed bug Y". Show the command to copy to copy and paste (in sh markdown annotation ```sh).
 
 # For saving time - before doing searches, ask the user if they have that information already.
 

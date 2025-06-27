@@ -1,5 +1,5 @@
 const Game = require('../../models/Game');
-const moveUserToGameState = require('./moveUserToGameState');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 const { getUserIdFromDevice } = require('./utils');
 
 module.exports.registerUpdateGameNameHandler = async function(socket) {
@@ -27,7 +27,7 @@ module.exports.registerUpdateGameNameHandler = async function(socket) {
       // Update the game name
       const success = await Game.updateGameName(gameId, gameName.trim());
       
-      moveUserToGameState(socket, gameId, userId, { screenName: 'ASK_USER_PHONE' });
+      await push_user_to_next_screen(socket, gameId, userId);
     } catch (error) {
       console.error('❌ Error in handleUpdateGameName:', error);
       socket.emit('error', { 

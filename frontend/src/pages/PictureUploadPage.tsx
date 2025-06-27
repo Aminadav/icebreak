@@ -5,6 +5,8 @@ import AnimatedImage from '../components/AnimatedImage';
 import { useLanguage } from '../contexts/LanguageContext';
 import { useModal } from '../contexts/ModalContext';
 import { useSocket } from '../contexts/SocketContext';
+import { useFullScreenModal } from '../components/FullScreenModal';
+import CameraPage from './CameraPage';
 
 import SkipConfirmationModal from '../components/SkipConfirmationModal';
 import { useGameId } from '../utils/useGameId';
@@ -25,6 +27,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   const { openModal } = useModal();
   const { socket } = useSocket();
   const navigate = useNavigate();
+  const cameraModal = useFullScreenModal();
   
   const [isLoading, setIsLoading] = useState(false);
   const [uploadMethod, setUploadMethod] = useState<'camera' | 'gallery' | null>(null);
@@ -123,7 +126,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
 
   const handleCameraUpload = () => {
     setUploadMethod('camera');
-    socket.emit('camera_upload_requested', { gameId });
+    cameraModal.open();
   };
 
   const handleGalleryUpload = () => {
@@ -175,6 +178,7 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
   };
 
   return (
+    <>
     <PageLayout 
       showHeader={true} 
     >
@@ -346,5 +350,11 @@ export default function PictureUploadPage({ phoneNumber, userId, email, name, ge
       
       </main>
     </PageLayout>
+
+    {/* Camera Modal */}
+    <cameraModal.element preventAlwaysMounted={true}>
+      <CameraPage />
+    </cameraModal.element>
+    </>
   );
 }

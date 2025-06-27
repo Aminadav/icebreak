@@ -1,8 +1,7 @@
 
 
 const User = require('../../models/User');
-const { push_user_to_next_screen } = require('./get-next-screen-logic');
-const moveUserToGameState = require('./moveUserToGameState');
+const { push_user_to_next_screen } = require('./push-user-next-screen');
 const { getUserIdFromDevice } = require('./utils');
 
 module.exports.registerConfirmImageSelectionHandler = async function(socket) {

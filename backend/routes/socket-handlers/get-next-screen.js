@@ -1,5 +1,5 @@
+const { push_user_to_next_screen } = require("./push-user-next-screen");
 const { getUserIdFromDevice } = require("./utils");
-const { push_user_to_next_screen } = require("./get-next-screen-logic");
 
 
 module.exports.registerGetNextScreenHandler = async function (socket) {

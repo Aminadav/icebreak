@@ -1,6 +1,5 @@
 const { getUserIdFromDevice } = require("./utils");
 const pool = require('../../config/database');
-const { moveUserToScreen } = require("./get-next-screen-logic");
 const { updateMetaDataBinder, updateMetadata } = require("../../utils/update-meta-data");
 const { addPointsWithBadgeCheckAndEmit } = require("../../utils/points-helper");
 const moveUserToGameState = require("./moveUserToGameState");

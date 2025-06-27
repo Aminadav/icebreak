@@ -3,7 +3,6 @@ const { getUserIdFromDevice } = require('./utils');
 const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
-const { moveUserToScreen } = require('./get-next-screen-logic');
 
 /**
  * Debug handler to quickly set up current user as creator with completed onboarding

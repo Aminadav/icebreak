@@ -14,7 +14,7 @@ export default function ShareGamePage({ onClose }: ShareGamePageProps): JSX.Elem
   const [copiedLink, setCopiedLink] = useState(false);
 
   // Generate game link
-  const gameLink = `${window.location.origin}/game/${gameData?.gameId}`;
+  const gameLink = `${window.location.origin}/game/${gameData?.gameId}/play`;
 
   // Pre-defined Hebrew messages
   var shareMessages = [

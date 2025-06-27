@@ -12,41 +12,41 @@
   {
     "id": "conversation_starter",
     "name": "פותחי השיחות",
-    "pointsRequired": 130
+    "pointsRequired": 200
   },
   {
     "id": "walking_inspiration",
     "name": "השראה מהלכת",
-    "pointsRequired": 150
+    "pointsRequired": 400
   },
   {
     "id": "human_lighthouse",
     "name": "מגדלור אנושי",
-    "pointsRequired": 200
+    "pointsRequired": 600
   },
   {
     "id": "heart_toucher",
     "name": "נוגעים בלבבות",
-    "pointsRequired": 300
+    "pointsRequired": 800
   },
   {
     "id": "connection_deepener",
     "name": "מעמיקי הקשרים",
-    "pointsRequired": 400
+    "pointsRequired": 1000
   },
   {
     "id": "party_lifter",
     "name": "מרימי המסיבות",
-    "pointsRequired": 600
+    "pointsRequired": 1200
   },
   {
     "id": "community_gatherer",
     "name": "מקהילי הקהילות",
-    "pointsRequired": 800
+    "pointsRequired": 1400
   },
   {
     "id": "heart_uniter",
     "name": "מאחדי הלבבות",
-    "pointsRequired": 1000
+    "pointsRequired": 1500
   }
 ]

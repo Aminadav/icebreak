@@ -40,7 +40,7 @@ export default function NoMoreQuestionsPage(): JSX.Element {
         {/* Title */}
         <div className="mb-6 text-center">
           <h1 className="mb-4 text-4xl font-bold text-white drop-shadow-lg">
-            🎉 כל הכבוד!
+            כל הכבוד!
           </h1>
         </div>
 

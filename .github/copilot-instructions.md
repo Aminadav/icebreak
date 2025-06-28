@@ -33,7 +33,7 @@ if(!module.parent ){
 # Checking for compilation errors.
 If you want to check for errors, you have acess to the problem panes.
 
-# When agent finish and after the summary give me suggessted git commit message. one line up to 10 words. such as "feature X" or "Fixed bug Y". Show the command to copy to copy and paste (in sh markdown annotation ```sh).
+# When agent finish and after the summary give me suggessted git commit message. one line up to 10 words. such as "feature X" or "Fixed bug Y". Show the command to copy to copy and paste (in sh markdown annotation ```sh```). such as `./autocommit.sh "feature X"`.
 
 # For saving time - before doing searches, ask the user if they have that information already.
 

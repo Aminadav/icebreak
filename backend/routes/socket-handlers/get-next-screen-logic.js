@@ -61,6 +61,13 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
     };
   }
 
+  // Show welcome screen for non-creators joining a game
+  if (!isCreator && await userNotVisited('JOIN_GAME_WELCOME')) {
+    return {
+      screenName: 'JOIN_GAME_WELCOME',
+    };
+  }
+
   // Check if user needs to enter phone number
   if (!hasPhoneNumber) {
     return {
@@ -107,13 +114,6 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   if (hasPendingImage && !hasImage) {
     return {
       screenName: 'GALLERY',
-    };
-  }
-
-  // Show welcome screen for non-creators joining a game
-  if (!isCreator && await userNotVisited('JOIN_GAME_WELCOME')) {
-    return {
-      screenName: 'JOIN_GAME_WELCOME',
     };
   }
 

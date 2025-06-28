@@ -70,11 +70,35 @@ export default function GotBadgePage(props: {gameState: GAME_STATE_GOT_BADGE, is
   const progress = getProgressToNextLevel(userPoints);
   var {userData}=useSocket()
 
+  // Function to find a friend's maximum badge level
+  const getFriendMaxBadgeId = (friendUserId: string): string | null => {
+    if (!badgeData?.friendsByBadge) return null;
+    
+    let maxBadgeId = null;
+    let maxPoints = -1;
+    
+    // Check all badges to find the highest one this friend has
+    for (const [badgeId, friends] of Object.entries(badgeData.friendsByBadge)) {
+      if (friends.some(friend => friend.user_id === friendUserId)) {
+        const badge = badges.find(b => b.id === badgeId);
+        if (badge && badge.pointsRequired > maxPoints) {
+          maxPoints = badge.pointsRequired;
+          maxBadgeId = badgeId;
+        }
+      }
+    }
+    
+    return maxBadgeId;
+  };
 
-  // Get friends for current badge level
+  // Get friends for current badge level - only show if this is their maximum level
   const currentBadgeFriends = badgeData?.friendsByBadge?.[currentBadge?.id || ''] 
     ? badgeData.friendsByBadge[currentBadge?.id || '']
-    .filter(item=>item.user_id!=userData?.user_id)
+    .filter(item => item.user_id != userData?.user_id)
+    .filter(friend => {
+      const friendMaxBadgeId = getFriendMaxBadgeId(friend.user_id);
+      return friendMaxBadgeId === currentBadge?.id;
+    })
     : []
 
   const handleContinue = () => {

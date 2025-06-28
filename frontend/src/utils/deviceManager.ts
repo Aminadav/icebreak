@@ -22,7 +22,7 @@ export function getDeviceId(): string | null {
 export function setDeviceId(deviceId: string): void {
   try {
     localStorage.setItem(DEVICE_ID_KEY, deviceId);
-    console.log('✅ Device ID saved to localStorage:', deviceId);
+    // console.log('✅ Device ID saved to localStorage:', deviceId);
   } catch (error) {
     console.error('Error saving device ID to localStorage:', error);
   }

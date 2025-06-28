@@ -16,18 +16,37 @@ interface ListOfLevelsToAchieveProps {
 
 export function BadgeListOfLevelsToAchieve({ badges, friendsByBadge }: ListOfLevelsToAchieveProps) {
   var currentUserId=useSocket().userData?.userId;
+  
+  // Calculate highest badge for each user
+  const userHighestBadge: { [userId: string]: string } = {};
+  
+  // Iterate through badges in order (assuming they're sorted by level)
+  badges.forEach((badge) => {
+    const badgeFriends = friendsByBadge?.[badge.id] || [];
+    badgeFriends.forEach((friend) => {
+      userHighestBadge[friend.user_id] = badge.id; // This will keep the highest badge
+    });
+  });
+
   return (
     <div className="flex flex-col items-center w-full gap-7">
       {badges.map((badge) => {
         const badgeFriends = friendsByBadge?.[badge.id] || [];
         const isAchieved = currentUserId ? badgeFriends.some(friend => friend.user_id === currentUserId) : false;
         
+        // Only show avatars for users whose highest badge is this one
+        const friendsToShowAvatars = badgeFriends.filter(friend => 
+          userHighestBadge[friend.user_id] === badge.id
+        );
+        
+        console.log(badgeFriends,currentUserId,isAchieved)
         return (
           <OneLevelToAchieve
             key={badge.id}
             badge={badge}
             isAchieved={isAchieved}
             badgeFriends={badgeFriends}
+            friendsToShowAvatars={friendsToShowAvatars}
           />
         );
       })}
@@ -44,9 +63,10 @@ interface OneLevelToAchieveProps {
   isAchieved: boolean;
   isNext?: boolean;
   badgeFriends: Friend[];
+  friendsToShowAvatars: Friend[];
 }
 
-export function OneLevelToAchieve({ badge, isAchieved, badgeFriends }: OneLevelToAchieveProps) {
+export function OneLevelToAchieve({ badge, isAchieved, badgeFriends, friendsToShowAvatars }: OneLevelToAchieveProps) {
   const backgroundClass = isAchieved ? "bg-[#fae3ff]" : "bg-gray-100";
   const borderClass = isAchieved 
     ? "border border-[#925b03]" 
@@ -57,9 +77,9 @@ export function OneLevelToAchieve({ badge, isAchieved, badgeFriends }: OneLevelT
     ? "drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.25))" 
     : "grayscale(100%) drop-shadow(1px 2px 4px rgba(0, 0, 0, 0.25))";
 
-  // Prepare users display
-  var displayedUsers = badgeFriends.slice(0, 10);
-  var remainingCount = badgeFriends.length - 10;
+  // Prepare users display - use friendsToShowAvatars instead of badgeFriends
+  var displayedUsers = friendsToShowAvatars.slice(0, 10);
+  var remainingCount = friendsToShowAvatars.length - 10;
   // displayedUsers=[...displayedUsers,...displayedUsers]
   // displayedUsers=[...displayedUsers,...displayedUsers]
   // displayedUsers=[...displayedUsers,...displayedUsers]
@@ -85,15 +105,17 @@ export function OneLevelToAchieve({ badge, isAchieved, badgeFriends }: OneLevelT
             flex items-center gap-1 text-right opacity-75
             ${textColor}
           `}>
-            <span className="text-xs">{badgeFriends.length}</span>
+            <span className="text-xs">{friendsToShowAvatars.length}</span>
             <span className="text-sm">זכו בדרגה זו</span>
           </div>
           {/* Bottom section - User avatars */}
-      {badgeFriends.length > 0 && (
+      {friendsToShowAvatars.length > 0 && (
         <div className="flex flex-wrap items-center justify-center gap-1">
         
           {displayedUsers.map((friend, index) => (
-              <Avatar friend={friend} animateIndex={index} size="small" />
+              <Avatar 
+              key={friend.user_id}
+              friend={friend} animateIndex={index} size="small" />
           ))}
           
           {remainingCount > 0 && (

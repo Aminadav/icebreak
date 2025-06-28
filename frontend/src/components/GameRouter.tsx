@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import { GameProvider, useGame } from '../contexts/GameContext';
 import Play from '../pages/play';
+import AdminPage from '../pages/AdminPage';
 
 function GameRoutes(): JSX.Element {
   const { gameId, gameData, isLoading, error } = useGame();
@@ -32,6 +33,10 @@ function GameRoutes(): JSX.Element {
 
   return (
     <Routes>
+      <Route
+        path='/admin'
+        element={<AdminPage/>}
+      />
       <Route 
         path="play" 
         element={<Play />} 

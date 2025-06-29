@@ -47,3 +47,6 @@ If you want to check for errors, you have acess to the problem panes.
 
 # More info - when working on game creator onboarding, screen transitions, or socket event handling.
 Use the file [GAME_CREATOR_FLOW.md](../GAME_CREATOR_FLOW.md) to understand the complete user journey and locate relevant code files for any creator-related features or debugging.
+
+# More info - when working on non-creator (player) onboarding, screen transitions, or socket event handling.
+Use the file [NON_CREATOR_GAME_FLOW.md](../NON_CREATOR_GAME_FLOW.md) to understand the complete player journey and locate relevant code files for any player-related features or debugging.

@@ -2,12 +2,6 @@ import { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
 import { useGame } from '../contexts/GameContext';
 
-const SENSITIVITY_DESCRIPTIONS: Record<string, string> = {
-  low: 'נמוך - אפשר לספר לכל אחד, כמו נהג אוטובוס. (לדוג׳: האם אתה מעדיף מיץ תפוזים או מיץ תפוחים?)',
-  medium: 'בינוני - למישהו שמכירים ומרגישים איתו בנוח. (לדוג׳: איפה אתה גר?)',
-  high: 'גבוה - למישהו שסומכים עליו ויש קשר טוב. (לדוג׳: מה החלומות שלך? מה הכישלונות שלך?)',
-};
-
 export default function AdminPage(): JSX.Element {
   const { socket } = useSocket();
   const [currentState, setCurrentState] = useState<string>('INITIAL');
@@ -15,21 +9,6 @@ export default function AdminPage(): JSX.Element {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState<string>('');
   const [deviceInfo, setDeviceInfo] = useState<any>(null);
-  const [questions, setQuestions] = useState<any[]>([]);
-  const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
-  const [questionForm, setQuestionForm] = useState<any>({
-    questionText: '',
-    questionAboutMale: '',
-    questionAboutFemale: '',
-    questionType: 'free_form',
-    answers: [],
-    allowOther: false,
-    sensitivity: 'low',
-    maxAnswersToShow: 4,
-  });
-  const [questionLoading, setQuestionLoading] = useState(false);
-  const [inlineEditingField, setInlineEditingField] = useState<{questionId: string, field: string} | null>(null);
-  const [inlineEditValue, setInlineEditValue] = useState<string>('');
   const game=useGame();
   const gameId=game?.gameId
 
@@ -99,185 +78,6 @@ export default function AdminPage(): JSX.Element {
     setIsLoading(true);
     setMessage('');
 
-  };
-
-
-  // Socket listeners for questions
-  useEffect(() => {
-    if (!socket) return;
-    const handleQuestionsList = (data: any) => {
-      setQuestions(data.questions || []);
-    };
-    const handleQuestionCreated = (data: any) => {
-      setQuestions((prev) => [...prev, data.question]);
-      setMessage('✅ שאלה נוספה בהצלחה');
-      setQuestionForm({ questionText: '', questionAboutMale: '', questionAboutFemale: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
-      setEditingQuestion(null);
-      setQuestionLoading(false);
-    };
-    const handleQuestionUpdated = (data: any) => {
-      setQuestions((prev) => prev.map(q => q.question_id === data.question.question_id ? data.question : q));
-      setMessage('✅ שאלה עודכנה בהצלחה');
-      setEditingQuestion(null);
-      setQuestionForm({ questionText: '', questionAboutMale: '', questionAboutFemale: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
-      setQuestionLoading(false);
-      setInlineEditingField(null);
-    };
-    const handleQuestionDeleted = (data: any) => {
-      setQuestions((prev) => prev.filter(q => q.question_id !== data.questionId));
-      setMessage('🗑️ שאלה נמחקה');
-      setQuestionLoading(false);
-    };
-    const handleError = (data: any) => {
-      setMessage(`❌ שגיאה: ${data.message}`);
-      setQuestionLoading(false);
-    };
-    socket.on('questions_list', handleQuestionsList);
-    socket.on('question_created', handleQuestionCreated);
-    socket.on('question_updated', handleQuestionUpdated);
-    socket.on('question_deleted', handleQuestionDeleted);
-    socket.on('error', handleError);
-    // Fetch questions on mount
-    socket.emit('get_questions');
-    return () => {
-      socket.off('questions_list', handleQuestionsList);
-      socket.off('question_created', handleQuestionCreated);
-      socket.off('question_updated', handleQuestionUpdated);
-      socket.off('question_deleted', handleQuestionDeleted);
-      socket.off('error', handleError);
-    };
-  }, [socket]);
-
-  // Questions CRUD handlers
-  const handleEditQuestion = (q: any) => {
-    setEditingQuestion(q);
-    setQuestionForm({
-      questionText: q.question_text,
-      questionAboutMale: q.question_about_male || '',
-      questionAboutFemale: q.question_about_female || '',
-      questionType: q.question_type,
-      answers: q.answers && Array.isArray(q.answers) ? q.answers : (q.answers ? [] : []),
-      allowOther: q.allow_other,
-      sensitivity: q.sensitivity,
-      maxAnswersToShow: q.max_answers_to_show || 4,
-      questionId: q.question_id,
-    });
-  };
-
-  // Inline editing handlers
-  const handleInlineEdit = (questionId: string, field: string, currentValue: string) => {
-    setInlineEditingField({ questionId, field });
-    setInlineEditValue(currentValue || '');
-  };
-
-  const handleInlineSave = async (questionId: string, field: string) => {
-    if (!socket) return;
-    
-    const question = questions.find(q => q.question_id === questionId);
-    if (!question) return;
-
-    const updateData = {
-      questionId,
-      questionText: field === 'question_text' ? inlineEditValue : question.question_text,
-      questionAboutMale: field === 'question_about_male' ? inlineEditValue : (question.question_about_male || ''),
-      questionAboutFemale: field === 'question_about_female' ? inlineEditValue : (question.question_about_female || ''),
-      questionType: question.question_type,
-      answers: question.answers || [],
-      allowOther: question.allow_other,
-      sensitivity: question.sensitivity,
-      maxAnswersToShow: question.max_answers_to_show || 4,
-    };
-
-    setQuestionLoading(true);
-    socket.emit('save_question', updateData);
-    setInlineEditingField(null);
-  };
-
-  const handleInlineCancel = () => {
-    setInlineEditingField(null);
-    setInlineEditValue('');
-  };
-
-  const handleInlineKeyPress = (e: React.KeyboardEvent, questionId: string, field: string) => {
-    if (e.key === 'Enter') {
-      handleInlineSave(questionId, field);
-    } else if (e.key === 'Escape') {
-      handleInlineCancel();
-    }
-  };
-
-  const renderInlineEditableField = (question: any, field: string, displayValue: string) => {
-    const isEditing = inlineEditingField?.questionId === question.question_id && inlineEditingField?.field === field;
-    
-    if (isEditing) {
-      return (
-        <input
-          type="text"
-          value={inlineEditValue}
-          onChange={(e) => setInlineEditValue(e.target.value)}
-          onBlur={() => handleInlineSave(question.question_id, field)}
-          onKeyDown={(e) => handleInlineKeyPress(e, question.question_id, field)}
-          className="w-full p-1 text-white bg-gray-700 border border-gray-500 rounded"
-          autoFocus
-          style={{ direction: 'rtl' }}
-        />
-      );
-    }
-
-    return (
-      <div
-        className="cursor-pointer hover:bg-gray-700 p-1 rounded min-h-[24px]"
-        onClick={() => handleInlineEdit(question.question_id, field, displayValue)}
-        title="לחץ לעריכה"
-      >
-        {displayValue || <span className="text-gray-500 italic">לחץ להוספה</span>}
-      </div>
-    );
-  };
-  const handleDeleteQuestion = (questionId: string) => {
-    if (!socket) return;
-    setQuestionLoading(true);
-    socket.emit('delete_question', { questionId });
-  };
-  const handleQuestionFormChange = (e: any) => {
-    const { name, value, type, checked } = e.target;
-    setQuestionForm((prev: any) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value,
-    }));
-  };
-  const handleAnswersChange = (idx: number, value: string) => {
-    setQuestionForm((prev: any) => {
-      const answers = [...prev.answers];
-      answers[idx] = value;
-      return { ...prev, answers };
-    });
-  };
-  const handleAddAnswer = () => {
-    setQuestionForm((prev: any) => ({ ...prev, answers: [...prev.answers, ''] }));
-  };
-  const handleRemoveAnswer = (idx: number) => {
-    setQuestionForm((prev: any) => {
-      const answers = [...prev.answers];
-      answers.splice(idx, 1);
-      return { ...prev, answers };
-    });
-  };
-  const handleQuestionFormSubmit = (e: any) => {
-    e.preventDefault();
-    if (!socket) return;
-    setQuestionLoading(true);
-    const payload = {
-      ...questionForm,
-      answers: questionForm.questionType === 'choose_one' ? questionForm.answers : [],
-      allowOther: questionForm.questionType === 'choose_one' ? questionForm.allowOther : false,
-      questionId: editingQuestion?.question_id,
-    };
-    socket.emit('save_question', payload);
-  };
-  const handleCancelEdit = () => {
-    setEditingQuestion(null);
-    setQuestionForm({ questionText: '', questionAboutMale: '', questionAboutFemale: '', questionType: 'free_form', answers: [], allowOther: false, sensitivity: 'low', maxAnswersToShow: 4 });
   };
 
   var sampleGameStates: Array<{ state: GAME_STATES, metadata?: any }> = [
@@ -389,6 +189,11 @@ export default function AdminPage(): JSX.Element {
         question: 'מה החג שלדעתך עמינדב הכי אוהב?',
         pointsReceived: 10,
         correctStatus: "YOU_CORRECT" as const,
+        about_user: {
+          user_id: 'user123',
+          name: 'עמינדב',
+          image: '0fefc0641d77036e053ffc654baba207'
+        },
         answers: [
           {
             text: 'פסח',
@@ -425,6 +230,11 @@ export default function AdminPage(): JSX.Element {
         question: 'מה החג שלדעתך עמינדב הכי אוהב?',
         pointsReceived: 1,
         correctStatus: "YOU_INCORRECT" as const,
+        about_user: {
+          user_id: 'user123',
+          name: 'עמינדב',
+          image: '0fefc0641d77036e053ffc654baba207'
+        },
         answers: [
           {
             text: 'פסח',
@@ -518,121 +328,16 @@ export default function AdminPage(): JSX.Element {
           </div>
         </div>
 
-        {/* Questions Management */}
+        {/* Questions Management Link */}
         <div className="p-6 mb-6 bg-gray-800 rounded-lg">
           <h2 className="mb-4 text-xl font-semibold">❓ ניהול שאלות</h2>
-          <div className="mb-4 text-sm text-gray-300">
-            <strong>דרגת רגישות (עברית):</strong>
-            <ul className="ml-6 list-disc">
-              <li><strong>נמוך:</strong> {SENSITIVITY_DESCRIPTIONS.low}</li>
-              <li><strong>בינוני:</strong> {SENSITIVITY_DESCRIPTIONS.medium}</li>
-              <li><strong>גבוה:</strong> {SENSITIVITY_DESCRIPTIONS.high}</li>
-            </ul>
-          </div>
-          {/* Questions List */}
-          <table className="w-full mb-6 text-sm bg-gray-900 rounded-lg">
-            <thead>
-              <tr className="bg-gray-700">
-                <th className="p-2">#</th>
-                <th className="p-2">שאלה (עצמי)</th>
-                <th className="p-2">שאלה (זכר)</th>
-                <th className="p-2">שאלה (נקבה)</th>
-                <th className="p-2">סוג</th>
-                <th className="p-2">תשובות</th>
-                <th className="p-2">רגישות</th>
-                <th className="p-2">מקס׳ תשובות</th>
-                <th className="p-2">פעולות</th>
-              </tr>
-            </thead>
-            <tbody>
-              {questions.map((q, idx) => (
-                <tr key={q.question_id} className="border-b border-gray-700">
-                  <td className="p-2">{idx + 1}</td>
-                  <td className="p-2 max-w-[200px]">
-                    {renderInlineEditableField(q, 'question_text', q.question_text)}
-                  </td>
-                  <td className="p-2 max-w-[200px]">
-                    {renderInlineEditableField(q, 'question_about_male', q.question_about_male)}
-                  </td>
-                  <td className="p-2 max-w-[200px]">
-                    {renderInlineEditableField(q, 'question_about_female', q.question_about_female)}
-                  </td>
-                  <td className="p-2">{q.question_type === 'free_form' ? 'שאלה פתוחה' : 'בחירה'}</td>
-                  <td className="p-2">
-                    {q.question_type === 'choose_one' && q.answers ? (
-                      <span className="text-xs">{Array.isArray(q.answers) ? q.answers.join(', ') : 'לא זמין'}</span>
-                    ) : '-'}
-                  </td>
-                  <td className="p-2">{q.sensitivity}</td>
-                  <td className="p-2">{q.max_answers_to_show || 4}</td>
-                  <td className="p-2">
-                    <button className="px-2 py-1 mr-2 text-xs bg-blue-700 rounded" onClick={() => handleEditQuestion(q)}>ערוך מלא</button>
-                    <button className="px-2 py-1 text-xs bg-red-700 rounded" onClick={() => handleDeleteQuestion(q.question_id)}>מחק</button>
-                  </td>
-                </tr>
-              ))}
-              {questions.length === 0 && (
-                <tr><td colSpan={9} className="p-2 text-center text-gray-400">אין שאלות</td></tr>
-              )}
-            </tbody>
-          </table>
-          {/* Add/Edit Question Form */}
-          <form onSubmit={handleQuestionFormSubmit} className="p-4 bg-gray-900 rounded-lg">
-            <h3 className="mb-2 text-lg font-semibold">{editingQuestion ? 'עריכת שאלה מלאה' : 'הוספת שאלה חדשה'}</h3>
-            <div className="mb-2">
-              <label className="block mb-1">שאלה (עצמי)</label>
-              <input type="text" name="questionText" value={questionForm.questionText} onChange={handleQuestionFormChange} className="w-full p-2 text-white bg-gray-800 rounded" required style={{ direction: 'rtl' }} />
-            </div>
-            <div className="mb-2">
-              <label className="block mb-1">שאלה (זכר) - $1 יוחלף בשם</label>
-              <input type="text" name="questionAboutMale" value={questionForm.questionAboutMale} onChange={handleQuestionFormChange} className="w-full p-2 text-white bg-gray-800 rounded" style={{ direction: 'rtl' }} />
-            </div>
-            <div className="mb-2">
-              <label className="block mb-1">שאלה (נקבה) - $1 יוחלף בשם</label>
-              <input type="text" name="questionAboutFemale" value={questionForm.questionAboutFemale} onChange={handleQuestionFormChange} className="w-full p-2 text-white bg-gray-800 rounded" style={{ direction: 'rtl' }} />
-            </div>
-            <div className="mb-2">
-              <label className="block mb-1">סוג שאלה</label>
-              <select name="questionType" value={questionForm.questionType} onChange={handleQuestionFormChange} className="w-full p-2 text-white bg-gray-800 rounded">
-                <option value="free_form">שאלה פתוחה</option>
-                <option value="choose_one">בחירה</option>
-              </select>
-            </div>
-            {questionForm.questionType === 'choose_one' && (
-              <div className="mb-2">
-                <label className="block mb-1">תשובות אפשריות</label>
-                {questionForm.answers.map((a: string, idx: number) => (
-                  <div key={idx} className="flex mb-1">
-                    <input type="text" value={a} onChange={e => handleAnswersChange(idx, e.target.value)} className="flex-1 p-2 text-white bg-gray-800 rounded" required />
-                    <button type="button" className="px-2 py-1 ml-2 bg-red-700 rounded" onClick={() => handleRemoveAnswer(idx)}>X</button>
-                  </div>
-                ))}
-                <button type="button" className="px-2 py-1 bg-green-700 rounded" onClick={handleAddAnswer}>הוסף תשובה</button>
-                <div className="mt-2">
-                  <label className="inline-flex items-center">
-                    <input type="checkbox" name="allowOther" checked={questionForm.allowOther} onChange={handleQuestionFormChange} className="ml-2" />
-                    אפשרות אחרת (טקסט חופשי)
-                  </label>
-                </div>
-              </div>
-            )}
-            <div className="mb-2">
-              <label className="block mb-1">דרגת רגישות</label>
-              <select name="sensitivity" value={questionForm.sensitivity} onChange={handleQuestionFormChange} className="w-full p-2 text-white bg-gray-800 rounded">
-                <option value="low">נמוך</option>
-                <option value="medium">בינוני</option>
-                <option value="high">גבוה</option>
-              </select>
-            </div>
-            <div className="mb-2">
-              <label className="block mb-1">מספר תשובות מקסימלי להצגה</label>
-              <input type="number" name="maxAnswersToShow" value={questionForm.maxAnswersToShow} onChange={handleQuestionFormChange} className="w-full p-2 text-white bg-gray-800 rounded" min="1" max="20" />
-            </div>
-            <div className="flex gap-2 mt-4">
-              <button type="submit" className="px-4 py-2 text-white bg-blue-700 rounded" disabled={questionLoading}>{editingQuestion ? 'עדכן' : 'הוסף'}</button>
-              {editingQuestion && <button type="button" className="px-4 py-2 text-white bg-gray-600 rounded" onClick={handleCancelEdit}>ביטול</button>}
-            </div>
-          </form>
+          <p className="mb-4 text-gray-300">עריכה וניהול של שאלות המשחק</p>
+          <a 
+            href="/admin/edit_questions"
+            className="inline-block px-6 py-3 text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            📝 עבור לעריכת שאלות
+          </a>
         </div>
       </div>
     </div>

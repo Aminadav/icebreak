@@ -6,6 +6,7 @@ import { ModalProvider } from './contexts/ModalContext';
 import StartPage from './pages/StartPage';
 import GameRouter from './components/GameRouter';
 import AdminPageSimple from './pages/AdminPage';
+import EditQuestionsPage from './pages/EditQuestionsPage';
 import AboutPage from './components/AboutPage';
 import ComponentsShowcase from './pages/ComponentsShowcase';
 import ModalRenderer from './components/ModalRenderer';
@@ -29,6 +30,7 @@ function App(): JSX.Element {
                 
                 {/* Admin page */}
                 <Route path="/admin" element={<AdminPageSimple />} />
+                <Route path="/admin/edit_questions" element={<EditQuestionsPage />} />
                 
                 {/* Menu pages - now as proper routes */}
                 <Route path="/about" element={<AboutPage />} />

@@ -13,8 +13,8 @@ export default function Footer({ className = '' }: FooterProps): JSX.Element {
   // Do not show share footer if less that 5 questions users answered
   if((gameData?.gameData?.answeredQuestionsAboutThemself || 0)<5) return <div/>
   return (
-    <div className={`fixed bottom-0 left-0 right-0 bg-black text-white text-center py-4 px-6 ${className}`}>
-      <div className="flex items-center justify-between max-w-screen-xl mx-auto">
+    <div  className={`fixed bottom-0 left-0 right-0 bg-black text-white text-center py-4 px-6 ${className}`}>
+      <div className="flex items-center justify-between max-w-screen-xl mx-auto flex-row-reverse">
         {/* Left side - Game improvement button */}
         <button className="flex items-center px-4 py-2 text-orange-400 transition-colors duration-200 border border-orange-400 rounded-lg hover:bg-orange-400 hover:text-black">
           <span className="text-sm">שיתוף המשחק</span>

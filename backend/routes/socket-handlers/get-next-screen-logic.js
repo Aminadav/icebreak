@@ -220,7 +220,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   }
 
   // Default to question about self
-  return {
+    return {
     screenName: "QUESTION_ABOUT_MYSELF",
     question: nextQuestionAboutMySelf,
     introTotalQuestions: 5,

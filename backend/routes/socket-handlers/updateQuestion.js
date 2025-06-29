@@ -47,9 +47,9 @@ function validateQuestionData(data, isUpdate = false) {
   }
   
   // For multiple choice, ensure answers are provided
-  if (questionType === 'choose_one' && (!answers || answers.length === 0)) {
-    return { isValid: false, message: 'Multiple choice questions require answers' };
-  }
+  // if (questionType === 'choose_one' && (!answers || answers.length === 0)) {
+  //   return { isValid: false, message: 'Multiple choice questions require answers' };
+  // }
   
   return { isValid: true };
 }
@@ -72,20 +72,25 @@ module.exports.registerSaveOrUpdateQuestionHandler = async function(socket) {
         return;
       }
       console.log(1)
-
-      const query = isUpdate
-        ? `UPDATE questions SET question_text = $1, question_about_male = $2, question_about_female = $3, question_type = $4, answers = $5, allow_other = $6, sensitivity = $7, max_answers_to_show = $8 WHERE question_id = $9 RETURNING question_id, question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`
-        : `INSERT INTO questions (question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING question_id, question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`;
-
+      var query=''
+      var params=[]
       const maxAnswers = maxAnswersToShow || 4; // Default to 4 if not provided
-      console.log(1)
+      
+      
+      params=[questionText, questionAboutMale || null, questionAboutFemale || null, questionType,  JSON.stringify(answers || '[]') , allowOther, sensitivity, maxAnswers];
+      
+      if (isUpdate) {
+        query = `UPDATE questions SET question_text = $1, question_about_male = $2, question_about_female = $3, question_type = $4, answers = $5, allow_other = $6, sensitivity = $7, max_answers_to_show = $8 WHERE question_id = $9 RETURNING question_id, question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`
+        params.push(questionId)
 
-      const params = isUpdate
-        ? [questionText, questionAboutMale || null, questionAboutFemale || null, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers, questionId]
-        : [questionText, questionAboutMale || null, questionAboutFemale || null, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers];
+      } else {
+
+        query= `INSERT INTO questions (question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING question_id, question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`;
+      }
+
 
       const result = await pool.query(query, params);
-      console.log(result)
+      // console.log(result)
 
       if (isUpdate && result.rows.length === 0) {
         const errorResponse = { success: false, message: 'Question not found' };

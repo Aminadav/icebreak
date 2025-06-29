@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTracking } from '../contexts/TrackingContext';
+import { useSocket } from '../contexts/SocketContext';
+import { useGameId } from '../utils/useGameId';
 
 export type ButtonVariant = 
   | 'primary' 
@@ -122,6 +124,8 @@ export default function Button({
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const { trackEvent } = useTracking();
+  const { socket } = useSocket();
+  const gameId = useGameId();
   
   useEffect(() => {
     // הוספת עיכוב קטן כדי שהאפקט יתחיל אחרי שהקומפוננטה נטענת
@@ -155,12 +159,12 @@ export default function Button({
   
   const handleClick = () => {
     // Track the button click if trackingId is provided
-    if (trackingId) {
-      // trackEvent(trackingId, {
-      //   variant,
-      //   buttonText: typeof children === 'string' ? children : 'non-text-content',
-      //   hasIcon: !!icon
-      // });
+    if (trackingId && socket && gameId) {
+      socket.emit('track_activity', {
+        gameId,
+        activityType: 'button_click',
+        activityName: trackingId
+      });
     }
     
     // Call the original onClick handler

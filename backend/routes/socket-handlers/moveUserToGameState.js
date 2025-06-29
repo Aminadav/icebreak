@@ -2,6 +2,7 @@ var { Socket } =require( "socket.io");
 var  pool=require("../../config/database");
 const { getGameUserRoom } = require("../../socket-room");
 const { getGlobalIo } = require("../../utils/socketGlobal");
+const { recordActivity } = require("../../utils/userActivityUtils");
 
 /**
  * Handles the 'moveToScreen' event for a game.
@@ -27,7 +28,12 @@ module.exports=async function moveUserToGameState(socket,gameId,userId, gameStat
       DO UPDATE SET state = $3, updated_at = CURRENT_TIMESTAMP
   `, [gameId, userId, gameState]);
   
-  // Record screen visit history
+  // Record screen visit in user_activities
+  if (gameState && gameState.screenName) {
+    await recordActivity(gameId, userId, 'screen_visit', gameState.screenName);
+  }
+  
+  // Keep legacy screen_visits for now (TODO: remove after migration confirmed working)
   await pool.query(`
       INSERT INTO screen_visits (game_id, user_id, state) 
       VALUES ($1, $2, $3)

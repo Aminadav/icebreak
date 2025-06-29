@@ -1,5 +1,6 @@
 const { getNextQuestionAboutYou } = require("../../utils/getNextQuestionAboutYou");
-const { hasSeenScreen, getAnswersAboutMyselfCount } = require("../../utils/screenHistoryUtils");
+const { getAnswersAboutMyselfCount } = require("../../utils/screenHistoryUtils");
+const { userVisited, userNotVisited, userClicked, userNotClicked } = require("../../utils/userActivityUtils");
 const pool = require("../../config/database");
 
 /**
@@ -10,8 +11,11 @@ const pool = require("../../config/database");
  */
 module.exports.get_next_screen = async function get_next_screen(gameId, userId) {
   const { checkForMissingBadge, awardBadge } = require('./badgeHelpers');
-  var userVisited =(screenName)=> hasSeenScreen(gameId, userId,screenName);
-  var userNotVisited =async (screenName)=> !await userVisited(screenName);
+  // Create bound helper functions for this specific game and user
+  const userVisitedScreen = async (screenName) => await userVisited(gameId, userId, screenName);
+  const userNotVisitedScreen = async (screenName) => await userNotVisited(gameId, userId, screenName);
+  const userClickedButton = async (buttonName) => await userClicked(gameId, userId, buttonName);
+  const userNotClickedButton = async (buttonName) => await userNotClicked(gameId, userId, buttonName);
   const missingBadge = await checkForMissingBadge(userId, gameId);
   const gameResult = await pool.query(`select creator_user_id, name from games where game_id = $1`, [gameId]);
   const isCreator = gameResult.rows[0].creator_user_id === userId;
@@ -61,8 +65,8 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
     };
   }
 
-  // Show welcome screen for non-creators joining a game
-  if (!isCreator && await userNotVisited('JOIN_GAME_WELCOME')) {
+  // Show welcome screen for non-creators joining a game until they click continue
+  if (!isCreator && await userNotClickedButton('join_game_welcome_continue')) {
     return {
       screenName: 'JOIN_GAME_WELCOME',
     };
@@ -118,14 +122,14 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   }
 
   // Check for First screen for creator
-  if (isCreator && await userNotVisited('CREATOR_GAME_READY')) {
+  if (isCreator && await userNotVisitedScreen('CREATOR_GAME_READY')) {
     return {
       screenName: 'CREATOR_GAME_READY',
     };
   }
 
   // Ask about themself
-  if (await userNotVisited('BEFORE_START_ABOUT_YOU')) {
+  if (await userNotVisitedScreen('BEFORE_START_ABOUT_YOU')) {
     return {
       screenName: 'BEFORE_START_ABOUT_YOU',
     };
@@ -135,7 +139,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   const answeredCount = await getAnswersAboutMyselfCount(gameId, userId);
 
   // Creator finished onboarding questions
-  if (isCreator && answeredCount >= 5 && await userNotVisited('CREATOR_FINISHED_ONBOARDING_QUESTIONS')) {
+  if (isCreator && answeredCount >= 5 && await userNotVisitedScreen('CREATOR_FINISHED_ONBOARDING_QUESTIONS')) {
     return {
       screenName: 'CREATOR_FINISHED_ONBOARDING_QUESTIONS',
     };

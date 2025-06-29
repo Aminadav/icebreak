@@ -13,6 +13,7 @@ const { registerUpdateGameNameHandler } = require('./socket-handlers/updateGameN
 const { registerSubmitPhoneNumberHandler } = require('./socket-handlers/submitPhoneNumber');
 const { registerVerify2FACodeHandler } = require('./socket-handlers/verify2FACode');
 const { registerTrackEventHandler } = require('./socket-handlers/trackEvent');
+const { registerTrackActivityHandler } = require('./socket-handlers/trackActivity');
 const { registerSaveEmailHandler } = require('./socket-handlers/saveEmail');
 const { registerSaveUserNameHandler } = require('./socket-handlers/saveUserName');
 const { registerSaveUserGenderHandler } = require('./socket-handlers/saveUserGender');
@@ -88,6 +89,7 @@ function setupSocketHandlers(io) {
     registerSubmitPhoneNumberHandler(socket);
     registerVerify2FACodeHandler(socket);
     registerTrackEventHandler(socket);
+    registerTrackActivityHandler(socket);
     registerSaveEmailHandler(socket);
     registerSaveUserNameHandler(socket);
     registerSaveUserGenderHandler(socket);

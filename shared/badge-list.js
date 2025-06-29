@@ -30,7 +30,7 @@ function getBadgeImage(badgeId) {
  */
 function getAllDeservedBadges(points) {
   return BADGES.filter(badge => {
-    console.log('Compare points', { badgeId: badge.id, pointsRequired: badge.pointsRequired, points },points >= badge.pointsRequired);
+    // console.log('Compare points', { badgeId: badge.id, pointsRequired: badge.pointsRequired, points },points >= badge.pointsRequired);
     return points >= badge.pointsRequired
 });
 }

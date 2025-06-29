@@ -42,6 +42,7 @@ const {registerGetUserDataHandler} = require('./socket-handlers/registerGetUserD
 const { registerDebugAddPlayersHandler } = require('./socket-handlers/debugAddPlayers');
 const { registerDebugSpeedCreatorSignupHandler } = require('./socket-handlers/debugSpeedCreatorSignup');
 const { registerDebugGetUserMetadataHandler } = require('./socket-handlers/debugGetUserMetadata');
+const { getGameUserRoom } = require('../socket-room');
 /**
  * Setup socket event handlers for the application.
  * @param {import('socket.io').Server} io - The Socket.IO server instance.
@@ -66,14 +67,16 @@ function setupSocketHandlers(io) {
       console.log(colors.green('>> ' + eventName + ': ' + JSON.stringify(args)));
     })
     
-    socket.prependAny((eventName, ...args) => {
+    socket.prependAny(async (eventName, ...args) => {
+      var userId = await getUserIdFromDevice(socket.deviceId);
       console.log(colors.cyan('<< ' + eventName + ': ' +  JSON.stringify(args)));
       
       // Auto-join user to game room if gameId is provided in the event data
       if (args && args[0] && args[0].gameId) {
         const gameId = args[0].gameId;
         socket.join(gameId);
-        console.log(colors.yellow(`Socket ${socket.id} joined room: ${gameId}`));
+        console.log(colors.yellow(`Socket ${socket.id} joined room: ${getGameUserRoom(gameId, userId)}`));
+        socket.join(getGameUserRoom(gameId, userId));
       }
     })
 

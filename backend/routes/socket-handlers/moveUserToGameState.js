@@ -1,5 +1,7 @@
 var { Socket } =require( "socket.io");
-var  pool=require("../../config/database")
+var  pool=require("../../config/database");
+const { getGameUserRoom } = require("../../socket-room");
+const { getGlobalIo } = require("../../utils/socketGlobal");
 
 /**
  * Handles the 'moveToScreen' event for a game.
@@ -10,7 +12,11 @@ var  pool=require("../../config/database")
  */
 module.exports=async function moveUserToGameState(socket,gameId,userId, gameState) {
   if(socket) {
-      socket.emit('update-game-state',gameState)
+      // socket.emit('update-game-state',gameState)
+      console.log(`Send to ${getGameUserRoom(gameId, userId)}`)
+      const io = getGlobalIo();
+      io.to(getGameUserRoom(gameId, userId)).emit('update-game-state', gameState
+      )
   }
   
   // Update current state

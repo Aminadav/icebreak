@@ -63,7 +63,7 @@ async function checkForMissingBadge(userId, gameId) {
   // Get all badges user should have based on points
   const { getAllDeservedBadges } = require("../../../shared/badge-list");
   const deservedBadges = getAllDeservedBadges(currentPoints);
-  console.log('DeservedBadges', {currentPoints, deservedBadges});
+  // console.log('DeservedBadges', {currentPoints, deservedBadges});
   if (deservedBadges.length === 0) {
     return null; // User doesn't deserve any badges yet
   }

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSocket } from '../contexts/SocketContext';
+import { useGame } from '../contexts/GameContext';
 
 const SENSITIVITY_DESCRIPTIONS: Record<string, string> = {
   low: 'נמוך - אפשר לספר לכל אחד, כמו נהג אוטובוס. (לדוג׳: האם אתה מעדיף מיץ תפוזים או מיץ תפוחים?)',
@@ -25,6 +26,8 @@ export default function AdminPage(): JSX.Element {
     maxAnswersToShow: 4,
   });
   const [questionLoading, setQuestionLoading] = useState(false);
+  const game=useGame();
+  const gameId=game?.gameId
 
 
   // Set up socket event listeners
@@ -204,31 +207,16 @@ export default function AdminPage(): JSX.Element {
       state: {
         screenName: 'CREATOR_GAME_READY'
       },
-      metadata: {
-        IS_CREATOR: true,
-        SEEN_GAME_READY:true,
-      }
     },
     {
       state: {
         screenName: 'BEFORE_START_ABOUT_YOU'
       },
-      metadata: {
-        IS_CREATOR: true,
-        SEEN_GAME_READY:true,
-        SEEN_BEFORE_ASK_ABOUT_YOU: true,
-      }
     },
     {
       state: {
         screenName: 'CREATOR_FINISHED_ONBOARDING_QUESTIONS'
       },
-      metadata: {
-        IS_CREATOR: true,
-        SEEN_GAME_READY: true,
-        SEEN_BEFORE_ASK_ABOUT_YOU: true,
-        ANSWER_ABOUT_MYSELF: 5,
-      }
     },
     {
       state: {
@@ -236,9 +224,6 @@ export default function AdminPage(): JSX.Element {
         points: 10,
         text: 'כל הכבוד!'
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
@@ -251,17 +236,11 @@ export default function AdminPage(): JSX.Element {
         text: 'נשארו רק עוד 2 שאלות',
         messageId: 'TWO_MORE_QUESTIONS_ABOUT_YOU'
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
         screenName: 'PLEASE_TAKE_A_PICTURE'
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
@@ -271,9 +250,6 @@ export default function AdminPage(): JSX.Element {
           question_text: 'מה דעתך?',
         }
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
@@ -285,9 +261,6 @@ export default function AdminPage(): JSX.Element {
           answers: ['כן', 'לא'],
         }
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
@@ -299,9 +272,6 @@ export default function AdminPage(): JSX.Element {
           answers: ['כן', 'לא'],
         }
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
@@ -309,9 +279,6 @@ export default function AdminPage(): JSX.Element {
         badgeId: 'badge1',
         // friendsInLevel: []
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
@@ -343,9 +310,6 @@ export default function AdminPage(): JSX.Element {
           }
         ]
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
@@ -382,17 +346,11 @@ export default function AdminPage(): JSX.Element {
           }
         ]
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     },
     {
       state: {
         screenName: 'NO_MORE_QUESTIONS'
       },
-      metadata: {
-        IS_CREATOR: true,
-      }
     }
   ]
 
@@ -443,7 +401,10 @@ export default function AdminPage(): JSX.Element {
                   <button
                     onClick={() => {
                       setMessage(`Done`);
-                      socket.emit('admin-set-page', item);
+                      socket.emit('admin-set-page', {
+                        gameId,
+                        gameState:item.state
+                      });
                     }}
                     className="px-4 py-2 mt-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                   >

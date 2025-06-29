@@ -32,12 +32,9 @@ module.exports.registerCreateGameImmediatelyHandler = async function(socket) {
       [gameId, gameName, userId]
     );
     
-    const creatorMetadata = {
-    };
-    
     await pool.query(
-      'INSERT INTO game_user_state (user_id, game_id, metadata) VALUES ($1, $2, $3)',
-      [userId, gameId, JSON.stringify(creatorMetadata)]
+      'INSERT INTO game_user_state (user_id, game_id) VALUES ($1, $2)',
+      [userId, gameId]
     );
 
     await awardBadge(userId, gameId, BADGES[0].id);

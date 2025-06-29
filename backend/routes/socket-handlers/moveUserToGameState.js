@@ -32,10 +32,4 @@ module.exports=async function moveUserToGameState(socket,gameId,userId, gameStat
   if (gameState && gameState.screenName) {
     await recordActivity(gameId, userId, 'screen_visit', gameState.screenName);
   }
-  
-  // Keep legacy screen_visits for now (TODO: remove after migration confirmed working)
-  await pool.query(`
-      INSERT INTO screen_visits (game_id, user_id, state) 
-      VALUES ($1, $2, $3)
-  `, [gameId, userId, gameState]);
 }

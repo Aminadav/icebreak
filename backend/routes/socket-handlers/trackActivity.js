@@ -1,9 +1,10 @@
 const { recordActivity } = require("../../utils/userActivityUtils");
+const { getUserIdFromDevice } = require("./utils");
 
 async function trackActivity(socket, data) {
   try {
     const { gameId, activityType, activityName } = data;
-    const userId = socket.user?.user_id;
+    const userId = await getUserIdFromDevice(socket.deviceId);
 
     if (!gameId || !activityType || !activityName) {
       console.error('❌ Missing required fields for track_activity:', { gameId, activityType, activityName, userId });

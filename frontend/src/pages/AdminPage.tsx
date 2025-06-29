@@ -244,6 +244,30 @@ export default function AdminPage(): JSX.Element {
     },
     {
       state: {
+        screenName: 'QUESTION_ABOUT_OTHER',
+        question: {
+          question_type: 'free_form',
+          question_text: 'מה דעתך?',
+          max_answers_to_show:4,
+          answers: [
+            'אפשרות א',
+            'אפשרות ב',
+            'אפשרות ג',
+            'אפשרות ד',
+            'אפשרות ה',
+            'אפשרות ו',
+            'אפשרות ז',
+          ],
+        },
+        about_user: {
+          user_id: 'user123',
+          name: 'עמינדב',
+          image: '0fefc0641d77036e053ffc654baba207'
+        }
+      },
+    },
+    {
+      state: {
         screenName: 'QUESTION_ABOUT_MYSELF',
         question: {
           question_type: 'free_form',

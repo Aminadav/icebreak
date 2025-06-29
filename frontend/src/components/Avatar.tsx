@@ -7,10 +7,11 @@ interface OneFriendInYourLevelProps {
   friend: Friend;
   size: "medium" | "small" | 'large';
   animateIndex?:number
+  showName?:boolean
 }
 var _animateIndex=0
 
-export default function Avatar({ friend,size }: OneFriendInYourLevelProps) {
+export default function Avatar({ friend,size,showName=true }: OneFriendInYourLevelProps) {
   var animateIndex=useMemo(()=>_animateIndex++,[])
   useStylesheet('AvatarStyling',`
             @keyframes float {
@@ -44,7 +45,7 @@ export default function Avatar({ friend,size }: OneFriendInYourLevelProps) {
       showName:true
     },
     'large':{
-      pixels:90,
+      pixels:160,
       showName:true
     }
   }
@@ -68,7 +69,7 @@ export default function Avatar({ friend,size }: OneFriendInYourLevelProps) {
           style={{ borderRadius: "50%" }}
         />
       </div>
-      {thisVariant.showName && (
+      {showName && thisVariant.showName && (
         <div
           className="font-normal text-[#ffffff] text-[11px] text-center overflow-hidden overflow-ellipsis text-nowrap"
           style={{ width: `${thisVariant.pixels}px` }}

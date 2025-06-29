@@ -51,6 +51,11 @@ declare global {
   type GAME_STATE_QUESTION_ABOUT_OTHER ={
     screenName:'QUESTION_ABOUT_OTHER',
     question:QUESTION,
+    about_user:{
+      user_id:string,
+      name:string,
+      image:string
+    }
   }
 
   type GAME_STATE_QUESTION_ABOUT_MYSELF ={

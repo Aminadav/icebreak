@@ -5,6 +5,7 @@ import ProgressCircles from '../components/ProgressCircles';
 import AnswerContainer from '../components/AnswerContainer';
 import Button from '../components/Button';
 import Footer from '../components/Footer';
+import Avatar from '../components/Avatar';
 
 interface QuestionPageProps {
   gameState: GAME_STATE_QUESTION_ABOUT_OTHER;
@@ -14,6 +15,7 @@ export default function QuestionAboutOtherPage({
   gameState, 
 }: QuestionPageProps): JSX.Element {
   var question=gameState.question;
+  var aboutUser=gameState.about_user;
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string>('');
   const [freeformAnswer, setFreeformAnswer] = useState<string>('');
@@ -67,7 +69,8 @@ export default function QuestionAboutOtherPage({
     >
       {/* Question Content */}
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6">
-        <div className="w-full max-w-2xl">
+        <Avatar friend={aboutUser} size='large' animateIndex={1} showName={false} />
+        <div className="w-full max-w-2xl mt-5">
           {/* Question Text */}
           <h1 className="mb-8 text-4xl font-bold leading-tight text-center text-white md:text-5xl">
             {question.question_text}

@@ -14,7 +14,7 @@ const { recordActivity } = require("../../utils/userActivityUtils");
 module.exports=async function moveUserToGameState(socket,gameId,userId, gameState) {
   if(socket) {
       // socket.emit('update-game-state',gameState)
-      console.log(`Send to ${getGameUserRoom(gameId, userId)}`)
+      // console.log(`Send to ${getGameUserRoom(gameId, userId)}`)
       const io = getGlobalIo();
       io.to(getGameUserRoom(gameId, userId)).emit('update-game-state', gameState
       )

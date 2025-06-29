@@ -107,6 +107,10 @@ backend/
 └── .env               # משתני סביבה
 ```
 
+## Documentation
+
+- [Questions Table Documentation](../QUESTIONS.md) - Complete guide to the questions system and gender variants
+
 ## Socket.io Events & User Flow
 
 ### New 2FA User Management Flow

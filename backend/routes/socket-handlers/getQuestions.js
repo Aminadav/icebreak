@@ -9,6 +9,8 @@ module.exports.registerGetQuestionsHandler = async function(socket) {
         SELECT 
           question_id,
           question_text,
+          question_about_male,
+          question_about_female,
           question_type,
           answers,
           allow_other,

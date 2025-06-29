@@ -58,7 +58,7 @@ module.exports.registerSaveOrUpdateQuestionHandler = async function(socket) {
   socket.on('save_question', async (data, callback) => {
     try {
       data.maxAnswersToShow = parseInt(data.maxAnswersToShow)
-      var { questionId, questionText, questionType, answers, allowOther, sensitivity, maxAnswersToShow } = data;
+      var { questionId, questionText, questionAboutMale, questionAboutFemale, questionType, answers, allowOther, sensitivity, maxAnswersToShow } = data;
       maxAnswersToShow = parseInt(maxAnswersToShow)
       const isUpdate = !!questionId;
 
@@ -74,15 +74,15 @@ module.exports.registerSaveOrUpdateQuestionHandler = async function(socket) {
       console.log(1)
 
       const query = isUpdate
-        ? `UPDATE questions SET question_text = $1, question_type = $2, answers = $3, allow_other = $4, sensitivity = $5, max_answers_to_show = $6 WHERE question_id = $7 RETURNING question_id, question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`
-        : `INSERT INTO questions (question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show) VALUES ($1, $2, $3, $4, $5, $6) RETURNING question_id, question_text, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`;
+        ? `UPDATE questions SET question_text = $1, question_about_male = $2, question_about_female = $3, question_type = $4, answers = $5, allow_other = $6, sensitivity = $7, max_answers_to_show = $8 WHERE question_id = $9 RETURNING question_id, question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`
+        : `INSERT INTO questions (question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING question_id, question_text, question_about_male, question_about_female, question_type, answers, allow_other, sensitivity, max_answers_to_show, created_at`;
 
       const maxAnswers = maxAnswersToShow || 4; // Default to 4 if not provided
       console.log(1)
 
       const params = isUpdate
-        ? [questionText, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers, questionId]
-        : [questionText, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers];
+        ? [questionText, questionAboutMale || null, questionAboutFemale || null, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers, questionId]
+        : [questionText, questionAboutMale || null, questionAboutFemale || null, questionType, questionType === 'choose_one' ? JSON.stringify(answers) : null, questionType === 'choose_one' ? (allowOther || false) : false, sensitivity, maxAnswers];
 
       const result = await pool.query(query, params);
       console.log(result)

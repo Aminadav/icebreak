@@ -32,6 +32,7 @@ const { registerGetQuestionsHandler } = require('./socket-handlers/getQuestions'
 const { registerDeleteQuestionHandler } = require('./socket-handlers/deleteQuestion');
 const { registerGetNextScreenHandler } = require('./socket-handlers/get-next-screen');
 const { registerSubmitAnswerMyselfHandler } = require('./socket-handlers/submit-answer-myself');
+const { registerSubmitAnswerOthersHandler } = require('./socket-handlers/submit-answer-others');
 const { registerGetUserBadgesHandler } = require('./socket-handlers/getUserBadges');
 const {  registerGetUserGameDataHandler } = require('./socket-handlers/getUserGameData');
 const { getDataForBadgePage } = require('./socket-handlers/getDataForBadgePage');
@@ -75,7 +76,7 @@ function setupSocketHandlers(io) {
       // Auto-join user to game room if gameId is provided in the event data
       if (args && args[0] && args[0].gameId) {
         const gameId = args[0].gameId;
-        socket.join(gameId);
+        // socket.join(gameId);
         console.log(colors.yellow(`Socket ${socket.id} joined room: ${getGameUserRoom(gameId, userId)}`));
         socket.join(getGameUserRoom(gameId, userId));
       }
@@ -112,6 +113,7 @@ function setupSocketHandlers(io) {
     registerDeleteQuestionHandler(socket);
     registerGetNextScreenHandler(socket);
     registerSubmitAnswerMyselfHandler(socket);
+    registerSubmitAnswerOthersHandler(socket);
     registerGetUserBadgesHandler(socket);
     registerGetUserGameDataHandler(socket);
     registerLogoutHandler(socket);

@@ -19,7 +19,7 @@ async function trackActivity(socket, data) {
     // Record the activity in the database
     await recordActivity(gameId, userId, activityType, activityName);
     
-    console.log(`📊 Activity tracked: ${activityType}/${activityName} for user ${userId} in game ${gameId}`);
+    // console.log(`📊 Activity tracked: ${activityType}/${activityName} for user ${userId} in game ${gameId}`);
 
   } catch (error) {
     console.error('❌ Error tracking activity:', error);

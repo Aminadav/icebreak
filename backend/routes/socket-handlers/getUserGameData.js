@@ -16,7 +16,7 @@ module.exports.registerGetUserGameDataHandler = function(socket) {
         return;
       }
 
-      console.log(`📋 Getting user data for user ${userId} in game ${gameId}`);
+      // console.log(`📋 Getting user data for user ${userId} in game ${gameId}`);
 
       // Get user basic info
       const userResult = await pool.query(`
@@ -48,7 +48,7 @@ module.exports.registerGetUserGameDataHandler = function(socket) {
       const { getCurrentBadge } = require('../../../shared/badge-list');
       const currentBadge = getCurrentBadge(points);
 
-      console.log(`📋 User data loaded: ${user.name}, ${points} points, ${userBadgeIds.length} badges`);
+      // console.log(`📋 User data loaded: ${user.name}, ${points} points, ${userBadgeIds.length} badges`);
 
       // Emit complete user data
       socket.emit('user_game_data_updated', {

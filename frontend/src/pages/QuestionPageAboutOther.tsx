@@ -6,6 +6,7 @@ import AnswerContainer from '../components/AnswerContainer';
 import Button from '../components/Button';
 import Footer from '../components/Footer';
 import Avatar from '../components/Avatar';
+import { useGame } from '../contexts/GameContext';
 
 interface QuestionPageProps {
   gameState: GAME_STATE_QUESTION_ABOUT_OTHER;
@@ -16,10 +17,17 @@ export default function QuestionAboutOtherPage({
 }: QuestionPageProps): JSX.Element {
   var question=gameState.question;
   var aboutUser=gameState.about_user;
+  const {gameEmitter} = useGame();
 
   const [selectedAnswerId, setSelectedAnswerId] = useState<string>('');
-  const [freeformAnswer, setFreeformAnswer] = useState<string>('');
   const [otherAnswer, setOtherAnswer] = useState<string>('');
+
+  // Helper function to escape HTML characters
+  const escapeHtml = (text: string): string => {
+    return text.replace(/[<>&"']/g, (char) => 
+      ({ '<': '&lt;', '>': '&gt;', '&': '&amp;', '"': '&quot;', "'": '&#x27;' })[char] || char
+    );
+  };
 
   const handleAnswerClick = (answerId: string, value?: string) => {
     setSelectedAnswerId(answerId);
@@ -35,26 +43,26 @@ export default function QuestionAboutOtherPage({
   const handleSubmit = () => {
     let result = '';
     
-    if (question.question_type === 'choose_one' && selectedAnswerId) {
+    if (selectedAnswerId) {
       if (selectedAnswerId === 'other') {
         result = otherAnswer;
       } else if (question.answers) {
         const selectedAnswer = question.answers[parseInt(selectedAnswerId)];
         result = selectedAnswer;
       }
-    } else if (question.question_type === 'free_form' && freeformAnswer.trim()) {
-      result = freeformAnswer.trim();
     }
     
     if (result) {
-      alert(`User answer: ${result}`);
+      // Emit socket event for submitting answer about others
+      gameEmitter('submit-answer-others', {
+        questionId: question.question_id,
+        answer: result,
+        aboutUserId: aboutUser.user_id
+      });
     }
   };
 
-  const canSubmit = 
-    (question.question_type === 'choose_one' && selectedAnswerId && 
-     (selectedAnswerId !== 'other' || otherAnswer.trim())) ||
-    (question.question_type === 'free_form' && freeformAnswer.trim());
+  const canSubmit = selectedAnswerId && (selectedAnswerId !== 'other' || otherAnswer.trim());
 
   // Convert answers to the format expected by AnswerContainer
   const answerData = question.answers?.map((answer, index) => ({
@@ -73,35 +81,26 @@ export default function QuestionAboutOtherPage({
         <div className="w-full max-w-2xl mt-5">
           {/* Question Text */}
           <h1 className="mb-8 text-4xl font-bold leading-tight text-center text-white md:text-5xl">
-            {question.question_text}
+            <span 
+              dangerouslySetInnerHTML={{ 
+                __html: question.question_text.replace(
+                  aboutUser.name || '', 
+                  `<span style="text-decoration: underline;">${escapeHtml(aboutUser.name || '')}</span>`
+                ) 
+              }}
+            />
           </h1>
 
-          {/* Answer Section */}
+          {/* Answer Section - Always show choices for questions about others */}
           <div className="w-full">
-            {question.question_type === 'choose_one' ? (
-              <AnswerContainer
-                answers={answerData}
-                onAnswerClick={handleAnswerClick}
-                maxAnswers={4}
-                allowOther={question.allow_other}
-                onOtherAnswerChange={handleOtherAnswerChange}
-                otherAnswerValue={otherAnswer}
-              />
-            ) : (
-              /* Free Form Input */
-              <div className="space-y-6">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={freeformAnswer}
-                    onChange={(e) => setFreeformAnswer(e.target.value)}
-                    placeholder="הקלד כאן ..."
-                    className="w-full h-16 px-6 text-lg text-white transition-all duration-300 bg-transparent border-2 border-white rounded-2xl placeholder-white/70 focus:outline-none focus:border-orange-400 focus:ring-4 focus:ring-orange-400/30"
-                    style={{ direction: 'rtl' }}
-                  />
-                </div>
-              </div>
-            )}
+            <AnswerContainer
+              answers={answerData}
+              onAnswerClick={handleAnswerClick}
+              maxAnswers={question.max_answers_to_show || 4}
+              allowOther={question.allow_other}
+              onOtherAnswerChange={handleOtherAnswerChange}
+              otherAnswerValue={otherAnswer}
+            />
           </div>
 
           {/* Submit Button */}

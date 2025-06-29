@@ -22,6 +22,7 @@ After updating the scema execute `run update-schema` in the `backend` folder.
 
 # Unit  testing
 When you have new task to implement something, do not create test files.
+I don't like test files. Also for checking compliation errors, just check the problem pane.
 Dont run tsx to check compilation errors. Or create test files.
 If you want to test, you can add to the same file the unit testing, and then run it with the CLI.
 Such as: `node loader/my-new-file.js`
@@ -29,6 +30,8 @@ Such as: `node loader/my-new-file.js`
 if(!module.parent ){
   // Here is the unit testing
 }
+
+You can also use MCP to check for syntax erros in the problems pane.
 ```
 
 # Checking for compilation errors.

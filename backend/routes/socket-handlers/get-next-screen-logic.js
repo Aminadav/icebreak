@@ -1,4 +1,5 @@
 const { getNextQuestionAboutYou } = require("../../utils/getNextQuestionAboutYou");
+const { getNextQuestionAboutOthers, getAnswersAboutOthersCount } = require("../../utils/getNextQuestionAboutOthers");
 const { getAnswersAboutMyselfCount } = require("../../utils/screenHistoryUtils");
 const { userVisited, userNotVisited, userClicked, userNotClicked } = require("../../utils/userActivityUtils");
 const pool = require("../../config/database");
@@ -20,7 +21,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   const gameResult = await pool.query(`select creator_user_id, name from games where game_id = $1`, [gameId]);
   const isCreator = gameResult.rows[0].creator_user_id === userId;
   const gameName = gameResult.rows[0].name;
-  
+
   // Get user verification status
   const userResult = await pool.query(`select phone_number, phone_verified, name, email, gender, has_image, pending_image from users where user_id = $1`, [userId]);
   const user = userResult.rows[0];
@@ -31,6 +32,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   const hasGender = user.gender && user.gender.trim().length > 0;
   const hasImage = user.has_image;
   const hasPendingImage = user.pending_image && user.pending_image.trim().length > 0;
+  const answersAboutOthersCount = await getAnswersAboutOthersCount(gameId, userId);
 
   // console.log({
   //   gameId,
@@ -85,7 +87,28 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
       screenName: 'ASK_USER_VERIFICATION_CODE',
     };
   }
-  
+
+  // For non-creators: After 2FA, show 2 questions about others before profile setup
+  if (!isCreator && isPhoneVerified) {
+
+    if (answersAboutOthersCount < 2) {
+      const nextQuestionAboutOthers = await getNextQuestionAboutOthers(gameId, userId);
+      if (nextQuestionAboutOthers) {
+        // Check if we've already shown 2 initial questions about others
+
+        return {
+          screenName: 'QUESTION_ABOUT_OTHER',
+          question: nextQuestionAboutOthers,
+          about_user: {
+            user_id: nextQuestionAboutOthers.about_user_id,
+            name: nextQuestionAboutOthers.about_user_name,
+            image: nextQuestionAboutOthers.about_user_image || '',
+          },
+        };
+      }
+    }
+  }
+
   // Check if user needs to enter email
   if (!hasEmail) {
     return {
@@ -129,7 +152,7 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
   }
 
   // Ask about themself
-  if (await userNotVisitedScreen('BEFORE_START_ABOUT_YOU')) {
+  if (isCreator && await userNotVisitedScreen('BEFORE_START_ABOUT_YOU')) {
     return {
       screenName: 'BEFORE_START_ABOUT_YOU',
     };
@@ -145,20 +168,63 @@ module.exports.get_next_screen = async function get_next_screen(gameId, userId) 
     };
   }
 
-  // Show a question about the user
-  const nextQuestionAboutMySelf = await getNextQuestionAboutYou(gameId, userId)
+  // Mixed question algorithm: Try to alternate between self and others
+  const nextQuestionAboutMySelf = await getNextQuestionAboutYou(gameId, userId);
+  const nextQuestionAboutOthers = await getNextQuestionAboutOthers(gameId, userId);
 
-  if (!nextQuestionAboutMySelf) {
+  // If no questions available at all
+  if (!nextQuestionAboutMySelf && !nextQuestionAboutOthers) {
     return {
       screenName: 'NO_MORE_QUESTIONS',
     };
   }
 
+  // Determine which type of question to show based on last question answered
+  let shouldAskAboutOthers;
+
+  // If only one type available, use it
+  if (!nextQuestionAboutMySelf && nextQuestionAboutOthers) {
+    shouldAskAboutOthers = true;
+  } else if (nextQuestionAboutMySelf && !nextQuestionAboutOthers) {
+    shouldAskAboutOthers = false;
+  } else {
+    // Both types available - check what was the last question answered
+    const lastAnswerResult = await pool.query(`
+      SELECT is_about_me 
+      FROM user_answers 
+      WHERE gameid = $1 AND answering_user_id = $2 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `, [gameId, userId]);
+
+    if (lastAnswerResult.rows.length > 0) {
+      const lastWasAboutMe = lastAnswerResult.rows[0].is_about_me;
+      // Alternate: if last was about me, ask about others; if last was about others, ask about me
+      shouldAskAboutOthers = lastWasAboutMe;
+    } else {
+      // No previous answers, start with others
+      shouldAskAboutOthers = true;
+    }
+  }
+
+  if (shouldAskAboutOthers && nextQuestionAboutOthers) {
+    return {
+      screenName: 'QUESTION_ABOUT_OTHER',
+      question: nextQuestionAboutOthers,
+      about_user: {
+        user_id: nextQuestionAboutOthers.about_user_id,
+        name: nextQuestionAboutOthers.about_user_name,
+        image: nextQuestionAboutOthers.about_user_image || '',
+      },
+    };
+  }
+
+  // Default to question about self
   return {
     screenName: "QUESTION_ABOUT_MYSELF",
     question: nextQuestionAboutMySelf,
     introTotalQuestions: 5,
     introCurrentQuestion: answeredCount + 1,
-    isIntro: answeredCount <= 5,
+    isIntro: isCreator && answeredCount <= 5,
   }
 }

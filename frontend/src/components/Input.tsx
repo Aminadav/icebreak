@@ -13,7 +13,6 @@ interface InputProps {
   inputMode?: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
   autoComplete?: string;
   trackingId?: string;
-  'data-testid'?: undefined;
 }
 
 export default function Input({
@@ -28,7 +27,6 @@ export default function Input({
   inputMode,
   autoComplete,
   trackingId,
-  'data-testid': undefined
 }: InputProps): JSX.Element {
   const { trackEvent } = useTracking();
   

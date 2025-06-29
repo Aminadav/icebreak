@@ -119,7 +119,6 @@ export default function Button({
   loading?: boolean;
   trackingId?: string;
   clickOnEnter?: boolean;
-  ['data-testid']?: undefined;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const { trackEvent } = useTracking();

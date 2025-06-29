@@ -42,6 +42,11 @@ declare global {
       isCorrect: boolean,
       howManyUsers: number
     }[]
+    about_user:{
+      user_id:string,
+      name:string,
+      image:string
+    }
   }
 
   type gameStatePleaseTakeAPicture ={

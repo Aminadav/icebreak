@@ -42,43 +42,69 @@ module.exports.registerSubmitAnswerOthersHandler = async function (socket) {
       ) VALUES ($1, $2, $3, $4, $5)
     `, [gameId, questionId, answer, userId, aboutUserId]);
     
-    // Get current count of answers about others
-    const currentAnswersResult = (await pool.query(`
-      SELECT COUNT(*) as count 
+    // Get the correct answer (what the about_user actually answered about themselves)
+    const correctAnswerResult = await pool.query(`
+      SELECT answer 
       FROM user_answers 
-      WHERE gameid = $1 AND answering_user_id = $2 AND is_about_me = false
-      -- gameId=$1, userId=$2
-    `, [gameId, userId])).rows[0].count;
+      WHERE gameid = $1 AND questionid = $2 AND answering_user_id = $3 AND is_about_me = true
+    `, [gameId, questionId, aboutUserId]);
     
-    // Award points based on answer count
-    let pointsToAward, message;
+    const correctAnswer = correctAnswerResult.rows[0]?.answer;
+    const isCorrect = correctAnswer && answer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
     
-    if (currentAnswersResult == 2) {
-      pointsToAward = 30;
-      message = 'ענית על 2 שאלות על אחרים! קיבלת בונוס';
-    } else if (currentAnswersResult == 10) {
-      pointsToAward = 50;
-      message = 'ענית על 10 שאלות על אחרים! קיבלת בונוס';
-    } else {
-      pointsToAward = 10;
-      message = [
-        'כל הכבוד!',
-        'מצויין!',
-        'אליפות!',
-        'תודה רבה!',
-        'אין עליך!',
-        'מעניין!',
-        'חכם!',
-      ].sort(() => Math.random() - 0.5)[0];
-    }
+    // Award points based on correctness
+    const pointsToAward = isCorrect ? 10 : 2;
+    const correctStatus = isCorrect ? "YOU_CORRECT" : "YOU_INCORRECT";
+    
+    // Get question text
+    const questionResult = await pool.query(`
+      SELECT question_text 
+      FROM questions 
+      WHERE question_id = $1
+    `, [questionId]);
+    
+    const questionText = questionResult.rows[0]?.question_text || '';
+    
+    // Get all guesses for this question about this user (excluding their own answer)
+    const answersResult = await pool.query(`
+      SELECT answer, COUNT(*) as count
+      FROM user_answers 
+      WHERE gameid = $1 AND questionid = $2 AND about_user_id = $3 AND is_about_me = false
+      GROUP BY answer
+      ORDER BY count DESC, answer
+    `, [gameId, questionId, aboutUserId]);
+    
+    // Format answers for the feedback screen
+    const answers = answersResult.rows.map(row => ({
+      text: row.answer,
+      isCorrect: correctAnswer && row.answer.toLowerCase().trim() === correctAnswer.toLowerCase().trim(),
+      howManyUsers: parseInt(row.count)
+    }));
+    
+    // Get about_user info
+    const aboutUserResult = await pool.query(`
+      SELECT user_id, name, image 
+      FROM users 
+      WHERE user_id = $1
+    `, [aboutUserId]);
+    
+    const aboutUser = aboutUserResult.rows[0];
     
     const pointsResult = await addPointsWithBadgeCheckAndEmit(userId, gameId, pointsToAward, socket);
 
-    // Always show GOT_POINTS first - the screen flow will check for badges when user continues
+    // Navigate to ANSWER_FEEDBACK screen
     await moveUserToGameState(socket, gameId, userId, {
-      screenName: 'GOT_POINTS',
-      points: pointsToAward,
-      text: message
+      screenName: 'ANSWER_FEEDBACK',
+      mainMessage: isCorrect ? 'יפה מאוד' : 'טעות',
+      question: questionText,
+      pointsReceived: pointsToAward,
+      correctStatus: correctStatus,
+      answers: answers,
+      about_user: {
+        user_id: aboutUser.user_id,
+        name: aboutUser.name,
+        image: aboutUser.image
+      }
     });
 
     // Emit updated game data to all users in the game

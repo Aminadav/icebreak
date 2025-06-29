@@ -7,12 +7,14 @@ import OneAnswerFeedback from '../components/OneAnswerFeedback';
 import { useSocket } from '../contexts/SocketContext';
 import { useGameId } from '../utils/useGameId';
 import { useLanguage } from '../contexts/LanguageContext';
+import { useGame } from '../contexts/GameContext';
 
 export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFeedback}): JSX.Element {
   const gameState = props.gameState;
   const { socket } = useSocket();
   const gameId = useGameId();
   const { texts } = useLanguage();
+  var {emitMoveToNextPage} = useGame();
   const [showContinueButton, setShowContinueButton] = useState(false);
   const [animationPhase, setAnimationPhase] = useState('initial'); // 'initial', 'message', 'points', 'answers', 'complete'
   const [starScale, setStarScale] = useState(0);
@@ -67,12 +69,7 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
 
   const handleContinue = () => {
     if (!socket) return;
-    
-    // Emit continue event to backend
-    socket.emit('continue-from-answer-feedback', {
-      gameId,
-      answerId: gameState.answers.find(a => a.isCorrect)?.text || 'unknown'
-    });
+    emitMoveToNextPage()
   };
 
   return (

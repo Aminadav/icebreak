@@ -103,8 +103,8 @@ export default function GiveGameNamePage(): JSX.Element {
           // placeholder={texts.giveGameName.placeholder}
           className="mb-8"
           autoFocus
-          trackingId="game_name"
-          data-testid="game-name-input"
+          /*trackingId="game_name"*/
+          trackingId="game-name-input"
         />
         
         {/* Continue Button */}
@@ -113,8 +113,8 @@ export default function GiveGameNamePage(): JSX.Element {
             variant="primary-large"
             onClick={handleContinue}
             disabled={!gameName.trim() || isLoading}
-            trackingId="give_game_name_continue_clicked"
-            data-testid="game-name-continue-button"
+            /*trackingId="give_game_name_continue_clicked"*/
+            trackingId="game-name-continue-button"
           >
             {isLoading ? (
               <div className="flex items-center justify-center">

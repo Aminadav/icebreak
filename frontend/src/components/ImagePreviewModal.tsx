@@ -200,7 +200,7 @@ export default function ImagePreviewModal({
               onClick={onChoose}
               icon={<ChooseIcon />}
               className="px-6 py-4"
-              data-testid='choose-image-button'
+              trackingId='choose-image-button'
             >
               בחר תמונה זו!
             </Button>

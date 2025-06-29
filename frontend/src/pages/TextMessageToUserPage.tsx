@@ -83,8 +83,8 @@ export default function TextMessageToUserPage(props: {gameState: gameStateTextMe
               <Button
                 variant="primary-large"
                 onClick={handleContinue}
-                trackingId="text-message-continue"
-                data-testid="continue-button"
+                /*trackingId="text-message-continue"*/
+                trackingId="continue-button"
               >
                 המשך {">>"}
               </Button>

@@ -55,7 +55,7 @@ export default function ShareGameModal({ onStartPlay, onShareGame }: ShareGameMo
             variant="primary"
             onClick={handleStartPlay}
             className="w-full text-lg py-3 rounded-[20px]"
-            data-testid="share-modal-start-play"
+            trackingId="share-modal-start-play"
           >
             התחל לשחק
           </Button>
@@ -65,7 +65,7 @@ export default function ShareGameModal({ onStartPlay, onShareGame }: ShareGameMo
             variant="ghost"
             onClick={handleShareGame}
             className="w-full text-lg py-3 rounded-[20px]"
-            data-testid="share-modal-share-game"
+            trackingId="share-modal-share-game"
           >
             שיתוף המשחק
           </Button>

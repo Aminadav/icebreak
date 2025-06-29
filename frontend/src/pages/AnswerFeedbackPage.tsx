@@ -181,8 +181,8 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
                 <Button
                   variant="primary-small"
                   onClick={handleContinue}
-                  trackingId="answer-feedback-continue"
-                  data-testid="continue-button"
+                  /*trackingId="answer-feedback-continue"*/
+                  trackingId="continue-button"
                 >
                   {texts.answerFeedback.continueButton} {">>"}
                 </Button>
@@ -289,8 +289,8 @@ export default function AnswerFeedbackPage(props: {gameState: gameStateAnswerFee
                 <Button
                   variant="primary-small"
                   onClick={handleContinue}
-                  trackingId="answer-feedback-continue"
-                  data-testid="continue-button"
+                  /*trackingId="answer-feedback-continue"*/
+                  trackingId="continue-button"
                 >
                   {texts.answerFeedback.continueButton} {">>"}
                 </Button>

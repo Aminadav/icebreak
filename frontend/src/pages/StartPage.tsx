@@ -101,8 +101,8 @@ export default function StartPage(): JSX.Element {
             loading={isCreating}
             disabled={isCreating}
 
-            trackingId="start_page_create_game_clicked"
-            data-testid="create-game-button"
+            /*trackingId="start_page_create_game_clicked"*/
+            trackingId="create-game-button"
           >
             {isCreating ? 'יוצר משחק...' : texts.homepage.createGameButton}
           </Button>

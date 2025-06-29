@@ -65,7 +65,7 @@ export default function CreatorFinishedOnboardingQuestionsPage(): JSX.Element {
             variant="primary-large"
             onClick={handleWhatsappShare}
             clickOnEnter={true}
-            data-testid="whatsapp-share-button"
+            trackingId="whatsapp-share-button"
             icon={
               <img 
                 src="/images/icons/whatsapp.svg" 
@@ -82,7 +82,7 @@ export default function CreatorFinishedOnboardingQuestionsPage(): JSX.Element {
             variant="outline-purple"
             onClick={handleContinue}
             className="w-full px-6 py-3 text-lg text-white transition-all duration-200 border-2 border-white/30 hover:bg-white/10"
-            data-testid="continue-questions-button"
+            trackingId="continue-questions-button"
           >
             או שתמשיכו לענות על עוד שאלות &gt;&gt;
           </Button>

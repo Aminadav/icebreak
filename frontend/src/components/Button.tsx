@@ -109,7 +109,6 @@ export default function Button({
   icon,
   trackingId,
   clickOnEnter = false,
-  'data-testid': testId
 }: {
   variant: ButtonVariant;
   children: React.ReactNode;
@@ -120,7 +119,7 @@ export default function Button({
   loading?: boolean;
   trackingId?: string;
   clickOnEnter?: boolean;
-  'data-testid'?: string;
+  ['data-testid']?: undefined;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const { trackEvent } = useTracking();
@@ -180,7 +179,7 @@ export default function Button({
       <button
         onClick={handleClick}
         disabled={isDisabled}
-        data-testid={testId}
+        data-testid={trackingId}
         className={`
           cursor-pointer
           ${buttonVariants[variant]}

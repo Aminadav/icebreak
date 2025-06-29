@@ -16,7 +16,8 @@ If you see other things that needs to fixes or implement do not do it. You can t
 Don't do big changes, or things that no requested. The minimum changes to implement the task.
 
 # Schema
-If needed access to the databse schema. Use Docker. the container name is icebreak_postgres, the databasename icebreak_db.  The username is: icebreak_user.
+If needed read to the databse schema. check the file /backend/scripts/schema.sql
+ If you need to update the Schema Use Docker. the container name is icebreak_postgres, the databasename icebreak_db.  The username is: icebreak_user.
 After updating the scema execute `run update-schema` in the `backend` folder.
 
 # Unit  testing

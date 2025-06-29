@@ -158,8 +158,8 @@ export default function QuestionAboutYourSelfPage({
                 clickOnEnter
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                trackingId="question-submit"
-                data-testid="question-submit-button"
+                /*trackingId="question-submit"*/
+                trackingId="question-submit-button"
               >
                 שלח
               </Button>

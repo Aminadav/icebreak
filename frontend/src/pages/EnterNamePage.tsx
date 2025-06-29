@@ -139,7 +139,7 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
             type="text"
             disabled={isLoading}
             className="w-full"
-            data-testid="name-input"
+            trackingId="name-input"
             onKeyPress={(e: React.KeyboardEvent) => {
               if (e.key === 'Enter' && isNameValid) {
                 handleContinue();
@@ -159,8 +159,8 @@ export default function EnterNamePage({ phoneNumber, userId, email }: EnterNameP
             variant="primary-large"
             onClick={handleContinue}
             disabled={!isNameValid || isLoading}
-            trackingId="enter_name_continue_clicked"
-            data-testid="name-continue-button"
+            /*trackingId="enter_name_continue_clicked"*/
+            trackingId="name-continue-button"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               isNameValid && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 

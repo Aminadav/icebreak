@@ -78,7 +78,7 @@ export default function CreatorGameReadyPage(): JSX.Element {
             onClick={handleStartGame}
             clickOnEnter={true}
             className="w-full px-8 py-4 text-xl"
-            data-testid="creator-start-game-button"
+            trackingId="creator-start-game-button"
           >
             התחל לשחק
           </Button>

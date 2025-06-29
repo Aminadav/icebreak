@@ -103,7 +103,7 @@ export default function NameConfirmationModal({ name, onYes, onNo }: NameConfirm
             variant="secondary"
             onClick={handleYes}
             className="w-full text-lg py-3 rounded-[20px]"
-            data-testid="name-confirmation-yes"
+            trackingId="name-confirmation-yes"
           >
             {texts.nameConfirmation.yesButton}
           </Button>
@@ -112,7 +112,7 @@ export default function NameConfirmationModal({ name, onYes, onNo }: NameConfirm
             variant="secondary"
             onClick={handleNo}
             className="w-full text-lg py-3 rounded-[20px]"
-            data-testid="name-confirmation-no"
+            trackingId="name-confirmation-no"
           >
             {texts.nameConfirmation.noButton}
           </Button>

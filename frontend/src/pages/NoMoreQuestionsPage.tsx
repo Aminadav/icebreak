@@ -67,7 +67,7 @@ export default function NoMoreQuestionsPage(): JSX.Element {
             variant="primary-large"
             onClick={handleWhatsappShare}
             clickOnEnter={true}
-            data-testid="whatsapp-share-button"
+            trackingId="whatsapp-share-button"
             icon={
               <img 
                 src="/images/icons/whatsapp.svg" 

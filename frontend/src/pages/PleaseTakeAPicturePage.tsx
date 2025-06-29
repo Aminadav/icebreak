@@ -53,8 +53,8 @@ export default function PleaseTakeAPicturePage(props: {gameState: gameStatePleas
             <Button
               variant="primary-large"
               onClick={handleTakePhoto}
+              /*trackingId="take-photo-button"*/
               trackingId="take-photo-button"
-              data-testid="take-photo-button"
             >
               {texts.pleaseTakeAPicture.photoWithImageButton}
             </Button>
@@ -62,8 +62,8 @@ export default function PleaseTakeAPicturePage(props: {gameState: gameStatePleas
             <Button
               variant="secondary"
               onClick={handleGameWithoutPhotos}
+              /*trackingId="game-without-photos-button"*/
               trackingId="game-without-photos-button"
-              data-testid="game-without-photos-button"
             >
               {texts.pleaseTakeAPicture.gameWithoutPhotosButton}
             </Button>

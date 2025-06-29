@@ -90,7 +90,7 @@ export default function SkipConfirmationModal({ onTakePhoto }: SkipConfirmationM
             variant="primary"
             onClick={handleTakePhoto}
             className="w-full text-lg py-3 rounded-[20px]"
-            data-testid="skip-confirmation-take-photo"
+            trackingId="skip-confirmation-take-photo"
           >
             {texts.skipConfirmationModal.mainButton}
           </Button>
@@ -100,7 +100,7 @@ export default function SkipConfirmationModal({ onTakePhoto }: SkipConfirmationM
             variant="ghost"
             onClick={handleSkip}
             className="w-full text-lg py-3 rounded-[20px]"
-            data-testid="skip-confirmation-skip"
+            trackingId="skip-confirmation-skip"
           >
             {texts.skipConfirmationModal.ghostButton}
           </Button>

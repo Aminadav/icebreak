@@ -171,7 +171,7 @@ export default function EnterEmailPage(): JSX.Element {
             type="email"
             disabled={isLoading}
             className="w-full"
-            data-testid="email-input"
+            trackingId="email-input"
             onKeyPress={(e: React.KeyboardEvent) => {
               if (e.key === 'Enter' && isEmailValid) {
                 handleContinue();
@@ -186,8 +186,8 @@ export default function EnterEmailPage(): JSX.Element {
             variant="primary-large"
             onClick={handleContinue}
             disabled={!isEmailValid || isLoading}
-            trackingId="enter_email_continue_clicked"
-            data-testid="email-continue-button"
+            /*trackingId="enter_email_continue_clicked"*/
+            trackingId="email-continue-button"
             className={`text-xl px-12 py-5 min-w-[300px] border-6 border-white rounded-3xl shadow-xl transition-all duration-200 ${
               isEmailValid && !isLoading
                 ? 'bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 cursor-pointer' 
@@ -243,12 +243,6 @@ export default function EnterEmailPage(): JSX.Element {
           </button>
         </div>
 
-        {/* Debug info - only show in development */}
-        {DEBUG && phoneNumber && (
-          <div className="mt-4 text-sm text-white opacity-70">
-            טלפון: {phoneNumber} | משתמש: {userId}
-          </div>
-        )}
       </main>
     </PageLayout>
   );

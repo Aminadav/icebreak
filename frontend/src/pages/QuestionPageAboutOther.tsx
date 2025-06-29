@@ -108,7 +108,7 @@ export default function QuestionAboutOtherPage({
                 variant={canSubmit ? "primary-large" : "disabled"}
                 onClick={handleSubmit}
                 disabled={!canSubmit}
-                trackingId="question-submit"
+                /*trackingId="question-submit"*/
               >
                 שלח
               </Button>

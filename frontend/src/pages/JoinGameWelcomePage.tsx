@@ -100,8 +100,8 @@ export default function JoinGameWelcomePage(): JSX.Element {
             variant="primary-large"
             onClick={handleJoinGame}
             disabled={isLoading || !gameInfo}
-            trackingId="join_game_welcome_clicked"
-            data-testid="join-game-button"
+            /*trackingId="join_game_welcome_clicked"*/
+            trackingId="join-game-button"
           >
             {isLoading ? (
               <div className="flex items-center justify-center">

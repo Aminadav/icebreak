@@ -61,41 +61,26 @@ export default function JoinGameWelcomePage(): JSX.Element {
     <PageLayout showHeader={true}>
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-88px)] px-4">
         {/* Logo */}
-        <div className="mb-8">
+        <div className="mb-20">
           <img 
             src="/videos/animated-logo-white.gif" 
             alt="IceBreak Logo" 
             className="h-auto max-w-full w-80"
           />
         </div>
+
         
-        {/* Game Name */}
-        {gameInfo?.gameName && (
-          <div className="max-w-md mb-4 text-center">
-            <h1 className="text-3xl font-bold leading-tight text-white">
-              {gameInfo.gameName}
-            </h1>
-          </div>
-        )}
-        
-        {/* Creator Name */}
-        {gameInfo?.creatorName && (
-          <div className="max-w-md mb-8 text-center">
-            <h2 className="text-xl text-white opacity-90">
-              נוצר על ידי {gameInfo.creatorName}
-            </h2>
-          </div>
-        )}
+      
         
         {/* Subtitle */}
         <div className="max-w-md mb-16 text-center">
-          <h3 className="text-2xl font-bold leading-tight text-white">
-            הצטרף למשחק הכרות מהנה!
+          <h3 className="text-5xl  leading-tight text-white">
+            משחק גיבוש לחברים בקבוצות WhatsApp
           </h3>
         </div>
         
         {/* Join Game Button */}
-        <div className="mb-20">
+        <div className="mb-3">
           <Button
             variant="primary-large"
             onClick={handleJoinGame}
@@ -108,10 +93,18 @@ export default function JoinGameWelcomePage(): JSX.Element {
                 מצטרף למשחק...
               </div>
             ) : (
-              'הצטרף למשחק'
+              'הצטרפו למשחק של קבוצת ' + (gameInfo?.gameName) + ' >>'
             )}
           </Button>
         </div>
+          {/* Creator Name */}
+        {gameInfo?.creatorName && (
+          <div className="max-w-md mb-8 text-center">
+            <h2 className="text-md text-white opacity-90">
+              המשחק נוצר על ידי {gameInfo.creatorName}
+            </h2>
+          </div>
+        )}
       </main>
     </PageLayout>
   );

@@ -2,7 +2,15 @@ import { expect, Page } from '@playwright/test';
 import { step } from './step';
 import { get2FACode } from './test-utils';
 import { delay } from './delay';
+import { fillPhone2faCode } from './fillPhone2faCode';
+import { fillEmail } from './fillEmail';
+import { fillName } from './fillName';
+import { fillGender } from './fillGender';
+import { cameraAndGallerySteps } from './cameraAndGallerySteps';
 const DEFAULT_DELAY = 100
+const TEST_PHONE_NUMBER_2 = (new Date().valueOf() + 1).toString();
+const TEST_EMAIL_2 = 'test2@user.com'
+const TEST_NAME_2 = 'שרה לוי';
 
 export async function startUser2(page: Page,{gameUrl}) {
 
@@ -19,27 +27,12 @@ export async function startUser2(page: Page,{gameUrl}) {
         await page.waitForLoadState('networkidle');
         await step(page, 'User 2 joined game - should see welcome screen');
   
-        // User 2 phone number
-        const TEST_PHONE_NUMBER_2 = (new Date().valueOf() + 1).toString();
-  
         // Step: Join Game Welcome
         await step(page, 'User 2 - Join Game Welcome screen');
         await page.getByTestId('join_game_welcome_continue').click();
         // await delay(DEFAULT_DELAY);
   
-        // Step: Enter phone number
-        await step(page, 'User 2 - Enter phone number');
-        await page.getByTestId('phone-number-input').fill(TEST_PHONE_NUMBER_2);
-        await page.getByTestId('phone-number-continue-button').click();
-        // await delay(DEFAULT_DELAY);
-  
-        // Step: 2FA verification
-        await step(page, 'User 2 - Enter 2FA code');
-        const verificationCode2 = get2FACode(TEST_PHONE_NUMBER_2);
-        for (let i = 0; i < 6; i++) {
-          await page.getByTestId(`2fa-code-input-${i}`).fill(verificationCode2[i]);
-        }
-        // await delay(DEFAULT_DELAY);
+        await fillPhone2faCode(page, TEST_PHONE_NUMBER_2);
   
         // Step: Answer 2 questions about others first (non-creator flow)
         for (let questionNumber = 1; questionNumber <= 2; questionNumber++) {
@@ -176,31 +169,13 @@ export async function startUser2(page: Page,{gameUrl}) {
           }
         }
   
-        // Step: Enter email (should be visible now)
-        await step(page, 'User 2 - Enter email');
-        await page.getByTestId('email-input').fill('user2@example.com');
-        await page.getByTestId('email-continue-button').click();
-        await delay(DEFAULT_DELAY);
+        await fillEmail(page,TEST_EMAIL_2)
   
-        // Step: Enter name
-        await step(page, 'User 2 - Enter name');
-        await page.getByTestId('name-input').fill('שרה לוי');
-        await page.getByTestId('name-continue-button').click();
-        // await delay(DELAY_ON_MODAL);
-        await page.getByTestId('name-confirmation-yes').click();
-        // await delay(DELAY_ON_MODAL);
+        await fillName(page,TEST_NAME_2)
+        
+        await fillGender(page);
   
-        // Step: Select gender
-        await step(page, 'User 2 - Select gender');
-        await page.locator('img[alt="Male character"]').locator('..').click();
-        // await delay(DEFAULT_DELAY);
-  
-        // Step: Picture upload - skip
-        await step(page, 'User 2 - Skip picture upload');
-        await page.getByTestId('skip-picture-button').click();
-        // await delay(DEFAULT_DELAY);
-        await page.getByTestId('skip-confirmation-skip').click();
-        // await delay(DEFAULT_DELAY);
+        await cameraAndGallerySteps(page);
   
         // Step: User 2 answers 1 question about self and 1 about others
         await step(page, 'User 2 - Answer question about self');

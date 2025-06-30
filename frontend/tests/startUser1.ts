@@ -8,9 +8,9 @@ import { fillName } from './fillName';
 import { verifyPointsLabel } from './verifyPointsLabel';
 import { delay } from './delay';
 
-export const TEST_PHONE_NUMBER1 = new Date().valueOf().toString()
-export const TEST_EMAIL_1 = 'test2@example.com'
-export const TEST_NAME_1 = 'אברהם לוי'
+const TEST_PHONE_NUMBER1 = new Date().valueOf().toString()
+const TEST_EMAIL_1 = 'test2@example.com'
+const TEST_NAME_1 = 'אברהם לוי'
 const DEFAULT_DELAY = 100
 const DELAY_ON_MODAL = 300
 

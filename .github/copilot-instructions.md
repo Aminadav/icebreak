@@ -50,3 +50,6 @@ Use the file [GAME_CREATOR_FLOW.md](../GAME_CREATOR_FLOW.md) to understand the c
 
 # More info - when working on non-creator (player) onboarding, screen transitions, or socket event handling.
 Use the file [NON_CREATOR_GAME_FLOW.md](../NON_CREATOR_GAME_FLOW.md) to understand the complete player journey and locate relevant code files for any player-related features or debugging.
+
+# data-test-id
+For teting pruposes, you can use `data-test-id` attribute to identify elements in the frontend. But for buttons you can use `trackingId` element, it will add the `data-test-id` attribute automatically.

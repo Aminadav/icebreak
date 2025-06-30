@@ -58,27 +58,38 @@ async function awardBadgeAndShowScreen(socket, userId, gameId, badgeId) {
 async function checkForMissingBadge(userId, gameId) {
 
   const currentPoints = await getUserTotalPoints(userId, gameId);
-  if (currentPoints === 0) return false;
-
-  // Get all badges user should have based on points
-  const { getAllDeservedBadges } = require("../../../shared/badge-list");
-  const deservedBadges = getAllDeservedBadges(currentPoints);
-  // console.log('DeservedBadges', {currentPoints, deservedBadges});
-  if (deservedBadges.length === 0) {
-    return null; // User doesn't deserve any badges yet
-  }
   
-  // Get badges user actually has
+  // Auto-award "warming_up" badge silently if user doesn't have it
   const userBadgesResult = await pool.query(`
     SELECT badge_id FROM badges 
     WHERE user_id = $1 AND game_id = $2
   `, [userId, gameId]);
   
   const userBadgeIds = userBadgesResult.rows.map(row => row.badge_id);
-
+  
+  if (!userBadgeIds.includes('warming_up')) {
+    console.log(`🏆 Auto-awarding warming_up badge to user ${userId} silently`);
+    await awardBadge(userId, gameId, 'warming_up');
+    // Refresh user badges after awarding warming_up
+    const updatedBadgesResult = await pool.query(`
+      SELECT badge_id FROM badges 
+      WHERE user_id = $1 AND game_id = $2
+    `, [userId, gameId]);
+    userBadgeIds.length = 0; // Clear array
+    userBadgeIds.push(...updatedBadgesResult.rows.map(row => row.badge_id));
+  }
+  
+  // Get all badges user should have based on points (excluding warming_up which is auto-awarded)
+  const { getAllDeservedBadges } = require("../../../shared/badge-list");
+  const deservedBadges = getAllDeservedBadges(currentPoints).filter(badge => badge.id !== 'warming_up');
+  
+  if (deservedBadges.length === 0) {
+    return null; // User doesn't deserve any non-warming_up badges yet
+  }
+  
   console.log('userBadgeIds', {userBadgeIds});
   
-  // Find missing badges (deserved but not awarded)
+  // Find missing badges (deserved but not awarded, excluding warming_up)
   const missingBadges = deservedBadges.filter(badge => !userBadgeIds.includes(badge.id));
   
   if (missingBadges.length === 0) {
